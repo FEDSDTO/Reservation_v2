@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Reservation
 {
     public class Program
@@ -6,6 +8,12 @@ namespace Reservation
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // 設定編碼為 UTF-8
+             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            builder.Services.Configure<RequestLocalizationOptions>(options =>{
+                options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("zh-TW");
+            });
+            
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -28,7 +36,7 @@ namespace Reservation
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Restaurant}/{action=Index}/{id?}");
 
             app.Run();
         }
