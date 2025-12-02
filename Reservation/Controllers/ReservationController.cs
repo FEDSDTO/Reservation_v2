@@ -104,6 +104,32 @@ namespace Reservation.Controllers
             };
         }
 
+        // 取得菜單資料（只有圖片）
+        private List<Menu> GetMenus(int restaurantId)
+        {
+            return new List<Menu>
+            {
+                new Menu
+                {
+                    Id = 1,
+                    RestaurantId = restaurantId,
+                    ImageUrl = "/Image/menu1.jpg"
+                },
+                new Menu
+                {
+                    Id = 2,
+                    RestaurantId = restaurantId,
+                    ImageUrl = "/Image/menu2.jpg"
+                },
+                new Menu
+                {
+                    Id = 3,
+                    RestaurantId = restaurantId,
+                    ImageUrl = "/Image/menu3.jpg"
+                }
+            };
+        }
+
         // 訂位功能 - GET
         public IActionResult Index(int id)
         {
@@ -127,7 +153,8 @@ namespace Reservation.Controllers
                 AdultCount = 2,
                 ChildCount = 0,
                 SelectedMealPeriod = "中午",
-                AvailableTimeSlots = GetAvailableTimeSlots("中午", DateTime.Today)
+                AvailableTimeSlots = GetAvailableTimeSlots("中午", DateTime.Today),
+                Menus = GetMenus(restaurant.Id)
             };
 
             return View(viewModel);
@@ -151,6 +178,7 @@ namespace Reservation.Controllers
                     }
                 }
                 model.AvailableTimeSlots = GetAvailableTimeSlots(model.SelectedMealPeriod, model.SelectedDate ?? DateTime.Today);
+                model.Menus = GetMenus(model.Restaurant.Id);
                 return View(model);
             }
 

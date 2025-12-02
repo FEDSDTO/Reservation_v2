@@ -140,6 +140,53 @@
             </div>
         </form>
     </div>
+
+    <!-- 菜單展示區域 -->
+    <div class="menu-section">
+        <h3 class="section-title">美味菜單</h3>
+        <div class="menu-carousel-container">
+            <div class="menu-carousel" id="menuCarousel">
+                @foreach (var menu in Model.Menus)
+                {
+                    <div class="menu-card" data-menu-image="@Url.Content(menu.ImageUrl)" data-bs-toggle="modal" data-bs-target="#menuImageModal">
+                        <img src="@Url.Content(menu.ImageUrl)" alt="@menu.Title" class="menu-card-image" />
+                    </div>
+                }
+            </div>
+            <!-- 左右箭頭導航 -->
+            <button class="menu-carousel-nav menu-carousel-prev" id="menuCarouselPrev" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </button>
+            <button class="menu-carousel-nav menu-carousel-next" id="menuCarouselNext" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 圖片放大 Modal -->
+    <div class="modal fade" id="menuImageModal" tabindex="-1" aria-labelledby="menuImageModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content menu-image-modal-content">
+                <div class="modal-header menu-image-modal-header">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body menu-image-modal-body">
+                    <div class="menu-image-wrapper">
+                        <img id="menuModalImage" src="" alt="菜單" class="menu-modal-image" />
+                        <button type="button" class="btn-close btn-close-image" data-bs-dismiss="modal" aria-label="Close">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" viewBox="0 0 16 16">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -233,6 +280,42 @@
             if ($('#timeSlotsGrid').children().length === 0) {
                 loadTimeSlots();
             }
+
+            // 菜單輪播功能
+            var menuCarousel = $('#menuCarousel');
+            var scrollAmount = 300; // 每次滾動的距離
+            
+            // 左右箭頭導航
+            $('#menuCarouselPrev').on('click', function() {
+                menuCarousel.animate({ scrollLeft: '-=' + scrollAmount }, 300);
+            });
+            
+            $('#menuCarouselNext').on('click', function() {
+                menuCarousel.animate({ scrollLeft: '+=' + scrollAmount }, 300);
+            });
+            
+            // 點擊菜單卡片時載入圖片到 Modal
+            $('.menu-card').on('click', function() {
+                var imageUrl = $(this).data('menu-image');
+                $('#menuModalImage').attr('src', imageUrl);
+            });
+            
+            // 點擊 modal 背景時關閉
+            $('#menuImageModal').on('click', function(e) {
+                // 如果點擊的不是 modal-content 或其子元素，則關閉
+                if (!$(e.target).closest('.menu-image-modal-content').length) {
+                    var modalElement = document.getElementById('menuImageModal');
+                    var modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                }
+            });
+            
+            // Modal 關閉時清空圖片（可選）
+            $('#menuImageModal').on('hidden.bs.modal', function() {
+                $('#menuModalImage').attr('src', '');
+            });
         });
     </script>
 }

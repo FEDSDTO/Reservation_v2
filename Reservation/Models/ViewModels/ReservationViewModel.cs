@@ -12,6 +12,7 @@ namespace Reservation.Models.ViewModels
         public string SelectedMealPeriod { get; set; } = "中午"; // "中午" 或 "晚上"
         public string? SelectedTimeSlot { get; set; } // 如 "11:00"
         public List<string> AvailableTimeSlots { get; set; } = new(); // 可用時段列表
+        public List<Menu> Menus { get; set; } = new(); // 菜單列表
     }
 }
 
