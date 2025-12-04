@@ -166,7 +166,10 @@ namespace Reservation.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // 重新載入資料
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
+                }
                 var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == model.Restaurant.Id);
                 if (restaurant != null)
                 {
@@ -181,10 +184,11 @@ namespace Reservation.Controllers
                 model.Menus = GetMenus(model.Restaurant.Id);
                 return View(model);
             }
-
-            // TODO: 儲存訂位資料到資料庫
-            // 這裡可以跳轉到確認頁面或下一步
-            TempData["ReservationSuccess"] = "訂位資料已提交";
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, message = "訂位成功" });
+            }
+            TempData["ReservationSuccess"] ="訂位資料已提交";
             return RedirectToAction("Index", "Restaurant");
         }
 

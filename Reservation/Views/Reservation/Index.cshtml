@@ -171,6 +171,36 @@
             </div>
         </div>
     </div>
+
+    <!-- 訂位成功彈窗 -->
+    <div class="modal fade" id="reservationSuccessModal" tabindex="-1" aria-labelledby="reservationSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content reservation-success-modal">
+                <button type="button" class="btn-close btn-close-white reservation-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+                
+                <div class="reservation-success-content">
+                    <div class="success-icon-wrapper">
+                        <div class="success-checkmark">
+                            <svg viewBox="0 0 52 52" class="checkmark-svg">
+                                <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="white" stroke-width="2"/>
+                                <path class="checkmark-check" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <h2 class="reservation-success-title">訂位完成</h2>
+                    
+                    <p class="reservation-success-message">
+                        可於遠百APP,【個人訊息功能】查詢訂候位記錄
+                    </p>
+                    
+                    <button type="button" class="btn reservation-query-btn" onclick="window.location.href='@Url.Action("Index", "Restaurant")'">
+                        訂位紀錄查詢
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -379,6 +409,44 @@
             $('#menuImageModal').on('hidden.bs.modal', function() {
                 $('#menuModalImage').attr('src', '');
             });
+
+            // 表單提交處理 - 改為 AJAX 提交
+            $('#reservationForm').on('submit',function(e){
+                e.preventDefault();
+                
+                if(!this.checkValidity()){
+                    $(this).addClass('was-validated');
+                    return false;
+                }
+
+                var formData = $(this).serialize();
+                var submitBtn= $(this).find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                submitBtn.prop('disabled',true).html('處理中...');
+
+                $.ajax({
+                    url: '@Url.Action("Index", "Reservation")',
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            var modalElement = document.getElementById('reservationSuccessModal');
+                            var modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        } else {
+                            alert('訂位失敗：' + (response.errors ? response.errors.join(', ') : '請檢查輸入資料'));
+                        }
+                        submitBtn.prop('disabled', false).html(originalText);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('訂位失敗，請稍後再試');
+                        submitBtn.prop('disabled', false).html(originalText);
+                    }
+                });
+            })
         });
     </script>
 }
