@@ -77,17 +77,6 @@
                        min="@DateTime.Today.ToString("yyyy-MM-dd")"
                        max="@DateTime.Today.AddDays(90).ToString("yyyy-MM-dd")"
                        required />
-                <!-- <div class="selected-date-display" id="selectedDateDisplay">
-                    @if (Model.SelectedDate.HasValue)
-                    {
-                        var date = Model.SelectedDate.Value;
-                        var weekdays = new[] { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
-                        var weekday = weekdays[(int)date.DayOfWeek];
-                        <text>@date.ToString("yyyy-MM-dd") @weekday</text>
-                    }
-                </div> -->
-
-
             </div>
 
             <!-- 人數選擇 -->
@@ -194,7 +183,6 @@
         $(document).ready(function() {
             // 日期選擇器事件
             $('.reservation-date-input').on('change', function() {
-                updateDateDisplay();
                 loadTimeSlots();
             });
 
@@ -221,18 +209,6 @@
                     $('#selectedTimeSlot').val(slot);
                 }
             });
-
-            // 更新日期顯示
-            function updateDateDisplay() {
-                var dateInput = $('.reservation-date-input').val();
-                if (dateInput) {
-                    var date = new Date(dateInput + 'T00:00:00');
-                    var weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-                    var weekday = weekdays[date.getDay()];
-                    var formattedDate = dateInput + ' ' + weekday;
-                    $('#selectedDateDisplay').text(formattedDate);
-                }
-            }
 
             // 載入時段
             function loadTimeSlots() {
@@ -276,23 +252,115 @@
                 });
             }
 
-            updateDateDisplay();
             if ($('#timeSlotsGrid').children().length === 0) {
                 loadTimeSlots();
             }
 
-            // 菜單輪播功能
-            var menuCarousel = $('#menuCarousel');
-            var scrollAmount = 300; // 每次滾動的距離
+            // 菜單輪播功能 - 位置交換邏輯（示例代碼模式）
+            var menuCards = $('.menu-card');
+            var totalMenus = menuCards.length;
+            
+            // 定義三個位置類的陣列，對應 [左, 中, 右]
+            var slots = ['slot-left', 'slot-center', 'slot-right'];
+            
+            // 初始化輪播：分配初始位置
+            function initCarousel() {
+                if (totalMenus === 0) return;
+                
+                // 重置位置陣列
+                slots = ['slot-left', 'slot-center', 'slot-right'];
+                
+                // 只處理前3張卡片（如果超過3張）
+                var cardsToShow = Math.min(3, totalMenus);
+                
+                // 清除所有位置類並重新分配
+                menuCards.each(function(index) {
+                    if (index < cardsToShow) {
+                        $(this)
+                            .removeClass('slot-left slot-center slot-right')
+                            .addClass(slots[index])
+                            .show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+            
+            // 向前旋轉（下一張）：圖1→圖2位置, 圖2→圖3位置, 圖3→圖1位置
+            function rotateForward() {
+                if (totalMenus === 0) return;
+                
+                // 陣列左旋轉：取出第一個，放到最後
+                // ['slot-left', 'slot-center', 'slot-right']
+                // → ['slot-center', 'slot-right', 'slot-left']
+                var firstSlot = slots.shift();
+                slots.push(firstSlot);
+                
+                // 重新分配位置類
+                var cardsToShow = Math.min(3, totalMenus);
+                menuCards.each(function(index) {
+                    if (index < cardsToShow) {
+                        $(this)
+                            .removeClass('slot-left slot-center slot-right')
+                            .addClass(slots[index]);
+                    }
+                });
+            }
+            
+            // 向後旋轉（上一張）：圖1→圖3位置, 圖2→圖1位置, 圖3→圖2位置
+            function rotateBackward() {
+                if (totalMenus === 0) return;
+                
+                // 陣列右旋轉：取出最後一個，放到最前面
+                var lastSlot = slots.pop();
+                slots.unshift(lastSlot);
+                
+                // 重新分配位置類
+                var cardsToShow = Math.min(3, totalMenus);
+                menuCards.each(function(index) {
+                    if (index < cardsToShow) {
+                        $(this)
+                            .removeClass('slot-left slot-center slot-right')
+                            .addClass(slots[index]);
+                    }
+                });
+            }
             
             // 左右箭頭導航
             $('#menuCarouselPrev').on('click', function() {
-                menuCarousel.animate({ scrollLeft: '-=' + scrollAmount }, 300);
+                rotateBackward();
             });
             
             $('#menuCarouselNext').on('click', function() {
-                menuCarousel.animate({ scrollLeft: '+=' + scrollAmount }, 300);
+                rotateForward();
             });
+            
+            // 觸摸滑動支持（移動端）
+            var touchStartX = 0;
+            var touchEndX = 0;
+            
+            $('#menuCarousel').on('touchstart', function(e) {
+                touchStartX = e.originalEvent.touches[0].clientX;
+            });
+            
+            $('#menuCarousel').on('touchend', function(e) {
+                touchEndX = e.originalEvent.changedTouches[0].clientX;
+                var swipeThreshold = 50;
+                var diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        // 向左滑動，下一張
+                        rotateForward();
+                    } else {
+                        // 向右滑動，上一張
+                        rotateBackward();
+                    }
+                }
+            });
+            
+            // 初始化
+            initCarousel();
             
             // 點擊菜單卡片時載入圖片到 Modal
             $('.menu-card').on('click', function() {
