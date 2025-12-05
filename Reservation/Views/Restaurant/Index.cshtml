@@ -124,7 +124,7 @@
                                 <div class="restaurant-actions">
                                     <a href="@Url.Action("Index", "Reservation", new { id = restaurant.Id })" 
                                        class="btn btn-outline-primary btn-reservation">訂位</a>
-                                    <a href="@Url.Action("Queue", "Restaurant", new { id = restaurant.Id })" 
+                                    <a href="@Url.Action("Index", "WaitingPosition", new { id = restaurant.Id })" 
                                        class="btn btn-outline-secondary btn-queue">候位</a>
                                 </div>
                             </div>

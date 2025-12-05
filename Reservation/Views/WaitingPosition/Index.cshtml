@@ -1,5 +1,216 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Reservation.Models.ViewModels.WaitingPositionViewModel
 @{
+    ViewData["Title"] = "候位";
+}
+
+<!-- 頂部 Header -->
+<header class="reservation-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <a href="@Url.Action("Index", "Restaurant")" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="col text-center">
+                <h1 class="reservation-header-title">@Model.Branch.Name</h1>
+            </div>
+            <div class="col-auto" style="width: 24px;"></div>
+        </div>
+    </div>
+</header>
+<!-- 餐廳資訊卡片 -->
+<div class="container-fluid px-3 py-3">
+    <div class="restaurant-info-card">
+        <div class="row g-0">
+            <div class="col-4">
+                <div class="restaurant-image-wrapper-reservation">
+                    <img src="@Url.Content(Model.Restaurant.ImageUrl)" alt="@Model.Restaurant.Name" class="restaurant-image-reservation" />
+                </div>
+            </div>
+            <div class="col-8">
+                <div class="restaurant-details-reservation">
+                    <h2 class="restaurant-name-reservation">@Model.Restaurant.Name</h2>
+                    <div class="restaurant-detail-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#258cfb" viewBox="0 0 16 16">
+                            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                        </svg>
+                        <span>@Model.Restaurant.Location</span>
+                    </div>
+                    <div class="restaurant-detail-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#258cfb" viewBox="0 0 16 16">
+                            <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122L9.78 10.22a.678.678 0 0 1-.58-.122L6.5 7.5a.678.678 0 0 1-.122-.58l.122-1.034a.678.678 0 0 0-.122-.58L3.654 1.328z"/>
+                        </svg>
+                        <span>@Model.Restaurant.Phone</span>
+                    </div>
+                    <div class="restaurant-detail-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#258cfb" viewBox="0 0 16 16">
+                            <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                        </svg>
+                        <span>@Model.Restaurant.OpeningHours</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 候位狀態區塊 -->
+    <div class="waiting-position-section">
+        <div class="waiting-position-content">
+            <h3 class="waiting-position-title">目前候位組數</h3>
+            <div class="waiting-count-display" id="waitingCountDisplay">
+                @Model.CurrentQueueCount
+            </div>
+            <div class="waiting-instructions">
+                <p>請前往餐廳排隊取號</p>
+                <p>實際等候時間及排隊人數,依現場為主</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 候位表單 -->
+    <div class="waiting-form-section">
+        <form method="post" action="@Url.Action("Index", "WaitingPosition")" id="waitingPositionForm">
+            <input type="hidden" name="Restaurant.Id" value="@Model.Restaurant.Id" />
+            <input type="hidden" name="Branch.Id" value="@Model.Branch.Id" />
+            
+            <div class="form-group mb-3">
+                <label class="form-label waiting-form-label">候位者姓名</label>
+                <input type="text" 
+                       class="form-control waiting-input" 
+                       name="CustomerName" 
+                       id="customerName"
+                       value="@Model.CustomerName"
+                       list="customerNameList"
+                       placeholder="請輸入姓名"
+                       required />
+                <datalist id="customerNameList">
+                </datalist>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label waiting-form-label">候位者電話</label>
+                <input type="tel" 
+                       class="form-control waiting-input" 
+                       name="CustomerPhone" 
+                       id="customerPhone"
+                       value="@Model.CustomerPhone"
+                       placeholder="請輸入電話號碼"
+                       pattern="[0-9-+()]*"
+                       required />
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label">大人</label>
+                    <select class="form-select" name="AdultCount" id="adultCount" required>
+                        @for (int i = 1; i <= 8; i++)
+                        {
+                            <option value="@i" selected="@(Model.AdultCount == i)">@i 位</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label">小孩</label>
+                    <select class="form-select" name="ChildCount" id="childCount">
+                        @for (int i = 0; i <= 8; i++)
+                        {
+                            <option value="@i" selected="@(Model.ChildCount == i)">@i 位</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-waiting-position">我要候位</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 候位成功彈窗 -->
+<div class="modal fade" id="waitingPositionSuccessModal" tabindex="-1" aria-labelledby="waitingPositionSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content reservation-success-modal">
+            <button type="button" class="btn-close btn-close-white reservation-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+            
+            <div class="reservation-success-content">
+                <div class="success-icon-wrapper">
+                    <div class="success-checkmark">
+                        <svg viewBox="0 0 52 52" class="checkmark-svg">
+                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="white" stroke-width="2"/>
+                            <path class="checkmark-check" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <h2 class="reservation-success-title">候位完成</h2>
+                
+                <p class="reservation-success-message">
+                    可於遠百APP,【個人訊息功能】查詢訂候位記錄
+                </p>
+                
+                <button type="button" class="btn reservation-query-btn" onclick="window.location.href='@Url.Action("Index", "Restaurant")'">
+                    候位紀錄查詢
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#waitingPositionForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                if (!this.checkValidity()) {
+                    $(this).addClass('was-validated');
+                    return false;
+                }
+                
+                var formData = $(this).serialize();
+                var submitBtn = $(this).find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                submitBtn.prop('disabled', true).html('處理中...');
+                
+                $.ajax({
+                    url: '@Url.Action("Index", "WaitingPosition")',
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#waitingCountDisplay').text(response.currentQueueCount);
+                            
+                            var modalElement = document.getElementById('waitingPositionSuccessModal');
+                            var modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        } else {
+                            alert('候位失敗：' + (response.errors ? response.errors.join(', ') : '請檢查輸入資料'));
+                        }
+                        submitBtn.prop('disabled', false).html(originalText);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('候位失敗，請稍後再試');
+                        submitBtn.prop('disabled', false).html(originalText);
+                    }
+                });
+            });
+
+            setInterval(function() {
+                $.ajax({
+                    url: '@Url.Action("GetQueueStatus", "WaitingPosition")',
+                    type: 'GET',
+                    data: { restaurantId: @Model.Restaurant.Id },
+                    success: function(response) {
+                        $('#waitingCountDisplay').text(response.currentQueueCount);
+                    }
+                });
+            }, 30000);
+        });
+    </script>
 }
