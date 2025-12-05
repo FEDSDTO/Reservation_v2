@@ -410,43 +410,6 @@
                 $('#menuModalImage').attr('src', '');
             });
 
-            // 表單提交處理 - 改為 AJAX 提交
-            $('#reservationForm').on('submit',function(e){
-                e.preventDefault();
-                
-                if(!this.checkValidity()){
-                    $(this).addClass('was-validated');
-                    return false;
-                }
-
-                var formData = $(this).serialize();
-                var submitBtn= $(this).find('button[type="submit"]');
-                var originalText = submitBtn.html();
-                submitBtn.prop('disabled',true).html('處理中...');
-
-                $.ajax({
-                    url: '@Url.Action("Index", "Reservation")',
-                    type: 'POST',
-                    data: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            var modalElement = document.getElementById('reservationSuccessModal');
-                            var modal = new bootstrap.Modal(modalElement);
-                            modal.show();
-                        } else {
-                            alert('訂位失敗：' + (response.errors ? response.errors.join(', ') : '請檢查輸入資料'));
-                        }
-                        submitBtn.prop('disabled', false).html(originalText);
-                    },
-                    error: function(xhr, status, error) {
-                        alert('訂位失敗，請稍後再試');
-                        submitBtn.prop('disabled', false).html(originalText);
-                    }
-                });
-            })
         });
     </script>
 }

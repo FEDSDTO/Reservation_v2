@@ -160,16 +160,11 @@ namespace Reservation.Controllers
             return View(viewModel);
         }
 
-        // 訂位功能 - POST
         [HttpPost]
         public IActionResult Index(ReservationViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
-                }
                 var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == model.Restaurant.Id);
                 if (restaurant != null)
                 {
@@ -184,11 +179,62 @@ namespace Reservation.Controllers
                 model.Menus = GetMenus(model.Restaurant.Id);
                 return View(model);
             }
+
+            return RedirectToAction("Confirm", "Reservation", new
+            {
+                restaurantId = model.Restaurant.Id,
+                branchId = model.Branch.Id,
+                selectedDate = model.SelectedDate ?? DateTime.Today,
+                adultCount = model.AdultCount,
+                childCount = model.ChildCount,
+                selectedMealPeriod = model.SelectedMealPeriod,
+                selectedTimeSlot = model.SelectedTimeSlot ?? string.Empty
+            });
+        }
+
+        [HttpGet]
+        public IActionResult Confirm(int restaurantId, int branchId, DateTime selectedDate, int adultCount, int childCount, string selectedMealPeriod, string selectedTimeSlot)
+        {
+            if (restaurantId == 0)
+            {
+                return RedirectToAction("Index", "Restaurant");
+            }
+
+            var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == restaurantId);
+            if (restaurant == null)
+            {
+                return NotFound();
+            }
+
+            var branch = GetBranches().FirstOrDefault(b => b.Id == branchId);
+            if (branch == null)
+            {
+                branch = GetBranches().FirstOrDefault(b => b.Id == restaurant.BranchId) ?? GetBranches().First();
+            }
+
+            var model = new ReservationConfirmViewModel
+            {
+                Restaurant = restaurant,
+                Branch = branch,
+                SelectedDate = selectedDate,
+                AdultCount = adultCount,
+                ChildCount = childCount,
+                SelectedMealPeriod = selectedMealPeriod ?? "中午",
+                SelectedTimeSlot = selectedTimeSlot ?? string.Empty
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult Confirm(ReservationConfirmViewModel model)
+        {
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
                 return Json(new { success = true, message = "訂位成功" });
             }
-            TempData["ReservationSuccess"] ="訂位資料已提交";
+
+            TempData["ReservationSuccess"] = "訂位資料已提交";
             return RedirectToAction("Index", "Restaurant");
         }
 

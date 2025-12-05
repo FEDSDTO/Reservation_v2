@@ -1,0 +1,209 @@
+@model Reservation.Models.ViewModels.ReservationConfirmViewModel
+@{
+    ViewData["Title"] = "訂位確認";
+    var culture = new System.Globalization.CultureInfo("zh-TW");
+    var dayNames = new[] { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
+    var dayOfWeek = dayNames[(int)Model.SelectedDate.DayOfWeek];
+    var dateDisplay = Model.SelectedDate.ToString("yyyy-MM-dd") + " " + dayOfWeek;
+}
+
+<!-- 頂部 Header -->
+<header class="reservation-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <a href="@Url.Action("Index", "Reservation", new { id = Model.Restaurant.Id })" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="col text-center">
+                <h1 class="reservation-header-title">@Model.Branch.Name</h1>
+            </div>
+            <div class="col-auto" style="width: 24px;"></div>
+        </div>
+    </div>
+</header>
+
+<div class="container-fluid px-3 py-3">
+    <!-- 訂位資料區塊 -->
+    <div class="reservation-form-section">
+        <h3 class="section-title">訂位資料</h3>
+        
+        <div class="reservation-info-display">
+            <div class="reservation-info-item">
+                <span class="reservation-info-label">訂位日期</span>
+                <span class="reservation-info-value">@dateDisplay</span>
+            </div>
+            <div class="reservation-info-item">
+                <span class="reservation-info-label">訂位人數</span>
+                <span class="reservation-info-value">@Model.AdultCount 位大人 @Model.ChildCount 位小孩</span>
+            </div>
+            <div class="reservation-info-item">
+                <span class="reservation-info-label">訂位時間</span>
+                <span class="reservation-info-value">@Model.SelectedMealPeriod @Model.SelectedTimeSlot</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 訂位人資訊表單 -->
+    <div class="reservation-form-section">
+        <form method="post" action="@Url.Action("Confirm", "Reservation")" id="reservationConfirmForm">
+            <input type="hidden" name="Restaurant.Id" value="@Model.Restaurant.Id" />
+            <input type="hidden" name="Branch.Id" value="@Model.Branch.Id" />
+            <input type="hidden" name="SelectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+            <input type="hidden" name="AdultCount" value="@Model.AdultCount" />
+            <input type="hidden" name="ChildCount" value="@Model.ChildCount" />
+            <input type="hidden" name="SelectedMealPeriod" value="@Model.SelectedMealPeriod" />
+            <input type="hidden" name="SelectedTimeSlot" value="@Model.SelectedTimeSlot" />
+            
+            <div class="form-group mb-3">
+                <label class="form-label reservation-form-label">
+                    <span class="reservation-label-bullet">•</span>
+                    訂位人姓名
+                </label>
+                <div class="input-group">
+                    <input type="text" 
+                           class="form-control reservation-input" 
+                           name="CustomerName" 
+                           id="customerName"
+                           value="@Model.CustomerName"
+                           placeholder="請輸入姓名" />
+                    <select class="form-select reservation-title-select" name="CustomerTitle" id="customerTitle" style="max-width: 100px; flex-shrink: 0;">
+                        <option value="先生" selected="@(Model.CustomerTitle == "先生")">先生</option>
+                        <option value="小姐" selected="@(Model.CustomerTitle == "小姐")">小姐</option>
+                        <option value="女士" selected="@(Model.CustomerTitle == "女士")">女士</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label reservation-form-label">
+                    <span class="reservation-label-bullet">•</span>
+                    訂位人電話
+                </label>
+                <input type="tel" 
+                       class="form-control reservation-input" 
+                       name="CustomerPhone" 
+                       id="customerPhone"
+                       value="@Model.CustomerPhone"
+                       placeholder="請輸入電話號碼" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label reservation-form-label">
+                    <span class="reservation-label-bullet">•</span>
+                    用餐目的
+                </label>
+                <div class="dining-purpose-options">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="DiningPurpose" id="diningPurpose1" value="聚餐" @(Model.DiningPurpose == "聚餐" || string.IsNullOrEmpty(Model.DiningPurpose) ? "checked" : "")>
+                        <label class="form-check-label" for="diningPurpose1">聚餐</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="DiningPurpose" id="diningPurpose2" value="開會" @(Model.DiningPurpose == "開會" ? "checked" : "")>
+                        <label class="form-check-label" for="diningPurpose2">開會</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="DiningPurpose" id="diningPurpose3" value="商用" @(Model.DiningPurpose == "商用" ? "checked" : "")>
+                        <label class="form-check-label" for="diningPurpose3">商用</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="DiningPurpose" id="diningPurpose4" value="週年慶" @(Model.DiningPurpose == "週年慶" ? "checked" : "")>
+                        <label class="form-check-label" for="diningPurpose4">週年慶</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="DiningPurpose" id="diningPurpose5" value="慶生" @(Model.DiningPurpose == "慶生" ? "checked" : "")>
+                        <label class="form-check-label" for="diningPurpose5">慶生</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label reservation-form-label">
+                    <span class="reservation-label-bullet">•</span>
+                    訂位備註
+                </label>
+                <textarea class="form-control reservation-textarea" 
+                          name="Remarks" 
+                          id="remarks"
+                          rows="4"
+                          placeholder="有任何特殊需求可以在備註說明。[例如:不吃牛、蛋奶素等]">@Model.Remarks</textarea>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-reservation-confirm">預約訂位</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 訂位成功彈窗 -->
+<div class="modal fade" id="reservationSuccessModal" tabindex="-1" aria-labelledby="reservationSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content reservation-success-modal">
+            <button type="button" class="btn-close btn-close-white reservation-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+            
+            <div class="reservation-success-content">
+                <div class="success-icon-wrapper">
+                    <div class="success-checkmark">
+                        <svg viewBox="0 0 52 52" class="checkmark-svg">
+                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="white" stroke-width="2"/>
+                            <path class="checkmark-check" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <h2 class="reservation-success-title">訂位完成</h2>
+                
+                <p class="reservation-success-message">
+                    可於遠百APP,【個人訊息功能】查詢訂候位記錄
+                </p>
+                
+                <button type="button" class="btn reservation-query-btn" onclick="window.location.href='@Url.Action("Index", "Restaurant")'">
+                    訂位紀錄查詢
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#reservationConfirmForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var formData = $(this).serialize();
+                var submitBtn = $(this).find('button[type="submit"]');
+                var originalText = submitBtn.html();
+                submitBtn.prop('disabled', true).html('處理中...');
+                
+                $.ajax({
+                    url: '@Url.Action("Confirm", "Reservation")',
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            var modalElement = document.getElementById('reservationSuccessModal');
+                            var modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        } else {
+                            alert('訂位失敗：' + (response.errors ? response.errors.join(', ') : '請檢查輸入資料'));
+                        }
+                        submitBtn.prop('disabled', false).html(originalText);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('訂位失敗，請稍後再試');
+                        submitBtn.prop('disabled', false).html(originalText);
+                    }
+                });
+            });
+        });
+    </script>
+}
+

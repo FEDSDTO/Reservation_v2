@@ -4,7 +4,7 @@
 }
 
 <!-- 頂部漸層導航欄 -->
-<header class="restaurant-header"> <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<header class="restaurant-header">
     <div class="header-content">
         <h1 class="header-title">@(Model.SelectedBranchId.HasValue ? 
             Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百信義A13" 

@@ -1,0 +1,310 @@
+/* ============================================
+   餐廳列表頁面樣式
+   ============================================ */
+
+.restaurant-header {
+    background: linear-gradient(135deg,#E92180 0%, #E10074 75%, #0875EF 85%, #84D5FA 100%) ;
+    padding: 1.5rem 0;
+    margin-bottom: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    text-align: center;
+}
+
+.header-title {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.search-filter-section {
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 1rem;
+}
+
+.search-filter-section .container-fluid{
+    background-color: #f5f5f5;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.category-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.category-tag {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding: 0.25rem 0.5rem;
+    transition: color 0.2s;
+}
+
+.category-tag:hover {
+    color: #258cfb;
+    text-decoration: none;
+}
+
+.category-tag.active {
+    color: #258cfb;
+    font-weight: 600;
+}
+
+.category-separator {
+    color: #dee2e6;
+    margin: 0 0.25rem;
+}
+
+.restaurant-list-section {
+    padding-bottom: 2rem;
+}
+
+.restaurant-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.restaurant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.restaurant-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 150px;
+    overflow: hidden;
+}
+
+.restaurant-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.restaurant-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    z-index: 1;
+}
+
+.badge-popular {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+}
+
+.badge-new {
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
+}
+
+.restaurant-info {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 150px;
+}
+
+.restaurant-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 1rem;
+}
+
+.restaurant-details {
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.detail-icon {
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.restaurant-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.btn-reservation,
+.btn-queue {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s;
+    border-color: #6c757d;
+    color: #258cfb;
+}
+
+.btn-reservation:hover,
+.btn-queue:hover {
+    background-color: #258cfb;
+    color: white;
+    border-color: #258cfb;
+}
+
+.unified-control:not(.dropdown-toggle):not(.input-group):focus {
+    background-color: #1a7cd9 !important;
+    border-color: #1a7cd9 !important;
+    box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25) !important;
+}
+
+.search-filter-section .dropdown-toggle.unified-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background-color: white !important;
+    color: #212529 !important;
+    border: 2px solid #dee2e6;
+    border-radius: 8px !important;
+    height: 42px;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+.search-filter-section .dropdown-toggle.unified-control:hover {
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6;
+    color: #212529 !important;
+}
+
+.search-filter-section .dropdown-toggle.unified-control:focus {
+    background-color: white !important;
+    border-color: #dee2e6;
+    color: #212529 !important;
+    box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25) !important;
+}
+
+.search-filter-section .dropdown-toggle.unified-control svg {
+    color: #258cfb !important;
+    fill: #258cfb !important;
+}
+
+.unified-search-form .input-group {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #dee2e6;
+    background-color: white;
+    height: 42px;
+    box-sizing: border-box;
+}
+
+.unified-input {
+    border: none !important;
+    border-radius: 0;
+    padding: 0.5rem 1rem;
+    flex: 1;
+    height: 42px;
+}
+
+.unified-input:focus {
+    border: none !important;
+    box-shadow: none;
+    outline: none;
+}
+
+.unified-input::placeholder {
+    color: #6c757d;
+}
+
+.unified-search-btn {
+    border: none;
+    border-radius: 0;
+    background-color: #258cfb !important;
+    color: white !important;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    min-width: 50px;
+    transition: background-color 0.2s;
+}
+
+.unified-search-btn:hover {
+    background-color: #1a7cd9 !important;
+}
+
+.unified-search-btn:focus {
+    background-color: #1a7cd9 !important;
+    box-shadow: none;
+}
+
+.unified-search-btn svg {
+    color: white;
+}
+
+.search-filter-section .dropdown-item:hover {
+    background-color: #e7f3ff;
+    color: #258cfb;
+}
+
+.restaurant-list-section .container-fluid {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .header-title {
+        font-size: 1.25rem;
+    }
+
+    .restaurant-image-wrapper {
+        min-height: 120px;
+    }
+
+    .restaurant-info {
+        padding: 1rem;
+        min-height: 120px;
+    }
+
+    .restaurant-name {
+        font-size: 1.1rem;
+    }
+
+    .category-filter {
+        font-size: 0.85rem;
+    }
+
+    .unified-control,
+    .unified-input,
+    .unified-search-btn {
+        height: 38px;
+        font-size: 0.9rem;
+    }
+}
+

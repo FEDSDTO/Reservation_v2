@@ -26,7 +26,6 @@ body {
    餐廳列表頁面樣式
    ============================================ */
 
-/* 頂部漸層導航欄 */
 .restaurant-header {
     background: linear-gradient(135deg,#E92180 0%, #E10074 75%, #0875EF 85%, #84D5FA 100%) ;
     padding: 1.5rem 0;
@@ -46,7 +45,6 @@ body {
     text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
-/* 搜尋與篩選區域 */
 .search-filter-section {
     background: white;
     border-bottom: 1px solid #e0e0e0;
@@ -61,7 +59,6 @@ body {
     display: none;
 }
 
-/* 類別篩選 */
 .category-filter {
     display: flex;
     align-items: center;
@@ -92,7 +89,6 @@ body {
     margin: 0 0.25rem;
 }
 
-/* 餐廳列表區域 */
 .restaurant-list-section {
     padding-bottom: 2rem;
 }
@@ -111,7 +107,6 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-/* 餐廳圖片 */
 .restaurant-image-wrapper {
     position: relative;
     width: 100%;
@@ -147,7 +142,6 @@ body {
     background: linear-gradient(135deg, #ff6b9d 0%, #ff8fab 100%);
 }
 
-/* 餐廳資訊 */
 .restaurant-info {
     padding: 1.25rem;
     display: flex;
@@ -181,7 +175,6 @@ body {
     flex-shrink: 0;
 }
 
-/* 操作按鈕 */
 .restaurant-actions {
     display: flex;
     gap: 0.75rem;
@@ -206,39 +199,12 @@ body {
     border-color: #258cfb;
 }
 
-/* 響應式設計 */
-@media (max-width: 768px) {
-    .header-title {
-        font-size: 1.25rem;
-    }
-
-    .restaurant-image-wrapper {
-        min-height: 120px;
-    }
-
-    .restaurant-info {
-        padding: 1rem;
-        min-height: 120px;
-    }
-
-    .restaurant-name {
-        font-size: 1.1rem;
-    }
-
-
-    .category-filter {
-        font-size: 0.85rem;
-    }
-}
-
-
 .unified-control:not(.dropdown-toggle):not(.input-group):focus {
     background-color: #1a7cd9 !important;
     border-color: #1a7cd9 !important;
     box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25) !important;
 }
 
-/* 下拉按鈕樣式 - 白色背景，和品牌搜尋相同的外框顏色 */
 .search-filter-section .dropdown-toggle.unified-control {
     display: flex;
     align-items: center;
@@ -266,13 +232,11 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25) !important;
 }
 
-/* 只有箭頭圖示是藍色 */
 .search-filter-section .dropdown-toggle.unified-control svg {
     color: #258cfb !important;
     fill: #258cfb !important;
 }
 
-/* 搜尋輸入框和按鈕合併樣式 */
 .unified-search-form .input-group {
     display: flex;
     border-radius: 8px;
@@ -328,20 +292,38 @@ body {
     color: white;
 }
 
-
 .search-filter-section .dropdown-item:hover {
     background-color: #e7f3ff;
     color: #258cfb;
 }
 
-/* 餐廳列表容器 */
 .restaurant-list-section .container-fluid {
     max-width: 1200px;
     margin: 0 auto;
 }
 
-/* 響應式調整 */
 @media (max-width: 768px) {
+    .header-title {
+        font-size: 1.25rem;
+    }
+
+    .restaurant-image-wrapper {
+        min-height: 120px;
+    }
+
+    .restaurant-info {
+        padding: 1rem;
+        min-height: 120px;
+    }
+
+    .restaurant-name {
+        font-size: 1.1rem;
+    }
+
+    .category-filter {
+        font-size: 0.85rem;
+    }
+
     .unified-control,
     .unified-input,
     .unified-search-btn {
@@ -354,7 +336,6 @@ body {
    訂位頁面樣式
    ============================================ */
 
-/* 頂部 Header */
 .reservation-header {
     background: linear-gradient(135deg, #E92180 0%, #E10074 75%, #0875EF 85%, #84D5FA 100%);
     padding: 1rem 0;
@@ -383,7 +364,6 @@ body {
     opacity: 0.8;
 }
 
-/* 餐廳資訊卡片 */
 .restaurant-info-card {
     background: white;
     border-radius: 12px;
@@ -442,7 +422,6 @@ body {
     flex-shrink: 0;
 }
 
-/* 訂位表單區塊 */
 .reservation-form-section {
     background: white;
     border-radius: 12px;
@@ -491,7 +470,6 @@ body {
     margin-top: 0.5rem;
 }
 
-/* 時段選擇區塊 */
 .time-slot-section {
     margin-top: 2rem;
 }
@@ -569,7 +547,6 @@ body {
     border-color: #e9ecef;
 }
 
-/* 下一步按鈕 */
 .btn-next-step {
     background: linear-gradient(135deg, #258cfb 0%, #1a7cd9 100%);
     color: white;
@@ -590,7 +567,6 @@ body {
     color: white;
 }
 
-/* 訂位頁面響應式設計 */
 @media (max-width: 768px) {
     .reservation-header-title {
         font-size: 1.1rem;
@@ -640,9 +616,6 @@ body {
     margin-bottom: 1.5rem;
 }
 
-
-
-/* 菜單區域內的標題置中 */
 .menu-section .section-title {
     text-align: center;
     color: white;
@@ -655,7 +628,6 @@ body {
     gap: 1rem;
 }
 
-/* 標題左側白色橫線 */
 .menu-section .section-title::before {
     content: '';
     flex: 1;
@@ -665,7 +637,6 @@ body {
     opacity: 0.8;
 }
 
-/* 標題右側白色橫線 */
 .menu-section .section-title::after {
     content: '';
     flex: 1;
@@ -684,24 +655,23 @@ body {
 .menu-carousel {
     position: relative;
     width: 100%;
-    height: 400px; /* 固定高度，為絕對定位提供定位上下文 */
-    overflow: hidden; /* 隱藏超出部分 */
+    height: 400px;
+    overflow: hidden;
 }
 
 .menu-card {
     position: absolute;
     top: 0;
-    width: calc((100% - 1rem) / 3);  /* 卡片寬度 */
+    width: calc((100% - 1rem) / 3);
     height: 400px;
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.6s ease-in-out; /* 平滑過渡動畫 */
+    transition: all 0.6s ease-in-out;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     box-sizing: border-box;
 }
 
-/* 左侧位置 - 缩小、变暗 */
 .menu-card.slot-left {
     left: 0;
     transform: translateX(0) scale(0.85);
@@ -710,7 +680,6 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* 中间位置 - 突出显示 */
 .menu-card.slot-center {
     left: 50%;
     transform: translateX(-50%) scale(1);
@@ -719,7 +688,6 @@ body {
     box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 
-/* 右侧位置 - 缩小、变暗 */
 .menu-card.slot-right {
     right: 0;
     transform: translateX(0) scale(0.85);
@@ -789,7 +757,6 @@ body {
     right: 10px;
 }
 
-/* 圖片放大 Modal 樣式 */
 .menu-image-modal-content {
     background:transparent;
     border: none;
@@ -829,7 +796,6 @@ body {
     flex: 1;
 }
 
-/* 圖片容器樣式 */
 .menu-image-wrapper {
     position: relative;
     display: inline-block;
@@ -847,6 +813,95 @@ body {
     border-radius: 8px;
     display: block;
     margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .menu-carousel {
+        height: 300px;
+    }
+    
+    .menu-card {
+        width: calc((100% - 1rem) / 3);
+        height: 300px;
+    }
+    
+    .menu-card.slot-left {
+        left: 0;
+        transform: translateX(0) scale(0.85);
+    }
+    
+    .menu-card.slot-center {
+        left: 50%;
+        transform: translateX(-50%) scale(1);
+    }
+    
+    .menu-card.slot-right {
+        right: 0;
+        transform: translateX(0) scale(0.85);
+    }
+    
+    .menu-carousel-nav {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .menu-image-modal-content {
+        max-height: 90vh;
+        margin: 5vh auto;
+        border-radius: 12px;
+    }
+    
+    .menu-image-modal-body {
+        padding: 2.5rem 0.5rem 0.5rem;
+        overflow: hidden;
+        flex: 1;
+    }
+    
+    .menu-image-wrapper {
+        max-width: 90%;
+        max-height: 75vh;
+    }
+    
+    .menu-modal-image {
+        max-width: 100%;
+        max-height: 75vh;
+        object-fit: contain;
+        object-position: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-section {
+        padding: 0.5rem 0.5rem;
+    }
+    
+    .menu-section .section-title {
+        margin-bottom: 0.01rem;
+    }    
+    
+    .menu-carousel {
+        height: 180px;
+    }
+    
+    .menu-card {
+        width: calc((100% - 1rem) / 3);
+        height: 180px;
+    }
+    
+    .menu-card.slot-left {
+        left: 0;
+        transform: translateX(0) scale(0.85);
+    }
+    
+    .menu-card.slot-center {
+        left: 50%;
+        transform: translateX(-50%) scale(1);
+    }
+    
+    .menu-card.slot-right {
+        right: 0;
+        transform: translateX(0) scale(0.85);
+    }
 }
 
 /* ============================================
@@ -1015,102 +1070,6 @@ body {
     }
 }
 
-
-
-/* 菜單區域響應式設計 */
-@media (max-width: 768px) {
-    .menu-carousel {
-        height: 300px;
-    }
-    
-    .menu-card {
-        width: calc((100% - 1rem) / 3);
-        height: 300px;
-    }
-    
-    .menu-card.slot-left {
-        left: 0;
-        transform: translateX(0) scale(0.85);
-    }
-    
-    .menu-card.slot-center {
-        left: 50%;
-        transform: translateX(-50%) scale(1);
-    }
-    
-    .menu-card.slot-right {
-        right: 0;
-        transform: translateX(0) scale(0.85);
-    }
-    
-    .menu-carousel-nav {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .menu-image-modal-content {
-        max-height: 90vh;
-        margin: 5vh auto;
-        border-radius: 12px;
-    }
-    
-    .menu-image-modal-body {
-        padding: 2.5rem 0.5rem 0.5rem;
-        overflow: hidden;
-        flex: 1;
-    }
-    
-    .menu-image-wrapper {
-        max-width: 90%;
-        max-height: 75vh;
-    }
-    
-    .menu-modal-image {
-        max-width: 100%;
-        max-height: 75vh;
-        object-fit: contain;
-        object-position: center;
-    }
-    
-}
-
-@media (max-width: 480px) {
-    /* 減少框的上下內部間距，確保左右對稱 */
-    .menu-section {
-        padding: 0.5rem 0.5rem;  /* 上右下左：右邊 0.4rem，左邊 0.5rem */
-    }
-    
-    /* 減少標題與圖片之間的間距 */
-    .menu-section .section-title {
-        margin-bottom: 0.01rem;
-        
-    }    
-    
-    .menu-carousel {
-        height: 180px;
-    }
-    
-    .menu-card {
-        width: calc((100% - 1rem) / 3);
-        height: 180px;
-    }
-    
-    .menu-card.slot-left {
-        left: 0;
-        transform: translateX(0) scale(0.85);
-    }
-    
-    .menu-card.slot-center {
-        left: 50%;
-        transform: translateX(-50%) scale(1);
-    }
-    
-    .menu-card.slot-right {
-        right: 0;
-        transform: translateX(0) scale(0.85);
-    }
-}
-
 .waiting-position-section {
     background: white;
     border-radius: 12px;
@@ -1264,5 +1223,189 @@ body {
         padding: 0.65rem 2rem;
         font-size: 1rem;
         min-width: 180px;
+    }
+}
+
+.reservation-info-display {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.reservation-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.reservation-info-item:last-child {
+    border-bottom: none;
+}
+
+.reservation-info-label {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.reservation-info-value {
+    color: #258cfb;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.reservation-form-label {
+    color: #258cfb;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.reservation-label-bullet {
+    color: #258cfb;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.reservation-input {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    height: 42px;
+    font-size: 0.95rem;
+}
+
+.reservation-input:focus {
+    border-color: #258cfb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25);
+    outline: none;
+}
+
+.reservation-form-section .input-group {
+    display: flex;
+}
+
+.reservation-form-section .input-group .reservation-input {
+    border-radius: 8px 0 0 8px;
+    flex: 1;
+}
+
+.reservation-title-select {
+    border-left: 1px solid #dee2e6;
+    border-radius: 0 8px 8px 0;
+    height: 42px;
+    font-size: 0.95rem;
+    min-width: 100px;
+}
+
+.reservation-title-select:focus {
+    border-color: #258cfb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25);
+    z-index: 3;
+}
+
+.reservation-textarea {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    resize: vertical;
+}
+
+.reservation-textarea:focus {
+    border-color: #258cfb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25);
+    outline: none;
+}
+
+.reservation-textarea::placeholder {
+    color: #adb5bd;
+}
+
+.btn-reservation-confirm {
+    background: #258cfb;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 3rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(37, 140, 251, 0.3);
+    min-width: 200px;
+}
+
+.btn-reservation-confirm:hover {
+    background: #1a7cd9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 140, 251, 0.4);
+    color: white;
+}
+
+.btn-reservation-confirm:active {
+    transform: translateY(0);
+}
+
+.dining-purpose-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2rem;
+    padding: 0.5rem 0;
+    align-items: center;
+}
+
+.dining-purpose-options .form-check {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.dining-purpose-options .form-check-input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    margin-right: 0.5rem;
+    border: 2px solid #dee2e6;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.dining-purpose-options .form-check-input:checked {
+    background-color: #258cfb;
+    border-color: #258cfb;
+}
+
+.dining-purpose-options .form-check-input:focus {
+    border-color: #258cfb;
+    box-shadow: 0 0 0 0.2rem rgba(37, 140, 251, 0.25);
+}
+
+.dining-purpose-options .form-check-label {
+    color: #212529;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .btn-reservation-confirm {
+        padding: 0.65rem 2rem;
+        font-size: 1rem;
+        min-width: 180px;
+    }
+    
+    .dining-purpose-options {
+        gap: 1rem 1.5rem;
+    }
+    
+    .dining-purpose-options .form-check-label {
+        font-size: 0.9rem;
     }
 }

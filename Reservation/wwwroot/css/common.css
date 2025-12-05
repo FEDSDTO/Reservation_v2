@@ -1,0 +1,303 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  background-color: #f5f5f5;
+}
+
+/* ============================================
+   共用 Header 和餐廳資訊卡片樣式
+   ============================================ */
+
+.reservation-header {
+    background: linear-gradient(135deg, #E92180 0%, #E10074 75%, #0875EF 85%, #84D5FA 100%);
+    padding: 1rem 0;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.reservation-header-title {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.back-button {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding-left: 1rem;
+}
+
+.back-button:hover {
+    color: white;
+    opacity: 0.8;
+}
+
+.restaurant-info-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.restaurant-info-card .row {
+    align-items: stretch;
+}
+
+.restaurant-image-wrapper-reservation {
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    overflow: hidden;
+    display: block;
+    position: relative;
+}
+
+.restaurant-image-reservation {
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.restaurant-details-reservation {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 120px;
+    height: 100%;
+}
+
+.restaurant-name-reservation {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+
+.restaurant-detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+.restaurant-detail-item svg {
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .reservation-header-title {
+        font-size: 1.1rem;
+    }
+
+    .restaurant-image-wrapper-reservation {
+        min-height: 100px;
+    }
+
+    .restaurant-image-reservation {
+        min-height: 100px;
+    }
+
+    .restaurant-details-reservation {
+        padding: 0.75rem;
+        min-height: 100px;
+    }
+
+    .restaurant-name-reservation {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
+   訂位成功彈窗樣式
+   ============================================ */
+
+.reservation-success-modal {
+    background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+    border: none;
+    border-radius: 20px;
+    padding: 0;
+    position: relative;
+    max-width: 400px;
+    margin: 0 auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.reservation-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    opacity: 1;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border: none;
+    background-image: none;
+}
+
+.reservation-close-btn::before {
+    content: '×';
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+}
+
+.reservation-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+}
+
+.reservation-success-content {
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.success-icon-wrapper {
+    margin-bottom: 1.5rem;
+}
+
+.success-checkmark {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.checkmark-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.reservation-success-title {
+    color: white;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reservation-success-message {
+    color: white;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    opacity: 0.95;
+}
+
+.reservation-query-btn {
+    background-color: white;
+    color: #FF1493;
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    min-width: 180px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reservation-query-btn:hover {
+    background-color: #f8f8f8;
+    color: #FF1493;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.reservation-query-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 576px) {
+    .reservation-success-modal {
+        max-width: 90%;
+        margin: 1rem auto;
+    }
+    
+    .reservation-success-content {
+        padding: 2.5rem 1.5rem 1.5rem;
+    }
+    
+    .success-checkmark {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .reservation-success-title {
+        font-size: 1.5rem;
+    }
+    
+    .reservation-success-message {
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .reservation-query-btn {
+        padding: 0.65rem 1.5rem;
+        font-size: 0.95rem;
+        min-width: 160px;
+    }
+    
+    .reservation-close-btn {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+}
+

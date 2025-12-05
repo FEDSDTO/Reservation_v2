@@ -5,7 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Reservation</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <!-- 所有頁面都載入的公用樣式 -->
+    <link rel="stylesheet" href="~/css/common.css" asp-append-version="true" />
+    
+    <!-- 條件式載入頁面專用樣式 -->
+    @{
+        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
+    
+    @if (controller == "Restaurant")
+    {
+        <link rel="stylesheet" href="~/css/restaurant-list.css" asp-append-version="true" />
+    }
+    else if (controller == "Reservation")
+    {
+        <link rel="stylesheet" href="~/css/reservation.css" asp-append-version="true" />
+    }
+    else if (controller == "WaitingPosition")
+    {
+        <link rel="stylesheet" href="~/css/waiting-position.css" asp-append-version="true" />
+    }
+    
     <link rel="stylesheet" href="~/Reservation.styles.css" asp-append-version="true" />
 </head>
 <body>
