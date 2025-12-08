@@ -11,8 +11,8 @@
     <Folder Include="Models\ViewModels\" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <None Include="wwwroot\Image\1.jpg" />
-  </ItemGroup>
+  </ItemGroup> -->
 
 </Project>

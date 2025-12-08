@@ -301,3 +301,21 @@ body {
     }
 }
 
+/* ============================================
+   修復手機模式下 modal 開啟時畫面偏移
+   ============================================ */
+@media (max-width: 768px) {
+    body.modal-open {
+        padding-right: 0 !important;
+        overflow: hidden !important;
+    }
+    
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+

@@ -27,7 +27,7 @@ namespace Reservation.Controllers
                 { 
                     Id = 1, 
                     Name = "1010湘食堂", 
-                    ImageUrl = "/Image/1.jpg",
+                    ImageUrl = "~/Image/1.jpg",
                     Location = "4F懷舊食光埕",
                     Phone = "02-2729-0597",
                     OpeningHours = "10:00-22:00",
@@ -40,7 +40,7 @@ namespace Reservation.Controllers
                 { 
                     Id = 2, 
                     Name = "1010湘食堂", 
-                    ImageUrl = "/Image/1.jpg",
+                    ImageUrl = "~/Image/1.jpg",
                     Location = "4F懷舊食光埕",
                     Phone = "02-2729-0597",
                     OpeningHours = "10:00-22:00",
@@ -53,7 +53,7 @@ namespace Reservation.Controllers
                 { 
                     Id = 3, 
                     Name = "1010湘食堂", 
-                    ImageUrl = "/Image/1.jpg",
+                    ImageUrl = "~/Image/1.jpg",
                     Location = "4F懷舊食光埕",
                     Phone = "02-2729-0597",
                     OpeningHours = "10:00-22:00",
@@ -66,7 +66,7 @@ namespace Reservation.Controllers
                 { 
                     Id = 4, 
                     Name = "1010湘食堂", 
-                    ImageUrl = "/Image/1.jpg",
+                    ImageUrl = "~/Image/1.jpg",
                     Location = "4F懷舊食光埕",
                     Phone = "02-2729-0597",
                     OpeningHours = "10:00-22:00",
@@ -79,7 +79,7 @@ namespace Reservation.Controllers
                 { 
                     Id = 5, 
                     Name = "輕食咖啡廳", 
-                    ImageUrl = "/Image/1.jpg",
+                    ImageUrl = "~/Image/1.jpg",
                     Location = "3F美食廣場",
                     Phone = "02-2729-1234",
                     OpeningHours = "10:00-22:00",
@@ -92,7 +92,7 @@ namespace Reservation.Controllers
                 { 
                     Id = 6, 
                     Name = "吃到飽火鍋", 
-                    ImageUrl = "/Image/1.jpg",
+                    ImageUrl = "~/Image/1.jpg",
                     Location = "5F主題餐廳",
                     Phone = "02-2729-5678",
                     OpeningHours = "10:00-22:00",
@@ -113,19 +113,19 @@ namespace Reservation.Controllers
                 {
                     Id = 1,
                     RestaurantId = restaurantId,
-                    ImageUrl = "/Image/menu1.jpg"
+                    ImageUrl = "~/Image/menu1.jpg"
                 },
                 new Menu
                 {
                     Id = 2,
                     RestaurantId = restaurantId,
-                    ImageUrl = "/Image/menu2.jpg"
+                    ImageUrl = "~/Image/menu2.jpg"
                 },
                 new Menu
                 {
                     Id = 3,
                     RestaurantId = restaurantId,
-                    ImageUrl = "/Image/menu3.jpg"
+                    ImageUrl = "~/Image/menu3.jpg"
                 }
             };
         }
