@@ -14,8 +14,8 @@ namespace Reservation.Controllers
             return new List<Branch>
             {
                 new Branch { Id = 1, Name = "遠百信義A13" },
-                new Branch { Id = 2, Name = "遠百板橋" },
-                new Branch { Id = 3, Name = "遠百台中" }
+                new Branch { Id = 2, Name = "板橋大遠百" },
+                new Branch { Id = 3, Name = "台中大遠百" }
             };
         }
 
@@ -39,9 +39,9 @@ namespace Reservation.Controllers
                 new Restaurant 
                 { 
                     Id = 2, 
-                    Name = "1010湘食堂", 
+                    Name = "新馬辣經典麻辣鍋", 
                     ImageUrl = "~/Image/1.jpg",
-                    Location = "4F懷舊食光埕",
+                    Location = "台北市信義區松仁路58號4樓",
                     Phone = "02-2729-0597",
                     OpeningHours = "10:00-22:00",
                     BranchId = 1,
@@ -52,9 +52,9 @@ namespace Reservation.Controllers
                 new Restaurant 
                 { 
                     Id = 3, 
-                    Name = "1010湘食堂", 
+                    Name = "筷炒台式餐館", 
                     ImageUrl = "~/Image/1.jpg",
-                    Location = "4F懷舊食光埕",
+                    Location = "台北市信義區松仁路58號7樓",
                     Phone = "02-2729-0597",
                     OpeningHours = "10:00-22:00",
                     BranchId = 1,
@@ -65,9 +65,9 @@ namespace Reservation.Controllers
                 new Restaurant 
                 { 
                     Id = 4, 
-                    Name = "1010湘食堂", 
+                    Name = "四川吳抄手", 
                     ImageUrl = "~/Image/1.jpg",
-                    Location = "4F懷舊食光埕",
+                    Location = "台北市信義區松仁路58號14樓（遠東信義A13）",
                     Phone = "02-2729-0597",
                     OpeningHours = "10:00-22:00",
                     BranchId = 1,
@@ -78,9 +78,9 @@ namespace Reservation.Controllers
                 new Restaurant 
                 { 
                     Id = 5, 
-                    Name = "輕食咖啡廳", 
+                    Name = "寰隆餐飲企業", 
                     ImageUrl = "~/Image/1.jpg",
-                    Location = "3F美食廣場",
+                    Location = "台北市信義區松仁路58號4樓",
                     Phone = "02-2729-1234",
                     OpeningHours = "10:00-22:00",
                     BranchId = 1,
@@ -91,9 +91,9 @@ namespace Reservation.Controllers
                 new Restaurant 
                 { 
                     Id = 6, 
-                    Name = "吃到飽火鍋", 
+                    Name = "香米泰國料理", 
                     ImageUrl = "~/Image/1.jpg",
-                    Location = "5F主題餐廳",
+                    Location = "台北市信義區松仁路58號30樓",
                     Phone = "02-2729-5678",
                     OpeningHours = "10:00-22:00",
                     BranchId = 1,

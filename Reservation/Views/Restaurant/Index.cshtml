@@ -1,4 +1,4 @@
-@model Reservation.Models.ViewModels.RestaurantListViewModel
+ @model Reservation.Models.ViewModels.RestaurantListViewModel
 @{
     ViewData["Title"] = "餐廳列表";
 }
@@ -14,7 +14,7 @@
 <!-- 搜尋與篩選區域 -->
 <div class="search-filter-section">
     <div class="container-fluid px-3 py-3">
-        <!-- 分店選擇和品牌搜尋 -->
+        <!-- 分店選擇 -->
         <div class="row mb-3">
             <div class="col-md-4 col-6 mb-2">
                 <div class="dropdown">
@@ -28,12 +28,12 @@
                         </span>
                     </button>
                     <ul class="dropdown-menu w-100" aria-labelledby="branchDropdown">
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, keyword = Model.SearchKeyword })">所有分店</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId })">所有分店</a></li>
                         @foreach (var branch in Model.Branches)
                         {
                             <li>
                                 <a class="dropdown-item @(Model.SelectedBranchId == branch.Id ? "active" : "")" 
-                                   href="@Url.Action("Index", new { branchId = branch.Id, categoryId = Model.SelectedCategoryId, keyword = Model.SearchKeyword })">
+                                   href="@Url.Action("Index", new { branchId = branch.Id, categoryId = Model.SelectedCategoryId })">
                                     @branch.Name
                                 </a>
                             </li>
@@ -41,23 +41,13 @@
                     </ul>
                 </div>
             </div>
-            <div class="col-md-8 col-6">
-                <form method="get" action="@Url.Action("Index")" class="d-flex unified-search-form">
-                    <input type="hidden" name="branchId" value="@Model.SelectedBranchId" />
-                    <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
-                    <div class="input-group unified-control">
-                        <input type="text" 
-                               class="form-control unified-input" 
-                               name="keyword" 
-                               placeholder="品牌搜尋" 
-                               value="@Model.SearchKeyword" />
-                        <button type="submit" class="btn btn-primary unified-search-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
+            <div class="col-md-8 col-6 mb-2">
+                <a href="@Url.Action("QueryRecord", "Restaurant")" 
+                   class="w-100 unified-control d-flex align-items-center justify-content-center text-secondary text-decoration-none" 
+                   style="border: none; padding: 0.5rem 0;">
+                    <img src="@Url.Content("~/Image/icon.png")" alt="訂候位紀錄查詢" class="me-2" style="width: 20px; height: 20px;">
+                    <span style="border-bottom: 1px solid #6c757d;">訂候位紀錄查詢</span>
+                </a>
             </div>
         </div>
 
@@ -67,7 +57,7 @@
             {
                 var isActive = (Model.SelectedCategoryId == category.Id) || 
                               (!Model.SelectedCategoryId.HasValue && category.Id == 0);
-                <a href="@Url.Action("Index", new { branchId = Model.SelectedBranchId, categoryId = category.Id == 0 ? (int?)null : category.Id, keyword = Model.SearchKeyword })" 
+                <a href="@Url.Action("Index", new { branchId = Model.SelectedBranchId, categoryId = category.Id == 0 ? (int?)null : category.Id })" 
                    class="category-tag @(isActive ? "active" : "")">
                     @category.Name
                 </a>
@@ -93,14 +83,6 @@
                         <div class="col-md-3 col-4">
                             <div class="restaurant-image-wrapper">
                                 <img src="@Url.Content(restaurant.ImageUrl)"  class="restaurant-image" />
-                                @if (restaurant.IsPopular)
-                                {
-                                    <span class="restaurant-badge badge-popular">人氣推薦</span>
-                                }
-                                @if (restaurant.IsNew)
-                                {
-                                    <span class="restaurant-badge badge-new">新櫃登場</span>
-                                }
                             </div>
                         </div>
                         <!-- 右側資訊 -->

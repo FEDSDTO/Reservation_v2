@@ -30,6 +30,12 @@
     font-size: 16px; /* 16px 防止 iOS Safari 自動縮放 */
 }
 
+/* 桌面版保持原樣 */
+@media (min-width: 768px) {
+    .reservation-date-input {
+        font-size: inherit;
+    }
+}
 
 .selected-date-display {
     font-size: 0.9rem;
@@ -47,6 +53,12 @@
     font-size: 16px; /* 16px 防止 iOS Safari 自動縮放 */
 }
 
+/* 桌面版保持原樣 */
+@media (min-width: 768px) {
+    .form-select {
+        font-size: inherit;
+    }
+}
 
 
 .reservation-info-text {
@@ -239,7 +251,7 @@
 .menu-card.slot-left {
     left: 0;
     transform: translateX(0) scale(0.85);
-    opacity: 0.6;
+    opacity: 1;
     z-index: 1;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -255,7 +267,7 @@
 .menu-card.slot-right {
     right: 0;
     transform: translateX(0) scale(0.85);
-    opacity: 0.6;
+    opacity: 1;
     z-index: 1;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -263,7 +275,7 @@
 .menu-card.slot-left:hover {
     left: 0;
     transform: translateX(0) scale(0.9);
-    opacity: 0.8;
+    opacity: 1;
     z-index: 5;
 }
 
@@ -277,7 +289,7 @@
 .menu-card.slot-right:hover {
     right: 0;
     transform: translateX(0) scale(0.9);
-    opacity: 0.8;
+    opacity: 1;
     z-index: 5;
 }
 
@@ -340,15 +352,20 @@
     z-index: 11;
 }
 
-.menu-image-modal-header .btn-close {
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    padding: 0.5rem;
-    opacity: 1;
+.menu-image-model-header .btn-close{
+    background:rgba(0,0,0,0.6);
+    border-radius:50%;
+    padding:0.5rem;
+    opacity:1;
+    width:40px;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.3);
 }
-
-.menu-image-modal-header .btn-close:hover {
-    background: rgba(255,255,255,0.3);
+.menu-image-model-header .btn-close:hover{
+    background:rgba(0,0,0,0.8);
 }
 
 .menu-image-modal-body {
@@ -358,12 +375,13 @@
     justify-content: center;
     overflow: hidden;
     flex: 1;
+    position: relative; /* 讓箭頭可以絕對定位 */
 }
 
 .menu-image-wrapper {
     position: relative;
     display: inline-block;
-    max-width: 95%;
+    max-width: calc(100% - 120px);
     max-height: 80vh;
 }
 
@@ -422,7 +440,7 @@
     }
     
     .menu-image-wrapper {
-        max-width: 90%;
+        max-width: calc(100% - 100px);
         max-height: 75vh;
     }
     
@@ -524,6 +542,12 @@
     font-size: 16px; /* 16px 防止 iOS Safari 自動縮放 */
 }
 
+/* 桌面版保持原樣 */
+@media (min-width: 768px) {
+    .reservation-input {
+        font-size: 0.95rem;
+    }
+}
 
 .reservation-input:focus {
     border-color: #258cfb;
@@ -548,6 +572,12 @@
     min-width: 100px;
 }
 
+/* 桌面版保持原樣 */
+@media (min-width: 768px) {
+    .reservation-title-select {
+        font-size: 0.95rem;
+    }
+}
 
 .reservation-title-select:focus {
     border-color: #258cfb;
@@ -563,6 +593,12 @@
     resize: vertical;
 }
 
+/* 桌面版保持原樣 */
+@media (min-width: 768px) {
+    .reservation-textarea {
+        font-size: 0.95rem;
+    }
+}
 
 .reservation-textarea:focus {
     border-color: #258cfb;
@@ -660,31 +696,6 @@
 }
 
 /* ============================================
-   響應式樣式 - 桌面版 (≥768px)
-   ============================================ */
-@media (min-width: 768px) {
-    .reservation-date-input {
-        font-size: inherit;
-    }
-    
-    .form-select {
-        font-size: inherit;
-    }
-    
-    .reservation-input {
-        font-size: 0.95rem;
-    }
-    
-    .reservation-title-select {
-        font-size: 0.95rem;
-    }
-    
-    .reservation-textarea {
-        font-size: 0.95rem;
-    }
-}
-
-/* ============================================
    修復手機模式下 modal 開啟時畫面偏移
    ============================================ */
 @media (max-width: 768px) {
@@ -699,6 +710,55 @@
         left: 0;
         width: 100%;
         height: 100%;
+    }
+}
+
+/* Modal 內箭頭導航 */
+.menu-modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 12;
+    transition: background 0.2s;
+}
+
+.menu-modal-nav:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.menu-modal-nav svg {
+    fill: white;
+}
+
+.menu-modal-prev {
+    left: 10px;
+}
+
+.menu-modal-next {
+    right: 10px;
+}
+
+@media (max-width: 768px) {
+    .menu-modal-nav {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .menu-modal-prev {
+        left: 5px;
+    }
+    
+    .menu-modal-next {
+        right: 5px;
     }
 }
 

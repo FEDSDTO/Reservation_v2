@@ -1,0 +1,243 @@
+﻿@model Reservation.Models.ViewModels.RecordQueryViewModel
+@{
+    ViewData["Title"] = "訂候位紀錄查詢";
+    var culture = new System.Globalization.CultureInfo("zh-TW");
+    var dayNames = new[] { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
+}
+
+<!-- 頂部 Header：返回列表、顯示分店 -->
+<header class="reservation-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <a href="@Url.Action("Index", "Restaurant")" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="col text-center">
+                <h1 class="reservation-header-title">@(Model.SelectedBranchId.HasValue ? 
+                    Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百信義A13" 
+                    : "遠百信義A13")</h1>
+            </div>
+            <div class="col-auto" style="width: 24px;"></div>
+        </div>
+    </div>
+</header>
+
+<div class="container-fluid px-3 py-3">
+    <!-- 分店選擇 -->
+    <div class="search-filter-section">
+        <div class="row mb-3">
+            <div class="col-12 mb-2">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle w-100 text-start unified-control" type="button" 
+                            id="branchDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="selectedBranchText">@(Model.SelectedBranchId.HasValue ? Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "分店選擇" : "分店選擇")</span>
+                        <span class="dropdown-arrow-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu w-100" aria-labelledby="branchDropdown">
+                        <li><a class="dropdown-item" href="@Url.Action("QueryRecord")">所有分店</a></li>
+                        @foreach (var branch in Model.Branches)
+                        {
+                            <li>
+                                <a class="dropdown-item @(Model.SelectedBranchId == branch.Id ? "active" : "")" 
+                                   href="@Url.Action("QueryRecord", new { branchId = branch.Id })">
+                                    @branch.Name
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 會員問候語 -->
+    <div class="mb-3">
+        <p class="mb-0">親愛的 會員 @Model.MemberName 您好:</p>
+    </div>
+
+    <!-- 標籤頁 -->
+    <div class="record-tabs mb-3">
+        <button type="button" class="record-tab active" data-tab="reservation">
+            訂位紀錄(@Model.ReservationRecords.Count)
+        </button>
+        <button type="button" class="record-tab" data-tab="waiting">
+            候位紀錄(@Model.WaitingRecords.Count)
+        </button>
+    </div>
+
+    <!-- 訂位紀錄列表 -->
+    <div id="reservationRecords" class="record-content">
+        @if (Model.ReservationRecords != null && Model.ReservationRecords.Any())
+        {
+            @foreach (var record in Model.ReservationRecords)
+            {
+                <div class="record-card mb-3">
+                    <div class="row g-0">
+                        <!-- 左側圖片 -->
+                        <div class="col-4">
+                            <div class="record-image-wrapper">
+                                <img src="@Url.Content(record.RestaurantImageUrl)" alt="@record.RestaurantName" class="record-image" />
+                            </div>
+                        </div>
+                        <!-- 右側資訊 -->
+                        <div class="col-8">
+                            <div class="record-info p-3">
+                                <!-- 日期與人數 -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="record-date">@record.ReservationDate.ToString("yyyy-MM-dd") @record.DayOfWeek</div>
+                                    </div>
+                                    <div class="record-guests">@(record.AdultCount) 大 @(record.ChildCount) 小</div>
+                                </div>
+                                <!-- 餐廳名稱 -->
+                                <h4 class="record-restaurant-name mb-2">@record.RestaurantName</h4>
+                                <!-- 地址與電話 -->
+                                <div class="record-details mb-2">
+                                    <div class="detail-item mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#258cfb" viewBox="0 0 16 16" class="detail-icon">
+                                            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                        </svg>
+                                        <span>@record.RestaurantLocation</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#258cfb" viewBox="0 0 16 16" class="detail-icon">
+                                            <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122L9.78 10.22a.678.678 0 0 1-.58-.122L6.5 7.5a.678.678 0 0 1-.122-.58l.122-1.034a.678.678 0 0 0-.122-.58L3.654 1.328z"/>
+                                        </svg>
+                                        <span>@record.RestaurantPhone</span>
+                                    </div>
+                                </div>
+                                <!-- 狀態按鈕 -->
+                                <div class="text-end">
+                                    @if (record.Status == "完成")
+                                    {
+                                        <button class="btn btn-primary btn-sm">完成</button>
+                                    }
+                                    else if (record.Status == "未入座")
+                                    {
+                                        <button class="btn btn-secondary btn-sm">未入座</button>
+                                    }
+                                    else if (record.Status == "已取消")
+                                    {
+                                        <button class="btn btn-secondary btn-sm">已取消</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted">目前沒有訂位紀錄</p>
+            </div>
+        }
+    </div>
+
+    <!-- 候位紀錄列表 -->
+    <div id="waitingRecords" class="record-content" style="display: none;">
+        @if (Model.WaitingRecords != null && Model.WaitingRecords.Any())
+        {
+            @foreach (var record in Model.WaitingRecords)
+            {
+                <div class="record-card mb-3">
+                    <div class="row g-0">
+                        <!-- 左側圖片 -->
+                        <div class="col-4">
+                            <div class="record-image-wrapper">
+                                <img src="@Url.Content(record.RestaurantImageUrl)" alt="@record.RestaurantName" class="record-image" />
+                            </div>
+                        </div>
+                        <!-- 右側資訊 -->
+                        <div class="col-8">
+                            <div class="record-info p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="record-date">@record.JoinDate.ToString("yyyy-MM-dd")</div>
+                                    </div>
+                                    <div class="record-guests">@(record.AdultCount) 大 @(record.ChildCount) 小</div>
+                                </div>
+                                <h4 class="record-restaurant-name mb-2">@record.RestaurantName</h4>
+                                <div class="record-details mb-2">
+                                    <div class="detail-item mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#258cfb" viewBox="0 0 16 16" class="detail-icon">
+                                            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                        </svg>
+                                        <span>@record.RestaurantLocation</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#258cfb" viewBox="0 0 16 16" class="detail-icon">
+                                            <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122L9.78 10.22a.678.678 0 0 1-.58-.122L6.5 7.5a.678.678 0 0 1-.122-.58l.122-1.034a.678.678 0 0 0-.122-.58L3.654 1.328z"/>
+                                        </svg>
+                                        <span>@record.RestaurantPhone</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-secondary btn-sm">@record.Status</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted">目前沒有候位紀錄</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // 標籤頁切換：顯示訂位或候位
+            $('.record-tab').on('click', function() {
+                var tab = $(this).data('tab');
+                $('.record-tab').removeClass('active');
+                $(this).addClass('active');
+                $('.record-content').hide();
+                if (tab === 'reservation') {
+                    $('#reservationRecords').show();
+                } else if (tab === 'waiting') {
+                    $('#waitingRecords').show();
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    /* 標籤樣式 */
+    .record-tabs { display: flex; border-bottom: 2px solid #e9ecef; }
+    .record-tab { flex: 1; padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid transparent; color: #6c757d; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+    .record-tab.active { color: #258cfb; border-bottom-color: #258cfb; font-weight: 600; }
+
+    /* 卡片與圖片 */
+    .record-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+    .record-image-wrapper { width: 100%; height: 100%; min-height: 120px; overflow: hidden; }
+    .record-image { width: 100%; height: 100%; object-fit: cover; }
+
+    /* 文字樣式 */
+    .record-date, .record-guests { font-size: 0.9rem; color: #6c757d; }
+    .record-restaurant-name { font-size: 1.1rem; font-weight: 600; color: #333; margin: 0; }
+    .record-details { font-size: 0.9rem; }
+    .detail-item { display: flex; align-items: center; gap: 0.5rem; }
+    .detail-icon { flex-shrink: 0; }
+    .search-filter-section
+    {
+        background:transparent;
+        box-shadow: none;
+    }
+</style>

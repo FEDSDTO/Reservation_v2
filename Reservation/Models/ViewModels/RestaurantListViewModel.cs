@@ -8,7 +8,6 @@ namespace Reservation.Models.ViewModels
         public List<Category> Categories { get; set; } = new();
         public List<Restaurant> Restaurants { get; set; } = new();
         public int? SelectedBranchId { get; set; }
-        public string? SearchKeyword { get; set; }
         public int? SelectedCategoryId { get; set; }
     }
 }

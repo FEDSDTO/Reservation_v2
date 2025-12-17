@@ -78,16 +78,21 @@
             
             <div class="form-group mb-3">
                 <label class="form-label waiting-form-label">候位者姓名</label>
-                <input type="text" 
-                       class="form-control waiting-input" 
-                       name="CustomerName" 
-                       id="customerName"
-                       value="@Model.CustomerName"
-                       list="customerNameList"
-                       placeholder="請輸入姓名"
-                       required />
-                <datalist id="customerNameList">
-                </datalist>
+                <div class="input-group">
+                    <input type="text" 
+                           class="form-control waiting-input" 
+                           name="CustomerName" 
+                           id="customerName"
+                           value="@Model.CustomerName"
+                           list="customerNameList"
+                           placeholder="請輸入姓名"
+                           required />
+                    <datalist id="customerNameList"></datalist>
+                    <select class="form-select waiting-title-select" name="Salutation" id="salutation" required>
+                        <option value="先生">先生</option>
+                        <option value="小姐">小姐</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-group mb-3">

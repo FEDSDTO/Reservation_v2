@@ -114,6 +114,12 @@
     outline: none;
 }
 
+.waiting-title-select {
+    max-width: 100px;
+    flex-shrink: 0;
+    height: 42px;
+}
+
 .waiting-form-section .input-group {
     position: relative;
 }

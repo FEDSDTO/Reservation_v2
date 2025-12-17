@@ -165,8 +165,19 @@
                 </div>
                 <div class="modal-body menu-image-modal-body">
                     <div class="menu-image-wrapper">
-                        <img id="menuModalImage" src="" alt="菜單" class="menu-modal-image" />
+                        <img id="menuModalImage" src="" alt="菜單" class="menu-modal-image" draggable="false" />
                     </div>
+                    <!-- 左右箭頭導航 -->
+                    <button class="menu-modal-nav menu-modal-prev" id="menuModalPrev" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                        </svg>
+                    </button>
+                    <button class="menu-modal-nav menu-modal-next" id="menuModalNext" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -288,6 +299,13 @@
             // 定義三個位置類的陣列，對應 [左, 中, 右]
             var slots = ['slot-left', 'slot-center', 'slot-right'];
             
+            // 收集菜單圖片，供放大後切換
+            var menuImages = [];
+            var currentMenuIndex = 0;
+            $('.menu-card').each(function (index) {
+                menuImages.push($(this).data('menu-image'));
+            });
+
             // 初始化輪播：分配初始位置
             function initCarousel() {
                 if (totalMenus === 0) return;
@@ -389,8 +407,111 @@
             
             // 點擊菜單卡片時載入圖片到 Modal
             $('.menu-card').on('click', function() {
-                var imageUrl = $(this).data('menu-image');
-                $('#menuModalImage').attr('src', imageUrl);
+               currentMenuIndex = $(this).index();
+               var imageUrl = $(this).data('menu-image');
+               $('#menuModalImage').attr('src', imageUrl);              
+            });
+
+
+            // 顯示上一張菜單圖片（循環）
+            function showPreviousMenuImage() {
+                if (menuImages.length === 0) return;
+                currentMenuIndex = (currentMenuIndex - 1 + menuImages.length) % menuImages.length;
+                $('#menuModalImage').attr('src', menuImages[currentMenuIndex]);
+            }
+
+            // 顯示下一張菜單圖片（循環）
+            function showNextMenuImage() {
+                if (menuImages.length === 0) return;
+                currentMenuIndex = (currentMenuIndex + 1) % menuImages.length;
+                $('#menuModalImage').attr('src', menuImages[currentMenuIndex]);
+            }
+             
+            // Modal 內觸摸滑動切換（支援觸控和滑鼠）
+            var modalTouchStartX = 0;
+            var modalMouseStartX = 0;
+            var isDragging = false;
+
+            // 觸控事件（手機）
+            $('#menuModalImage,.menu-image-wrapper').on('touchstart', function(e) {
+                modalTouchStartX = e.originalEvent.touches[0].clientX;
+            });
+
+            $('#menuModalImage,.menu-image-wrapper').on('touchend', function(e) {
+                var modalTouchEndX = e.originalEvent.changedTouches[0].clientX;
+                var swipeThreshold = 50;
+                var diff = modalTouchStartX - modalTouchEndX;
+
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        showNextMenuImage();
+                    } else {
+                        showPreviousMenuImage();
+                    }
+                }
+            });
+
+            // 滑鼠事件（網頁）
+            $('#menuModalImage,.menu-image-wrapper').on('mousedown', function(e) {
+                isDragging = true;
+                modalMouseStartX = e.clientX;
+                e.preventDefault(); // 防止圖片被拖曳
+            });
+
+            $(document).on('mousemove', function(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+            });
+
+            $(document).on('mouseup', function(e) {
+                if (!isDragging) return;
+
+                var modalMouseEndX = e.clientX;
+                var swipeThreshold = 50;
+                var diff = modalMouseStartX - modalMouseEndX;
+
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        // 向左拖曳，下一張
+                        showNextMenuImage();
+                    } else {
+                        // 向右拖曳，上一張
+                        showPreviousMenuImage();
+                    }
+                }
+
+                isDragging = false;
+            });
+
+            // Modal 關閉時重置拖曳狀態
+            $('#menuImageModal').on('hidden.bs.modal', function() {
+                isDragging = false;
+                $('#menuModalImage').attr('src', '');
+            });
+
+            // Modal 內箭頭點擊切換
+            $('#menuModalPrev').on('click',function(e){
+                e.preventDefault();
+                showPreviousMenuImage();
+            });
+
+            $('#menuModalNext').on('click',function(e){
+                e.preventDefault();
+                showNextMenuImage();
+            });
+
+
+            // 監聽鍵盤按鍵事件（Modal 開啟時左右切換）
+            $(document).on('keydown',function(e){
+                if($('#menuImageModal').hasClass('show')){
+                    if(e.key === 'ArrowLeft'){
+                        e.preventDefault();
+                        showPreviousMenuImage();
+                    }else if(e.key === 'ArrowRight'){
+                        e.preventDefault();
+                        showNextMenuImage();
+                    }
+                }
             });
             
             // 點擊 modal 背景時關閉
