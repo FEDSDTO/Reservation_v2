@@ -37,13 +37,6 @@
     }
 }
 
-.selected-date-display {
-    font-size: 0.9rem;
-    color: #258cfb;
-    margin-top: 0.5rem;
-    font-weight: 500;
-}
-
 .form-select {
     border: 1px solid #dee2e6;
     border-radius: 6px;
@@ -408,4 +401,195 @@
     }
 }
 
+/* ============================================
+   菜單區域樣式
+   ============================================ */
+.menu-section{
+    margin-bottom: 1.5rem;
+}
 
+.menu-section .section-title{
+    font-size: 1.25rem;
+    font-weight:600;
+    margin-bottom:1rem;
+    color:#333;
+}
+
+.menu-carousel-wrapper{
+    width:100%;
+    overflow:hidden;
+}
+.menu-carousel-container{
+    width:100%;
+    overflow:hidden;
+    position:relative;
+    cursor:grab;
+    user-select:none;
+    touch-action: pan-y;
+}
+.menu-carousel-container:active{
+    cursor:grabbing;
+}
+.menu-carousel-track{
+    display:flex;
+    transition:transform 0.3s ease-out;
+    will-change:transform;
+}
+.menu-item{
+    flex:0 0 calc(100% / 3);
+    padding:0 0.5rem;
+    box-sizing:border-box;
+}
+.menu-image{
+    width:100%;
+    height:auto;
+    display:block;
+    border-radius:8px;
+    object-fit:contain;
+    pointer-events:auto;
+    cursor:pointer;  /* 添加游標樣式，提示可點擊 */
+}
+@media(max-width:768px){
+    .menu-item{
+        flex:0 0 calc(100%/2);
+    }
+}
+
+.menu-carousel-indicators {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.5rem 0;
+}
+
+.menu-carousel-indicators.hidden {
+    display: none;
+}
+
+.menu-carousel-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ccc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+}
+
+.menu-carousel-indicator.active {
+    background-color: #258cfb;
+}
+
+.menu-carousel-indicator:hover {
+    background-color: #999;
+}
+
+.menu-carousel-indicator.active:hover {
+    background-color: #1a7cd9;
+}
+
+.menu-image-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+}
+
+.menu-image-modal.show {
+    display: block;
+}
+
+.menu-modal-close {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: all 0.3s ease;
+}
+
+.menu-modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1);
+}
+
+.menu-modal-image-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 60px 20px 20px 20px;
+    box-sizing: border-box;
+    touch-action: pan-y;
+    pointer-events: auto;
+    min-height: 100vh;
+}
+
+.menu-modal-image {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0;
+    padding: 0;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    touch-action: pan-y;
+    pointer-events: auto;
+    -webkit-touch-callout: none;
+}
+
+@media (max-width: 768px) {
+    .menu-modal-close {
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+    }
+    
+    .menu-image-modal {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        overscroll-behavior: contain;
+    }
+    
+    .menu-modal-image-container {
+        max-width: 100%;
+        padding: 50px 0 0 0;
+        touch-action: pan-y;
+        pointer-events: auto;
+        min-height: 100vh;
+    }
+    
+    .menu-modal-image {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        touch-action: pan-y;
+        pointer-events: auto;
+        -webkit-touch-callout: none;
+    }
+}

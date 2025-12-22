@@ -130,6 +130,36 @@
         </form>
     </div>
 
+    <!-- 菜單展示區域 -->
+    <div class="menu-section">
+        <h3 class="section-title">菜單</h3>
+        <div class="menu-carousel-wrapper">
+            <div class="menu-carousel-container" id="menuCarouselContainer">
+                <div class="menu-carousel-track" id="menuCarouselTrack">
+                    @foreach(var menu in Model.Menus){
+                        <div class="menu-item">
+                            <!-- 添加 data-menu-id 屬性，用於點擊時識別是哪張圖片 -->
+                            <img src="@Url.Content(menu.ImageUrl)" alt="菜單" class="menu-image" data-menu-id="@menu.Id" />
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="menu-carousel-indicators" id="menuCarouselIndicators"></div>
+        </div>
+    </div>
+
+    <!-- 菜單圖片全螢幕放大 Modal -->
+    <div id="menuImageModal" class="menu-image-modal">
+        <!-- 關閉按鈕 -->
+        <button class="menu-modal-close" id="menuModalClose">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="white" viewBox="0 0 16 16">
+                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+            </svg>
+        </button>
+        <div class="menu-modal-image-container" id="menuModalImageContainer">
+        </div>
+    </div>
+
     <!-- 訂位成功彈窗 -->
     <div class="modal fade" id="reservationSuccessModal" tabindex="-1" aria-labelledby="reservationSuccessModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -164,6 +194,340 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
+
+            // 菜單輪播功能物件
+            var menuCarousel = {
+                track: $('#menuCarouselTrack'),
+                container: $('#menuCarouselContainer'),
+                items: $('.menu-item'),
+                indicators: $('#menuCarouselIndicators'),
+                currentIndex: 0,
+                itemsPerPage: 3,
+                totalGroups: 0,
+                isDragging: false,
+                startX: 0,
+                startY: 0,
+                currentX: 0,
+                offsetX: 0,
+                threshold: 50,
+                
+                // 初始化輪播
+                init: function() {
+                    var totalItems = this.items.length;
+                    if (totalItems === 0) return;
+                    
+                    // 根據螢幕寬度更新每組顯示數量
+                    this.updateItemsPerGroup();
+                    
+                    // 計算總組數
+                    this.totalGroups = Math.ceil(totalItems / this.itemsPerPage);
+                    
+                    // 生成指示器
+                    this.createIndicators();
+                    
+                    // 設定初始位置
+                    this.updatePosition();
+                    
+                    // 綁定事件監聽器
+                    this.bindEvents();
+                },
+                
+                // 根據螢幕寬度更新每組顯示數量
+                updateItemsPerGroup: function() {
+                    var width = $(window).width();
+                    if(width <= 768){
+                        this.itemsPerPage = 2;
+                    }else{
+                        this.itemsPerPage = 3;
+                    }
+                    
+                    var totalItems = this.items.length;
+                    this.totalGroups = Math.ceil(totalItems / this.itemsPerPage);
+                    
+                    // 確保當前組索引不超過總組數
+                    if (this.currentIndex >= this.totalGroups) {
+                        this.currentIndex = this.totalGroups - 1;
+                    }
+                    
+                    // 重新生成指示器（因為組數可能改變）
+                    this.createIndicators();
+                },
+                
+                // 生成指示器點點
+                createIndicators: function() {
+                    this.indicators.empty();
+                    
+                    // 如果只有一組，隱藏指示器
+                    if (this.totalGroups <= 1) {
+                        this.indicators.addClass('hidden');
+                        return;
+                    }
+                    
+                    // 顯示指示器
+                    this.indicators.removeClass('hidden');
+                    
+                    // 生成點點
+                    var self = this;
+                    for (var i = 0; i < this.totalGroups; i++) {
+                        var indicator = $('<button>')
+                            .addClass('menu-carousel-indicator')
+                            .attr('data-index', i)
+                            .attr('aria-label', '切換到第 ' + (i + 1) + ' 組')
+                            .on('click', function(e) {
+                                var targetIndex = parseInt($(this).attr('data-index'));
+                                self.currentIndex = targetIndex;
+                                self.updatePosition();
+                            });
+                        
+                        this.indicators.append(indicator);
+                    }
+                    
+                    // 更新指示器狀態
+                    this.updateIndicators();
+                },
+                
+                // 更新指示器狀態
+                updateIndicators: function() {
+                    var self = this;
+                    this.indicators.find('.menu-carousel-indicator').each(function(index) {
+                        if (index === self.currentIndex) {
+                            $(this).addClass('active');
+                        } else {
+                            $(this).removeClass('active');
+                        }
+                    });
+                },
+                
+                // 更新輪播位置
+                updatePosition: function() {
+                    var itemWidth = 100 / this.itemsPerPage;
+                    var translateX = -(this.currentIndex * itemWidth);
+                    this.track.css('transform', 'translateX(' + translateX + '%)');
+                    
+                    // 更新指示器狀態
+                    this.updateIndicators();
+                },
+                
+                // 綁定所有事件監聽器
+                bindEvents: function() {
+                    var self = this;
+                    
+                    // 觸控事件：開始拖曳
+                    this.container.on('touchstart', function(e) {
+                        var touch = e.originalEvent.touches[0];
+                        self.handleStart(touch.clientX, touch.clientY);
+                    });
+                    
+                    // 觸控事件：拖曳中
+                    this.container.on('touchmove', function(e) {
+                        var touch = e.originalEvent.touches[0];
+                        var deltaX = Math.abs(touch.clientX - self.startX);
+                        var deltaY = Math.abs(touch.clientY - self.startY);
+                        
+                        // 如果橫向移動距離大於縱向移動，才視為在操作輪播，並阻止頁面捲動
+                        if (deltaX > deltaY) {
+                            if (e.cancelable) e.preventDefault();
+                            self.handleMove(touch.clientX);
+                        }
+                    });
+                    
+                    // 觸控事件：結束拖曳
+                    this.container.on('touchend', function(e) {
+                        self.handleEnd();
+                    });
+                    
+                    // 滑鼠事件：開始拖曳
+                    this.container.on('mousedown', function(e) {
+                        e.preventDefault();
+                        self.handleStart(e.clientX);
+                    });
+                    
+                    // 滑鼠事件：拖曳中
+                    $(document).on('mousemove', function(e) {
+                        if (self.isDragging) {
+                            self.handleMove(e.clientX);
+                        }
+                    });
+                    
+                    // 滑鼠事件：結束拖曳
+                    $(document).on('mouseup', function(e) {
+                        if (self.isDragging) {
+                            self.handleEnd();
+                        }
+                    });
+                    
+                    // 視窗大小改變時，重新計算每組顯示數量
+                    $(window).on('resize', function() {
+                        self.updateItemsPerGroup();
+                        self.updatePosition();
+                    });
+                },
+                
+                // 處理拖曳開始
+                handleStart: function(clientX, clientY) {
+                    this.isDragging = true;
+                    this.startX = clientX;
+                    this.startY = clientY || 0;
+                    this.currentX = clientX;
+                    this.offsetX = 0;
+                    this.track.css('transition', 'none');
+                },
+                
+                // 處理拖曳移動
+                handleMove: function(clientX) {
+                    if (!this.isDragging) return;
+                    
+                    this.currentX = clientX;
+                    this.offsetX = this.currentX - this.startX;
+                    
+                    var itemWidth = 100 / this.itemsPerPage;
+                    var currentTranslate = -(this.currentIndex * itemWidth);
+                    var dragTranslate = currentTranslate + (this.offsetX / this.container.width() * 100);
+                    
+                    var minTranslate = -(this.totalGroups - 1) * itemWidth;
+                    var maxTranslate = 0;
+                    
+                    if (dragTranslate > maxTranslate) {
+                        dragTranslate = maxTranslate;
+                    } else if (dragTranslate < minTranslate) {
+                        dragTranslate = minTranslate;
+                    }
+                    
+                    this.track.css('transform', 'translateX(' + dragTranslate + '%)');
+                },
+                
+                // 處理拖曳結束
+                handleEnd: function() {
+                    if (!this.isDragging) return;
+                    
+                    this.isDragging = false;
+                    this.track.css('transition', 'transform 0.3s ease-out');
+                    
+                    if (Math.abs(this.offsetX) > this.threshold) {
+                        if (this.offsetX > 0) {
+                            this.prevGroup();
+                        } else {
+                            this.nextGroup();
+                        }
+                    } else {
+                        this.updatePosition();
+                    }
+                },
+                
+                // 切換到下一組（循環：最後一組後回到第一組）
+                nextGroup: function() {
+                    this.currentIndex = (this.currentIndex + 1) % this.totalGroups;
+                    this.updatePosition();
+                },
+                
+                // 切換到上一組（循環：第一組後回到最後一組）
+                prevGroup: function() {
+                    this.currentIndex = (this.currentIndex - 1 + this.totalGroups) % this.totalGroups;
+                    this.updatePosition();
+                }
+            };
+            
+            // 初始化菜單輪播
+            menuCarousel.init();
+
+            // ============================================
+            // 菜單圖片點擊放大功能
+            // ============================================
+            
+            var menuImageModal = {
+                modal: $('#menuImageModal'),
+                imageContainer: $('#menuModalImageContainer'),
+                closeBtn: $('#menuModalClose'),
+                isDragging: false,
+                dragStartX: 0,
+                dragStartY: 0,
+                dragThreshold: 5,
+                
+                init: function() {
+                    var self = this;
+                    
+                    $(document).on('click', '#menuCarouselContainer .menu-image', function(e) {
+                        if (self.isDragging) {
+                            return;
+                        }
+                        
+                        var allMenuImages = [];
+                        $('#menuCarouselContainer .menu-image').each(function() {
+                            allMenuImages.push($(this).attr('src'));
+                        });
+                        
+                        self.show(allMenuImages);
+                    });
+                    
+                    this.closeBtn.on('click', function(e) {
+                        e.stopPropagation();
+                        self.hide();
+                    });
+                    
+                    this.modal.on('click', function(e) {
+                        if ($(e.target).hasClass('menu-image-modal')) {
+                            self.hide();
+                        }
+                    });
+                    
+                    $(document).on('keydown', function(e) {
+                        if (e.key === 'Escape' && self.modal.hasClass('show')) {
+                            self.hide();
+                        }
+                    });
+                    
+                    $(document).on('mousedown touchstart', '#menuCarouselContainer .menu-image', function(e) {
+                        var clientX = e.type === 'mousedown' ? e.clientX : e.originalEvent.touches[0].clientX;
+                        var clientY = e.type === 'mousedown' ? e.clientY : e.originalEvent.touches[0].clientY;
+                        
+                        self.isDragging = false;
+                        self.dragStartX = clientX;
+                        self.dragStartY = clientY;
+                    });
+                    
+                    $(document).on('mousemove touchmove', '#menuCarouselContainer .menu-image', function(e) {
+                        var clientX = e.type === 'mousemove' ? e.clientX : (e.originalEvent.touches ? e.originalEvent.touches[0].clientX : 0);
+                        var clientY = e.type === 'mousemove' ? e.clientY : (e.originalEvent.touches ? e.originalEvent.touches[0].clientY : 0);
+                        
+                        var deltaX = Math.abs(clientX - self.dragStartX);
+                        var deltaY = Math.abs(clientY - self.dragStartY);
+                        
+                        if (deltaX > self.dragThreshold || deltaY > self.dragThreshold) {
+                            self.isDragging = true;
+                        }
+                    });
+                    
+                    $(document).on('mouseup touchend', '#menuCarouselContainer .menu-image', function(e) {
+                        setTimeout(function() {
+                            self.isDragging = false;
+                        }, 100);
+                    });
+                },
+                
+                show: function(imageSources) {
+                    this.imageContainer.empty();
+                    
+                    var imageHtml = '';
+                    for (var i = 0; i < imageSources.length; i++) {
+                        imageHtml += '<img src="' + imageSources[i] + '" alt="菜單放大圖 ' + (i + 1) + '" class="menu-modal-image" />';
+                    }
+                    
+                    this.imageContainer.html(imageHtml);
+                    this.modal.addClass('show');
+                    $('body').css('overflow', 'hidden');
+                    this.modal.scrollTop(0);
+                },
+                
+                hide: function() {
+                    this.modal.removeClass('show');
+                    this.imageContainer.empty();
+                    $('body').css('overflow', 'auto');
+                }
+            };
+            
+            // 初始化菜單圖片放大功能
+            menuImageModal.init();
+
             // 日期選擇器事件
             $('.reservation-date-input').on('change', function() {
                 loadTimeSlots();

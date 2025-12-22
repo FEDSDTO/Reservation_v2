@@ -126,6 +126,18 @@ namespace Reservation.Controllers
                     Id = 3,
                     RestaurantId = restaurantId,
                     ImageUrl = "~/Image/menu3.jpg"
+                },
+                new Menu
+                {
+                    Id = 4,
+                    RestaurantId = restaurantId,
+                    ImageUrl = "~/Image/menu4.jpg"
+                },
+                new Menu
+                {
+                    Id = 5,
+                    RestaurantId = restaurantId,
+                    ImageUrl = "~/Image/menu5.jpg"
                 }
             };
         }
