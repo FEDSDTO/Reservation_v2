@@ -442,6 +442,13 @@
                 dragStartX: 0,
                 dragStartY: 0,
                 dragThreshold: 5,
+                currentScale: {},
+                minScale: 1.0,
+                maxScale: 3.0,
+                defaultScale: 1.0,
+                isZooming: false,
+                lastTouchDistance: 0,
+
                 
                 init: function() {
                     var self = this;
@@ -502,10 +509,134 @@
                             self.isDragging = false;
                         }, 100);
                     });
+                    
+                    // 綁定圖片縮放事件
+                    this.imageContainer.on('dblclick', '.menu-modal-image', function(e) {
+                        self.handleDoubleClick($(this), e);
+                    });
+                    
+                    this.imageContainer.on('wheel', '.menu-modal-image', function(e) {
+                        if (e.ctrlKey || e.metaKey) {
+                            e.preventDefault();
+                            self.handleWheelZoom($(this), e);
+                        }
+                    });
+                    
+                    this.imageContainer.on('touchstart', '.menu-modal-image', function(e) {
+                        if (e.originalEvent.touches.length === 2) {
+                            self.handlePinchStart($(this), e);
+                        }
+                    });
+                    
+                    this.imageContainer.on('touchmove', '.menu-modal-image', function(e) {
+                        if (e.originalEvent.touches.length === 2) {
+                            e.preventDefault();
+                            self.handlePinchMove($(this), e);
+                        }
+                    });
+                    
+                    this.imageContainer.on('touchend', '.menu-modal-image', function(e) {
+                        if (e.originalEvent.touches.length < 2) {
+                            self.handlePinchEnd($(this));
+                        }
+                    });
+                },
+                
+                handleDoubleClick: function($img, e) {
+                    var imageIndex = $img.index();
+                    var currentScale = this.currentScale[imageIndex] || this.defaultScale;
+                    var newScale = currentScale === this.defaultScale ? 2.0 : this.defaultScale;
+                    this.setImageScale($img, imageIndex, newScale, e.originalEvent.clientX, e.originalEvent.clientY);
+                },
+                
+                handleWheelZoom: function($img, e) {
+                    var imageIndex = $img.index();
+                    var currentScale = this.currentScale[imageIndex] || this.defaultScale;
+                    var delta = e.originalEvent.deltaY;
+                    var zoomFactor = delta > 0 ? 0.9 : 1.1;
+                    var newScale = Math.max(this.minScale, Math.min(this.maxScale, currentScale * zoomFactor));
+                    this.setImageScale($img, imageIndex, newScale, e.originalEvent.clientX, e.originalEvent.clientY);
+                },
+                
+                handlePinchStart: function($img, e) {
+                    var touches = e.originalEvent.touches;
+                    if (touches.length === 2) {
+                        var touch1 = touches[0];
+                        var touch2 = touches[1];
+                        this.lastTouchDistance = Math.hypot(
+                            touch2.clientX - touch1.clientX,
+                            touch2.clientY - touch1.clientY
+                        );
+                        this.isZooming = true;
+                    }
+                },
+                
+                handlePinchMove: function($img, e) {
+                    if (!this.isZooming) return;
+                    
+                    var touches = e.originalEvent.touches;
+                    if (touches.length === 2) {
+                        var touch1 = touches[0];
+                        var touch2 = touches[1];
+                        var currentDistance = Math.hypot(
+                            touch2.clientX - touch1.clientX,
+                            touch2.clientY - touch1.clientY
+                        );
+                        
+                        var imageIndex = $img.index();
+                        var currentScale = this.currentScale[imageIndex] || this.defaultScale;
+                        var scaleChange = currentDistance / this.lastTouchDistance;
+                        var newScale = Math.max(this.minScale, Math.min(this.maxScale, currentScale * scaleChange));
+                        
+                        // 計算兩指中心點作為縮放中心
+                        var centerX = (touch1.clientX + touch2.clientX) / 2;
+                        var centerY = (touch1.clientY + touch2.clientY) / 2;
+                        this.setImageScale($img, imageIndex, newScale, centerX, centerY);
+                        
+                        this.lastTouchDistance = currentDistance;
+                    }
+                },
+                
+                handlePinchEnd: function($img) {
+                    this.isZooming = false;
+                    this.lastTouchDistance = 0;
+                },
+                
+                setImageScale: function($img, imageIndex, scale, centerX, centerY) {
+                    this.currentScale[imageIndex] = scale;
+                    
+                    var transformOrigin = 'center center';
+                    if (centerX && centerY) {
+                        // 使用 getBoundingClientRect() 獲取圖片相對於視窗的位置
+                        var rect = $img[0].getBoundingClientRect();
+                        var imgWidth = rect.width;
+                        var imgHeight = rect.height;
+                        
+                        if (imgWidth > 0 && imgHeight > 0) {
+                            // 計算點擊位置相對於圖片的百分比
+                            // centerX 和 centerY 是相對於視窗的座標（clientX/clientY）
+                            var xPercent = ((centerX - rect.left) / imgWidth * 100) + '%';
+                            var yPercent = ((centerY - rect.top) / imgHeight * 100) + '%';
+                            transformOrigin = xPercent + ' ' + yPercent;
+                        }
+                    }
+                    
+                    $img.css({
+                        'transform': 'scale(' + scale + ')',
+                        'transform-origin': transformOrigin,
+                        'transition': 'transform 0.2s ease-out'
+                    });
+                    
+                    if (scale > this.defaultScale) {
+                        $img.css('touch-action', 'pan-x pan-y pinch-zoom');
+                    } else {
+                        $img.css('touch-action', 'pan-y');
+                    }
                 },
                 
                 show: function(imageSources) {
                     this.imageContainer.empty();
+                    this.currentScale = {};
                     
                     var imageHtml = '';
                     for (var i = 0; i < imageSources.length; i++) {
@@ -521,6 +652,7 @@
                 hide: function() {
                     this.modal.removeClass('show');
                     this.imageContainer.empty();
+                    this.currentScale = {};
                     $('body').css('overflow', 'auto');
                 }
             };
