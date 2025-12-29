@@ -1,18 +1,35 @@
-using Reservation.Models.DB;
-
 namespace Reservation.Models.ViewModels
 {
+    public class Menu
+    {
+        public int Id { get; set; }
+        public int RestaurantId { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
+    }
+
     public class ReservationViewModel
     {
         public Restaurant Restaurant { get; set; } = new();
         public Branch Branch { get; set; } = new();
         public DateTime? SelectedDate { get; set; }
-        public int AdultCount { get; set; } = 2;
-        public int ChildCount { get; set; } = 0;
-        public string SelectedMealPeriod { get; set; } = "中午"; // "中午" 或 "晚上"
-        public string? SelectedTimeSlot { get; set; } // 如 "11:00"
-        public List<string> AvailableTimeSlots { get; set; } = new(); // 可用時段列表
-        public List<Menu> Menus { get; set; } = new(); // 菜單列表
+        public int AdultCount { get; set; }
+        public int ChildCount { get; set; }
+        public string SelectedMealPeriod { get; set; } = string.Empty;
+        public string? SelectedTimeSlot { get; set; }
+        public List<string> AvailableTimeSlots { get; set; } = new();
+        public List<Menu> Menus { get; set; } = new();
+    }
+
+    public class ReservationConfirmViewModel
+    {
+        public Restaurant Restaurant { get; set; } = new();
+        public Branch Branch { get; set; } = new();
+        public DateTime SelectedDate { get; set; }
+        public int AdultCount { get; set; }
+        public int ChildCount { get; set; }
+        public string SelectedMealPeriod { get; set; } = string.Empty;
+        public string SelectedTimeSlot { get; set; } = string.Empty;
     }
 }
+
 

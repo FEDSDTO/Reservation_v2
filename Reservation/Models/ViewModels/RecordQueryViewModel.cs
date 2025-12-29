@@ -1,5 +1,3 @@
-﻿using Reservation.Models.DB;
-
 namespace Reservation.Models.ViewModels
 {
     public class ReservationRecord
@@ -14,7 +12,7 @@ namespace Reservation.Models.ViewModels
         public string DayOfWeek { get; set; } = string.Empty;
         public int AdultCount { get; set; }
         public int ChildCount { get; set; }
-        public string Status { get; set; } = "完成"; // 完成/未入座/已取消
+        public string Status { get; set; } = "完成";
     }
 
     public class WaitingRecord
@@ -38,6 +36,8 @@ namespace Reservation.Models.ViewModels
         public int? SelectedBranchId { get; set; }
         public List<ReservationRecord> ReservationRecords { get; set; } = new();
         public List<WaitingRecord> WaitingRecords { get; set; } = new();
-        public string MemberName { get; set; } = "黃O明"; // 模擬會員名稱
+        public string MemberName { get; set; } = "黃O明";
     }
 }
+
+

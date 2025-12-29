@@ -1,0 +1,2357 @@
+﻿:root {
+    --background-color: #F1F1F1;
+}
+
+a {
+    color: #212529 !important;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+}
+
+header {
+    background: #F1F1F1;
+    width: 100%;
+}
+
+/*banner圖片*/
+.header-wrap img {
+    display: none;
+    width: 100%;
+    height: auto;
+}
+
+    .header-wrap img:nth-child(1) {
+        display: block;
+    }
+
+
+/*會員服務*/
+#record_btn {
+    display: block;
+}
+
+#mb_record_btn {
+    display: none;
+}
+
+.member_block {
+    position: absolute;
+    color: #fff;
+    background: hsl(0deg 0% 0% / 40%);
+    border: 1px solid #606060;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0px 3px #ffffff;
+}
+
+    .member_block h3 {
+        display: inline-block;
+    }
+
+.member_bg ul {
+    display: none;
+    position: absolute;
+    background: hsl(0deg 0% 0% / 40%);
+    border: 1px solid #606060;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0px 3px #ffffff;
+    z-index: 1;
+}
+
+.member_bg .member_list li {
+    display: none;
+    text-align: center;
+    color: #fff;
+}
+
+.member_bg .member_list a {
+    width: 100%;
+}
+
+
+.member_bg .member_list.switchDisplay {
+    display: block;
+}
+
+.member_list.switchDisplay li {
+    display: block;
+}
+
+.member_bg .member_block .switchDisplay {
+    display: none;
+    text-align: center;
+}
+
+/*波浪分隔圖片*/
+#demarcation01 img {
+    display: none;
+    width: 100%;
+    height: auto;
+}
+
+    #demarcation01 img:nth-child(1) {
+        display: block;
+    }
+
+#demarcation02 {
+    display: none;
+}
+
+/*左側清單*/
+.list-menu {
+    position: absolute;
+}
+
+.logo_block .logo {
+    position: absolute;
+    background-color: #F1F1F1;
+}
+
+/*logo周圍icon控制*/
+.reservation_btm {
+    position: relative;
+}
+
+
+    .reservation_btm .icon-button {
+        box-shadow: 0 0px 5px #989898;
+        text-align: center;
+    }
+
+        .reservation_btm .icon-button .filter {
+            filter: brightness(0.5);
+        }
+
+.reservation_icon {
+    position: absolute;
+    filter: brightness(0.85);
+}
+
+.waiting_icon {
+    position: absolute;
+}
+
+.delivery_icon {
+    position: absolute;
+}
+
+.takeout_icon {
+    position: absolute;
+}
+
+.fc_icon {
+    position: absolute;
+}
+
+#reservation_btn {
+    border-radius: 20px;
+    padding: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+    box-shadow: 3px 0 3px #1c1c1c52 inset, 0 3px 3px #1c1c1c63 inset,0 -5px 7px #cac9c9 inset, -10px 0 15px #cac9c9 inset;
+}
+
+#waiting_btn {
+    border-radius: 20px;
+    padding: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+}
+
+#delivery_btn {
+}
+
+#takeout_btn {
+}
+
+#fc_btn {
+}
+
+.reservation_btm .icon-button {
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+}
+
+/*左側清單按鈕*/
+ul li {
+    list-style-type: none;
+}
+
+.reservation_btm button {
+    border-radius: 40px;
+}
+
+.section-button {
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+    box-shadow: 0 -5px 3px #fff, -5px 0 3px #fff, 2px 0 3px #777, 0 2px 3px #777;
+}
+
+/*左側 移動畫面的按鈕*/
+#restaurant_index {
+}
+
+#restaurant_status {
+}
+
+#recommend {
+    display: none;
+}
+
+#restaurant_menu {
+}
+
+
+/*內文*/
+#raservation_title {
+    margin: 10px 50px 0 0;
+    color: #3489B8;
+    font-weight: bold;
+}
+#time{
+    color: #3489B8;
+    font-weight: bold;
+}
+.raservation_infomation p {
+    color: #595757;
+}
+
+/*內文 人數  下拉式選單*/
+.people_block {
+    display: inline-block;
+    position: relative;
+}
+
+.people_bg {
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+}
+
+#people, #child {
+    float: right;
+}
+
+.people_hide_select, .child_hide_select {
+    position: relative;
+}
+
+    .people_hide_select ul, .child_hide_select ul {
+        position: absolute;
+        z-index: 1;
+        /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+        border-radius: 20px;
+    }
+
+        .people_hide_select ul li, .child_hide_select ul li {
+            display: none;
+            text-align: center;
+            color: #3489B8;
+        }
+
+    .people_hide_select i, .child_hide_select i {
+        position: absolute;
+        right: 0%;
+        top: 28%;
+        font-weight: bold;
+    }
+
+    .people_hide_select ul li a, .child_hide_select ul li a {
+        width: 100%;
+    }
+
+        .people_hide_select ul li a:link, .people_hide_select ul li a:visited, .child_hide_select ul li a:link, .child_hide_select ul li a:visited {
+            text-decoration: none;
+            color: #3489B8;
+        }
+
+    .people_hide_select ul li:hover, .child_hide_select ul li:hover {
+        /* background: #3489B8; */
+        /* color: #fff; */
+    }
+
+    .people_hide_select ul li a:hover, .people_hide_select ul li a:active, .child_hide_select ul li a:hover, .hide_select ul li a:active {
+        color: #fff;
+    }
+
+/*內文 人數下拉式選單JS 換的CSS*/
+h3.switchDisplay {
+}
+
+ul.switchDisplay li {
+    display: block;
+}
+
+    ul.switchDisplay li:hover {
+        background-color: #3489B8;
+        color: #fff;
+    }
+
+.option_block .switchDisplay {
+    display: none;
+    text-align: center;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    color: #595757;
+    border: 0px;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+}
+
+/*內文 日期  選單*/
+.date_block {
+    display: inline-block;
+    position: relative;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+}
+
+.date_bg p {
+    color: #3489B8;
+}
+
+.date_select input {
+    position: absolute;
+    color: #3489B8;
+    background-color: #e3e4e6;
+    text-align: center;
+    border: none;
+    box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+}
+
+/*內文 日期文字顯示部分*/
+input[type="date"]::-webkit-datetime-edit {
+    /* content: '起始时间'; */
+    color: #3489b8 padding-left: 10px;
+}
+
+
+input[type="date"] {
+    color: #3489b8;
+    border: 0px;
+    background-color: #0000;
+}
+
+
+/*內文 日曆CSS*/
+.ui-widget-content {
+    border: 0 !important;
+    background: none !important;
+    background-color: #e8ecf0 !important;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    color: #3489B8 !important;
+}
+
+.ui-widget-header {
+    border: 0 !important;
+    background: none !important;
+    color: #3489B8 !important;
+}
+
+    .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+        border: 0 !important;
+        background: none !important;
+        color: #3489B8 !important;
+        text-align: center !important;
+    }
+
+        .ui-state-default:hover {
+            border: 0 !important;
+            background: none !important;
+            background-color: #3489B8 !important;
+            color: #f8f9fa !important;
+            text-align: center !important;
+        }
+
+/*內文 午餐時段按鈕*/
+.morning_time .time-button {
+    background: #fdfdfd;
+    border: none;
+    color: #3489B8;
+}
+
+    .morning_time .time-button:hover {
+        box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+    }
+
+/*內文 午餐時段 點選後更改CSS*/
+.morning_time .active {
+    background-color: #3489B8;
+    box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+    border: none;
+    color: white;
+}
+
+/*內文 晚餐時段按鈕*/
+.dinner_time .time-button {
+    background: #fdfdfd;
+    border: none;
+    color: #3489B8;
+}
+
+    .dinner_time .time-button:hover {
+        box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+    }
+
+/*內文 晚餐時段 點選後更改CSS*/
+.dinner_time .active {
+    background-color: #3489B8;
+    box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+    border: none;
+    color: white;
+}
+
+/*內文 預約訂位按鈕*/
+#center_btn {
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+    background: #BC3432;
+    color: #fff;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    border: 0px;
+}
+
+/*菜單*/
+#menu {
+    margin-top: -19%;
+    padding-top: 20%;
+    width: 100%;
+    height: 1500px;
+    background-color: #E5E5E5;
+}
+
+/*菜單 標題*/
+.menu_title {
+    color: #3489B8;
+}
+
+/*菜單 相片輪播*/
+.flexslider {
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+}
+
+    .flexslider img {
+        border-radius: 20px;
+    }
+
+    .flexslider:hover .flex-direction-nav .flex-next {
+        color: white;
+    }
+
+    .flexslider:hover .flex-direction-nav .flex-prev {
+        color: white;
+    }
+
+.fancybox-error, .fancybox-iframe {
+    padding: 0px;
+}
+
+/*手機板餐廳資訊*/
+#res_mb_info {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    header {
+        height: 300px;
+    }
+
+    /*banner 依尺寸變換*/
+    .header-wrap img:nth-child(1) {
+        display: none;
+    }
+
+    .header-wrap img:nth-child(2) {
+        display: block;
+    }
+
+    /*會員服務*/
+    #record_btn {
+        display: none;
+    }
+
+    #mb_record_btn {
+        display: block;
+    }
+
+    .member_bg {
+        width: 100%;
+    }
+
+    .member_block {
+        top: 10px;
+        right: 10px;
+        font-size: 14pt;
+        border-radius: 30px;
+        padding: 8px 15px;
+    }
+
+
+
+        .member_block h3 {
+            display: none;
+            font-size: 14pt;
+            margin: 0px;
+        }
+
+    .member_bg .member_list {
+        top: 60px;
+        right: 10px;
+        width: 40%;
+        margin: 10px 0px;
+        border-radius: 20px;
+        font-size: 12pt;
+    }
+
+    .member_bg a {
+        width: 100%;
+    }
+
+    .member_bg .member_list li {
+        color: #fff !important;
+        margin-left: -19px !important;
+    }
+
+
+    .member_list.switchDisplay li {
+        width: 108%;
+        margin-top: 10px;
+        margin-left: -23px;
+        margin-bottom: 10px;
+    }
+
+    .member_bg .member_block .switchDisplay {
+        width: 100%;
+        padding: 5px 10px;
+        font-size: 14pt;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+    /*左側清單*/
+    .list-menu {
+        top: 7%;
+        left: 17%;
+        width: 15%;
+    }
+
+    .logo_block .logo {
+        width: 100px;
+        height: 100px;
+        margin-top: 0%;
+        margin-left: -16%;
+        margin-bottom: 5px;
+        border-radius: 200px;
+        box-shadow: 0 5px 5px #9c9b9b;
+    }
+
+    /*左側清單 logo周圍位置控制*/
+    .reservation_btm {
+        width: 500%;
+        height: 75px;
+        margin-left: -120px;
+    }
+
+
+        .reservation_btm .icon-button {
+            width: 36px;
+            height: 36px;
+            padding-bottom: 4px;
+        }
+
+            .reservation_btm .icon-button img {
+                width: 75%;
+            }
+
+    /*左側清單 logo周圍位置控制 - 訂位*/
+    .reservation_icon {
+        top: 65px;
+        left: 80px;
+    }
+
+    /*左側清單 logo周圍位置控制 - 候位*/
+    .waiting_icon {
+        top: 35px;
+        left: 120px;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外送*/
+    .delivery_icon {
+        top: 65px;
+        left: 215px;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外帶*/
+    .takeout_icon {
+        top: 35px;
+        left: 170px;
+    }
+    /*左側清單 logo周圍位置控制 - 速利便*/
+    .fc_icon {
+        top: 110px;
+        left: 230px;
+    }
+
+    /*左側清單 下方白色區塊*/
+    .row-list {
+        display: none;
+    }
+
+    /*內文 訂位標題*/
+    #raservation_title{
+        font-size: 24px;
+        font-weight: bold;
+        margin-left: 20px;
+    }
+    #time {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-left: 10px;
+        margin-bottom: 20px;
+        color: #3489B8;
+    }
+    .content h3 {
+        font-weight: bold;
+        font-size: 12pt;
+        margin: 10px 10px 10px 10px;
+    }
+
+
+    .raservation_infomation {
+        margin: auto;
+        padding: 10px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+        .raservation_infomation p {
+            font-size: 12pt;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+
+    /*內文 人數下拉式選單*/
+    .people_block img {
+        width: 8%;
+        padding-top: 1px;
+    }
+
+    .date_block img {
+        width: 7%;
+        padding-top: 1px;
+    }
+
+    .people_block {
+        width: 90%;
+        margin-left: 18px;
+        margin-right: 0px;
+        margin-bottom: 15px;
+    }
+
+    .people_bg {
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        padding: 7px 20px;
+        color: #3489B8;
+    }
+
+        .people_bg div {
+            font-size: 12pt;
+        }
+
+        .people_bg img {
+            margin-left: -5px;
+            margin-right: 5px;
+            margin-top: -2px;
+        }
+
+    /*內文 人數顯示文字*/
+    #people, #child {
+        width: 51%;
+        float: right;
+    }
+
+    /*內文 人數下拉式選單 隱藏區塊*/
+    .people_hide_select, .child_hide_select {
+        width: 100%;
+    }
+
+        .people_hide_select h3, .child_hide_select h3 {
+            width: 70%;
+        }
+
+        .people_hide_select div, .child_hide_select div {
+            padding: 0px 0px;
+            border: 0;
+            background: #aaa0;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .people_hide_select i, .child_hide_select i {
+            position: absolute;
+            right: 0%;
+            top: 30%;
+            font-weight: bold;
+        }
+
+        .people_hide_select ul, .child_hide_select ul {
+            padding-left: unset;
+            position: absolute;
+            width: 114%;
+            top: 2.5em;
+            left: -18px;
+            z-index: 1;
+            border-radius: 20px;
+        }
+
+            .people_hide_select ul li, .child_hide_select ul li {
+                width: 100%;
+                display: none;
+                padding: 5px 10px;
+                text-align: center;
+                color: #3489B8;
+                font-weight: 600;
+                font-size: 12pt;
+                margin-top: 5px;
+            }
+
+                .people_hide_select ul li a, .child_hide_select ul li a {
+                    width: 100%;
+                }
+
+    h3.switchDisplay {
+    }
+
+    ul.switchDisplay li {
+        display: block;
+        color: #3489b8;
+        /* border-bottom: solid 1px #d0d0d0; */
+        width: 92%;
+        margin-top: 10px;
+        margin-left: 14px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+    }
+
+    .option_block .switchDisplay {
+        width: 100%;
+        display: none;
+        padding: 5px 10px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+    /*內文 日期下拉式選單 */
+    .date_block {
+        width: 90%;
+        border-radius: 30px;
+        height: 43px;
+        margin-left: 18px;
+    }
+
+    .date_bg p {
+        margin: auto;
+        margin-left: 10px;
+        margin-top: 4px;
+        padding: 5px;
+        font-weight: bold;
+        font-size: 12pt;
+    }
+
+    .date_bg img {
+        margin-right: 5px;
+        margin-top: -4px;
+    }
+
+    /*內文 日期文字顯示 */
+    .date_select input {
+        top: 0;
+        width: 70%;
+        height: 70%;
+        font-weight: bold;
+        font-size: 12pt;
+        margin-top: 7px;
+        margin-left: 27%;
+        border-radius: 30px;
+    }
+
+    input[type="date"]::-webkit-datetime-edit {
+        /* content: '起始时间'; */
+        padding-left: 10px;
+    }
+
+
+    input[type="date"] {
+        font-weight: bold;
+        font-size: 14pt;
+        border: 0px;
+        margin: auto;
+        padding: 5px;
+    }
+
+    /*內文 日曆CSS */
+    .ui-widget-content {
+        width: 90% !important;
+        height: 260px;
+        margin-top: 5%;
+        margin-left: -5%;
+        border: 0 !important;
+        border-radius: 20px !important;
+    }
+
+    .ui-widget-header {
+        border: 0 !important;
+        background: none !important;
+        color: #3489B8 !important;
+    }
+
+        .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+            width: 77%;
+            margin: 0 auto !important;
+            border: 0 !important;
+            font-size: 12pt;
+            font-weight: bold !important;
+            text-align: center !important;
+        }
+
+            .ui-state-default:hover {
+                border: 0 !important;
+                border-radius: 20px !important;
+                font-weight: bold !important;
+                text-align: center !important;
+            }
+
+    /*內文 午餐時段按鈕*/
+    .morning_time {
+        margin-left: 10px;
+    }
+
+        .morning_time .time-button {
+            width: 20%;
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        /*內文 午餐時段按鈕 點選後更改CSS*/
+        .morning_time .active {
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+        }
+
+
+    /*內文 晚餐時段按鈕*/
+    .dinner_time {
+        margin-left: 10px;
+    }
+
+
+        .dinner_time .time-button {
+            width: 20%;
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        .dinner_time .active {
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+        }
+
+    /*內文 預約訂位按鈕*/
+    #center_btn {
+        text-align: center;
+    }
+
+    .center {
+        width: 50% !important;
+        padding: 5px 15px;
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    /*內文 波浪分隔線 依尺寸變換*/
+    #demarcation01 img:nth-child(1) {
+        display: none;
+    }
+
+    #demarcation01 img:nth-child(2) {
+        display: block;
+    }
+
+    .bg_wave {
+        width: 100%;
+    }
+
+    #demarcation02 {
+        display: block;
+    }
+
+        #demarcation02 .bg_mb_wave {
+            width: 100%;
+        }
+
+
+    /*菜單*/
+    #menu {
+        margin-top: -42%;
+        padding-top: 20%;
+        height: 710px;
+    }
+
+    /*菜單標題*/
+    .menu_title {
+        font-size: 35px;
+        font-weight: 600;
+        margin-top: -3%;
+        margin-left: 17.5%;
+    }
+
+    /*菜單 相片輪播*/
+    .flexslider {
+        width: 70% !important;
+        margin: 0px auto !important;
+        margin-top: 15% !important;
+        border-radius: 20px;
+    }
+
+        .flexslider img {
+            height: 465px;
+            border-radius: 20px;
+        }
+
+    .flex-direction-nav a {
+        height: 70% !important;
+        width: 100% !important;
+    }
+
+    /*手機板餐廳資訊*/
+    #res_mb_info {
+        display: block;
+    }
+
+    .res_mb_title {
+        color: #3489B8;
+        font-size: 30px;
+        font-weight: 600;
+        text-align: right;
+        margin-top: -23%;
+        margin-right: 10%;
+        margin-bottom: 20px;
+    }
+
+    #res_mb_info h3 {
+        color: #595757;
+        font-weight: bolder;
+        font-size: 16pt;
+        margin: 25px 25px 15px 25px;
+    }
+
+    #res_mb_info p {
+        color: #595757;
+        font-size: 12pt;
+        margin: 0px 25px 10px 25px;
+    }
+
+    #res_mb_info hr {
+        width: 90%;
+        margin: auto;
+    }
+
+    .rname {
+        font-size: 20px;
+        margin: 35% 11% 10% 10%;
+    }
+}
+
+
+@media (min-width: 768px) {
+
+    header {
+        height: 183px;
+    }
+
+    /*banner 依尺寸變換*/
+    .header-wrap img:nth-child(1) {
+        width: 100%;
+        display: block;
+    }
+
+    .header-wrap img:nth-child(2) {
+        width: 100%;
+        display: none;
+    }
+
+    /*會員服務*/
+    .member_bg {
+        width: 100%;
+    }
+
+    .member_block {
+        top: 20px;
+        right: 30px;
+        font-size: 14pt;
+        border-radius: 30px;
+        padding: 8px 20px;
+    }
+
+        .member_block i {
+            margin-right: 5px;
+        }
+
+        .member_block h3 {
+            font-size: 14pt;
+            margin: 0px;
+        }
+
+    .member_bg .member_list {
+        top: 70px;
+        right: 30px;
+        width: 17.5%;
+        margin: 10px 0px;
+        border-radius: 20px;
+        font-size: 14pt;
+    }
+
+        .member_bg .member_list li {
+            margin-left: -32px !important;
+        }
+
+
+    .member_list.switchDisplay li {
+        width: 150%;
+        margin-top: 10px;
+        margin-left: -23px;
+        margin-bottom: 10px;
+    }
+
+    .member_bg .member_block .switchDisplay {
+        width: 100%;
+        padding: 5px 10px;
+        font-size: 14pt;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+    /*左側清單*/
+    .list-menu {
+        position: absolute;
+        top: 2%;
+        left: 16%;
+        width: 15%;
+    }
+
+    /*左側清單 固定位置控制*/
+    .menuFixed {
+        position: fixed;
+        top: 5%;
+        left: 15.5%;
+        margin-top: 0;
+        /* opacity: 0.94; */
+        transition: opacity .5s ease-out;
+    }
+
+    .logo_block .logo {
+        width: 118px;
+        height: 118px;
+        position: absolute;
+        border-radius: 100px;
+        box-shadow: 0 5px 5px #9c9b9b;
+        margin-bottom: 5px;
+    }
+
+    /*左側清單 logo周圍位置控制*/
+    .reservation_btm .icon-button {
+        width: 80%;
+        height: 36px;
+        text-align: center;
+        padding-bottom: 4px;
+    }
+
+        .reservation_btm .icon-button img {
+            width: 75%;
+        }
+
+
+    .reservation_btm {
+        width: 190%;
+        height: 75px;
+        margin-left: -50%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 訂位*/
+    .reservation_icon {
+        top: 150%;
+        left: 2%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 候位*/
+    .waiting_icon {
+        top: 85%;
+        left: 10%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外送*/
+    .delivery_icon {
+        top: 40%;
+        left: 30%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外帶*/
+    .takeout_icon {
+        top: 40%;
+        left: 57%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 速利便*/
+    .fc_icon {
+        top: 85%;
+        left: 78%;
+    }
+
+    /*左側清單 下方白色區塊*/
+    .row-list {
+        background-color: #ffffffc9;
+        width: 100%;
+        height: 540px;
+        margin-top: 75% !important;
+        border-radius: 20px;
+    }
+
+    ul li {
+        list-style-type: none;
+    }
+
+    .section-list {
+        padding-left: 1px;
+    }
+
+    .preorder-menu {
+        padding-top: 20%;
+    }
+
+    .section-button {
+        margin: 5px 0px 5px 0px;
+        color: #3489B8;
+        font-weight: bold;
+        font-size: 10pt;
+        border: 0px;
+        width: 95%;
+        height: 30px;
+        border-radius: 30px;
+    }
+
+        .section-button a {
+            text-decoration: none;
+        }
+
+    /*左側清單 餐廳資訊 */
+    .rastaurant_infomation {
+        margin: auto;
+        width: 80%;
+    }
+
+        .rastaurant_infomation h3 {
+            color: #595757;
+            font-weight: 600;
+            font-size: 12pt;
+        }
+
+        .rastaurant_infomation p {
+            color: #595757;
+            font-size: 10pt;
+        }
+
+        .rastaurant_infomation hr {
+            border: solid 1px #e4e4e4;
+            width: 100%;
+        }
+
+
+
+    /*內文 訂位白色區塊 */
+    .content {
+        width: 53.5% !important;
+        margin-top: 5.5%;
+        margin-left: 37% !important;
+    }
+
+        .content h3 {
+            font-weight: bold;
+            font-size: 12pt;
+            margin: 10px;
+        }
+
+
+    .raservation_infomation {
+        background-color: #fff;
+        margin: auto;
+        padding: 10px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+        .raservation_infomation p {
+            font-size: 12pt;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+
+    /*內文 人數下拉式選單*/
+    .people_block img, .date_block img {
+        width: 9%;
+        padding-top: 1px;
+    }
+
+    .people_block {
+        width: 44%;
+        margin-left: 10px;
+        margin-right: 5px;
+    }
+
+    .people_bg {
+        border: 0px;
+        border-radius: 20px;
+        padding: 8px 10px;
+    }
+
+        .people_bg h3 {
+            font-size: 12pt;
+            margin: 10px;
+        }
+
+        .people_bg img {
+            width: 15%;
+            margin-left: -5px;
+            margin-right: 0px;
+            margin-top: -2px;
+        }
+
+    /*內文 人數顯示文字*/
+    #people, #child {
+        width: 59%;
+        float: right;
+    }
+
+    /*內文 人數下拉式選單 隱藏區塊*/
+    .people_hide_select, .child_hide_select {
+        width: 100%;
+    }
+
+        .people_hide_select h3, .child_hide_select h3 {
+            padding: 0px 10px;
+            border: 0;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /*內文 人數下拉式選單 隱藏區塊 控制輸入文字*/
+        .people_hide_select ul, .child_hide_select ul {
+            position: absolute;
+            width: 100%;
+            top: 3em;
+            left: 0px;
+        }
+
+            /*內文 人數下拉式選單 隱藏區塊 控制下拉式的文字*/
+            .people_hide_select ul li, .child_hide_select ul li {
+                width: 100%;
+                display: none;
+                padding: 5px 10px;
+                text-align: center;
+                font-weight: 600;
+                font-size: 12pt;
+                border: 0px;
+                border-radius: 30px;
+            }
+
+                .people_hide_select ul li a, .child_hide_select ul li a {
+                    width: 100%;
+                }
+
+                    .people_hide_select ul li a:link, .people_hide_select ul li a:visited, .child_hide_select ul li a:link, .child_hide_select ul li a:visited {
+                        text-decoration: none;
+                        color: #3489B8;
+                    }
+
+    /*內文 人數下拉式選單 隱藏區塊 以此呼叫下拉式*/
+    ul.switchDisplay li {
+        display: block;
+        width: 108%;
+        margin-top: 10px;
+        margin-left: -23px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+    }
+
+    .option_block .switchDisplay {
+        width: 100%;
+        display: none;
+        padding: 5px 10px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+    /*內文 日期下拉式選單 */
+    .date_block {
+        width: 45%;
+        position: relative;
+        border: 0px;
+        border-radius: 30px;
+        height: 43px;
+        margin-top: 15px;
+        margin-left: 10px;
+    }
+
+    .date_bg p {
+        margin: auto;
+        margin-left: 7px;
+        margin-top: 4px;
+        padding: 5px;
+        font-weight: bold;
+        font-size: 12pt;
+    }
+
+    .date_bg img {
+        margin-right: 2px;
+        margin-top: -4px;
+    }
+
+    /*內文 日期下拉式選單 文字顯示*/
+    .date_select input {
+        top: 0;
+        width: 57%;
+        height: 70%;
+        font-weight: bold;
+        font-size: 8pt;
+        margin-top: 7px;
+        margin-left: 40%;
+        text-align: center;
+        border: none;
+        border-radius: 30px;
+    }
+
+
+    input[type="date"] {
+        font-weight: bold;
+        font-size: 14pt;
+        border: 0px;
+        margin: auto;
+        padding: 5px;
+    }
+
+    /*內文 日曆CSS */
+    .ui-widget-content {
+        width: 23% !important;
+        margin-top: 2%;
+        margin-left: -9%;
+        border: 0 !important;
+        border-radius: 10px !important;
+    }
+
+    .ui-widget-header {
+        border: 0 !important;
+    }
+
+        .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+            width: 77%;
+            margin: 0 auto !important;
+            border: 0 !important;
+            font-size: 8pt;
+            text-align: center !important;
+        }
+
+    .ui-datepicker .ui-datepicker-title {
+        font-size: 12pt;
+    }
+
+    .ui-datepicker th {
+        font-size: 10pt;
+    }
+
+    .ui-state-default:hover {
+        border: 0 !important;
+        border-radius: 20px !important;
+        font-weight: bold !important;
+        text-align: center !important;
+    }
+
+    /*內文 午餐時段按鈕*/
+    .morning_time {
+        margin-left: 10px;
+    }
+
+        .morning_time .time-button {
+            width: 20%;
+            /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+            background: #e8ecf0; /* Old browsers */
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+            color: #595757;
+            margin-bottom: 20px;
+        }
+
+        /*內文 午餐時段按鈕 點選後更改CSS*/
+        .morning_time .active {
+            background-color: #3489B8;
+            box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+            color: white;
+        }
+
+    /*內文 晚餐時段按鈕*/
+    .dinner_time {
+        margin-left: 10px;
+    }
+
+        .dinner_time .time-button {
+            width: 20%;
+            /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+            background: #e8ecf0; /* Old browsers */
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+            color: #595757;
+        }
+
+        /*內文 晚餐時段按鈕 點選後更改CSS*/
+        .dinner_time .active {
+            background-color: #3489B8;
+            box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 30px;
+            padding: 5px 0px;
+            margin-left: 10px;
+            color: white;
+        }
+
+    /*內文 預約訂位按鈕*/
+    #center_btn {
+        text-align: center;
+    }
+
+    .center {
+        width: 30% !important;
+        padding: 5px 15px;
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    /*內文 波浪分隔線 依尺寸變換*/
+    #demarcation01 img:nth-child(1) {
+        display: block;
+    }
+
+    #demarcation01 img:nth-child(2) {
+        display: none;
+    }
+
+    .bg_mb_wave {
+        width: 100%;
+    }
+
+    /*菜單*/
+    #menu {
+        margin-top: -19%;
+        padding-top: 20%;
+        height: 820px;
+    }
+
+    /*菜單標題*/
+    .menu_title {
+        font-size: 40px;
+        font-weight: 600;
+        margin-top: -36%;
+        margin-left: -5.5%;
+    }
+
+    /*菜單 相片輪播*/
+    .flexslider {
+        width: 70% !important;
+        margin: 0px auto !important;
+        margin-top: 10% !important;
+        border-radius: 20px;
+    }
+
+        .flexslider img {
+            border-radius: 20px;
+            height: 570px;
+        }
+
+    .flex-direction-nav a {
+        height: 70% !important;
+        width: 100% !important;
+    }
+
+        .flex-direction-nav a:before {
+            font-size: 20px;
+        }
+
+    .fancybox-slide--iframe .fancybox-content {
+        width: 60% !important;
+        height: 56% !important;
+    }
+}
+
+@media (min-width: 992px) {
+
+    /*會員服務*/
+    .member_bg {
+        width: 100%;
+    }
+
+    .member_block {
+        top: 20px;
+        right: 30px;
+        font-size: 14pt;
+        border-radius: 30px;
+        padding: 8px 20px;
+    }
+
+        .member_block i {
+            margin-right: 5px;
+        }
+
+        .member_block h3 {
+            font-size: 14pt;
+            margin: 0px;
+        }
+
+    .member_bg .member_list {
+        top: 70px;
+        right: 30px;
+        width: 13.2%;
+        margin: 10px 0px;
+        border-radius: 20px;
+        font-size: 14pt;
+    }
+
+        .member_bg .member_list li {
+            margin-left: -27px !important;
+        }
+
+            .member_bg .member_list li:hover {
+                padding: 8px 15px;
+            }
+
+
+    .member_list.switchDisplay li {
+        width: 130%;
+        margin-top: 10px;
+        /* margin-left: -23px; */
+        margin-bottom: 10px;
+    }
+
+    .member_bg .member_block .switchDisplay {
+        width: 100%;
+        padding: 5px 10px;
+        font-size: 14pt;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+    /*左側清單 固定位置控制*/
+    .menuFixed {
+        position: fixed;
+        top: 5%;
+        left: 16%;
+        margin-top: 0;
+        /* opacity: 0.94; */
+        transition: opacity .5s ease-out;
+    }
+
+    .row-list {
+        background-color: #ffffffc9;
+        width: 100%;
+        height: 515px;
+        margin-top: 75% !important;
+        border-radius: 20px;
+    }
+
+    /*左側清單 logo周圍位置控制*/
+    .reservation_btm .icon-button {
+        width: 100%;
+        height: 46px;
+        text-align: center;
+        padding-bottom: 4px;
+    }
+
+        .reservation_btm .icon-button img {
+            width: 75%;
+        }
+
+    .reservation_btm {
+        width: 190%;
+        height: 75px;
+        margin-left: -40%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 訂位*/
+    .reservation_icon {
+        top: 170%;
+        left: 1%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 候位*/
+    .waiting_icon {
+        top: 88%;
+        left: 7%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外送*/
+    .delivery_icon {
+        top: 33%;
+        left: 27%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外帶*/
+    .takeout_icon {
+        top: 33%;
+        left: 53%;
+    }
+
+    /*左側清單 logo周圍位置控制 - 速利便*/
+    .fc_icon {
+        top: 88%;
+        left: 73%;
+    }
+
+    /*內文 人數顯示文字*/
+    #people, #child {
+        width: 56%;
+        float: right;
+    }
+
+    .people_bg img {
+        width: 10%;
+        margin-left: -5px;
+        margin-right: 0px;
+        margin-top: -2px;
+    }
+
+    /*菜單*/
+    #menu {
+        margin-top: -19%;
+        padding-top: 20%;
+        height: 1000px;
+    }
+
+    /*菜單標題*/
+    .menu_title {
+        margin-top: -33%;
+        margin-left: -3%;
+    }
+
+    /*菜單 相片輪播*/
+    .flexslider {
+        width: 70% !important;
+        margin: 0px auto !important;
+        margin-top: 10% !important;
+        border-radius: 20px;
+    }
+
+    .fancybox-slide--iframe .fancybox-content {
+        width: 40% !important;
+        height: 75% !important;
+    }
+}
+
+@media (min-width: 1200px) {
+
+    header {
+        background: #F1F1F1;
+        height: 430px;
+        width: 100%;
+    }
+
+    /*banner 依尺寸變換*/
+    .header-wrap img:nth-child(1) {
+        width: 100%;
+        display: block;
+    }
+
+    .header-wrap img:nth-child(2) {
+        width: 100%;
+        display: none;
+    }
+
+    /*會員服務*/
+    .member_bg {
+        width: 100%;
+    }
+
+    .member_block {
+        top: 20px;
+        right: 30px;
+        font-size: 14pt;
+        border-radius: 30px;
+        padding: 8px 20px;
+    }
+
+        .member_block i {
+            margin-right: 5px;
+        }
+
+        .member_block h3 {
+            font-size: 14pt;
+            margin: 0px;
+        }
+
+    .member_bg .member_list {
+        top: 70px;
+        right: 30px;
+        width: 7%;
+        margin: 10px 0px;
+        border-radius: 20px;
+        font-size: 14pt;
+    }
+
+
+        .member_bg .member_list li {
+            margin-left: -25px !important;
+        }
+
+    .member_list.switchDisplay li:hover {
+        padding: 7px;
+    }
+
+
+    ul.switchDisplay li {
+        width: 108%;
+        margin-top: 10px;
+        margin-left: -23px;
+        margin-bottom: 10px;
+    }
+
+    .member_bg .member_block .switchDisplay {
+        width: 100%;
+        padding: 5px 10px;
+        font-size: 14pt;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+    /*左側清單*/
+    .list-menu {
+        position: absolute;
+        top: 18%;
+        left: 20%;
+        width: 11%;
+    }
+
+    /*左側清單 固定位置控制*/
+    .menuFixed {
+        position: fixed;
+        top: 5%;
+        left: 20%;
+        margin-top: 0;
+        /* opacity: 0.94; */
+        transition: opacity .5s ease-out;
+    }
+
+    .logo_block .logo {
+        width: 190px;
+        height: 190px;
+        position: absolute;
+        border-radius: 100px;
+        box-shadow: 0 5px 5px #9c9b9b;
+        margin-bottom: 5px;
+    }
+
+    /*左側清單 logo周圍位置控制*/
+    .reservation_btm {
+        position: relative;
+        width: 200%;
+        height: 75px;
+        margin-left: -120px;
+    }
+
+        .reservation_btm .icon-button {
+            width: 120%;
+            height: 55px;
+            box-shadow: 0 0px 5px #989898;
+            text-align: center;
+            padding-bottom: 4px;
+        }
+
+            .reservation_btm .icon-button img {
+                width: 75%;
+            }
+
+    /*左側清單 logo周圍位置控制 - 訂位*/
+    .reservation_icon {
+        position: absolute;
+        top: 140px;
+        left: 40px;
+    }
+
+    /*左側清單 logo周圍位置控制 - 候位*/
+    .waiting_icon {
+        position: absolute;
+        top: 60px;
+        left: 70px;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外送*/
+    .delivery_icon {
+        position: absolute;
+        top: 10px;
+        left: 140px;
+    }
+
+    /*左側清單 logo周圍位置控制 - 外帶*/
+    .takeout_icon {
+        position: absolute;
+        top: 10px;
+        left: 225px;
+    }
+
+    /*左側清單 logo周圍位置控制 - 速利便*/
+    .fc_icon {
+        position: absolute;
+        top: 60px;
+        left: 300px;
+    }
+
+
+    /*左側清單 下方白色區塊*/
+    .row-list {
+        background-color: #ffffffc9;
+        width: 100%;
+        height: 680px;
+        margin-left: -15px;
+        margin-top: 160px !important;
+        border-radius: 25px;
+    }
+
+    ul li {
+        list-style-type: none;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .section-list {
+        padding-left: 1px;
+    }
+
+    .preorder-menu {
+        padding-top: 40px;
+    }
+
+    .section-button {
+        margin: 15px 10px 10px 20px;
+        font-weight: bold;
+        font-size: 14pt;
+        border: 0px;
+        width: 80%;
+        height: 40px;
+        border-radius: 30px;
+    }
+
+        .section-button a {
+            text-decoration: none;
+            color: #3489B8;
+        }
+
+    /*左側清單 餐廳資訊 */
+    .rastaurant_infomation {
+        margin: auto;
+        width: 80%;
+    }
+
+        .rastaurant_infomation h3 {
+            color: #595757;
+            font-weight: 600;
+            font-size: 14pt;
+        }
+
+        .rastaurant_infomation p {
+            color: #595757;
+            font-size: 12pt;
+        }
+
+        .rastaurant_infomation hr {
+            border: solid 1px #e4e4e4;
+            width: 100%;
+        }
+
+
+
+    /*內文 訂位白色區塊 */
+    .content {
+        width: 53.5% !important;
+        margin-top: 1.5%;
+        margin-left: 34% !important;
+    }
+
+        .content h3 {
+            display: inline-block;
+            color: #3489B8;
+            font-weight: bold;
+            font-size: 14pt;
+            margin: 10px;
+        }
+
+
+    .raservation_infomation {
+        background-color: #fff;
+        margin: auto;
+        padding: 10px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+        .raservation_infomation p {
+            color: #595757;
+            font-size: 12pt;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+    /*內文 人數下拉式選單*/
+    .people_block img, .date_block img {
+        width: 9%;
+        padding-top: 1px;
+    }
+
+    .people_block {
+        display: inline-block;
+        position: relative;
+        width: 25%;
+        margin-left: 10px;
+        margin-right: 5%;
+    }
+
+    .people_bg {
+        font-weight: bold;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        padding: 8px 15px;
+        color: #3489B8;
+    }
+
+        .people_bg p {
+            margin: auto;
+            margin-left: 15px;
+            margin-top: 2px;
+            padding: 5px;
+        }
+
+        .people_bg img {
+            margin-right: 5px;
+            margin-top: -5px;
+        }
+
+    .people_select {
+        position: absolute;
+        top: 0;
+        width: 80%;
+        margin-top: 6px;
+        margin-left: 45px;
+    }
+
+        .people_select select {
+            color: #3489B8;
+            font-weight: bold;
+            font-size: 14pt;
+            border: 0;
+            background-color: #fff0;
+            width: 100%;
+            text-align: center;
+            text-align-last: center;
+        }
+
+    /*內文 人數顯示文字*/
+    #people, #child {
+        width: 56%;
+        float: right;
+    }
+
+    /*內文 人數下拉式選單 隱藏區塊*/
+    .people_hide_select, .child_hide_select {
+        position: relative;
+        width: 100%;
+    }
+
+        .people_hide_select div, .child_hide_select div {
+            padding: 0px 0px;
+            border: 0;
+            background: #aaa0;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /*內文 人數下拉式選單 隱藏區塊 控制輸入文字*/
+        .people_hide_select ul, .child_hide_select ul {
+            position: absolute;
+            width: 100%;
+            top: 3em;
+            left: 0px;
+            z-index: 1;
+        }
+
+            .people_hide_select ul li, .child_hide_select ul li {
+                width: 100%;
+                display: none;
+                padding: 5px 10px;
+                margin-top: 5px;
+                text-align: center;
+                font-weight: 600;
+                font-size: 14pt;
+                border: 0px;
+                border-radius: 30px;
+            }
+
+                .people_hide_select ul li a, .child_hide_select ul li a {
+                    width: 100%;
+                }
+
+                    .people_hide_select ul li a:link, .people_hide_select ul li a:visited, .child_hide_select ul li a:link, .child_hide_select ul li a:visited {
+                        text-decoration: none;
+                        color: #3489B8;
+                    }
+
+    /*內文 人數下拉式選單 隱藏區塊 以此呼叫下拉式*/
+    ul.switchDisplay li {
+        display: block;
+        width: 106%;
+        margin-top: 10px;
+        margin-left: -23px;
+        margin-bottom: 10px;
+    }
+
+    .option_block .switchDisplay {
+        width: 100%;
+        display: none;
+        padding: 5px 10px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+    /*內文 日期下拉式選單 */
+    .date_block {
+        display: inline-block;
+        width: 30%;
+        font-weight: bold;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        height: 43px;
+        margin-top: -10px;
+        margin-left: 10px;
+    }
+
+    .date_bg p {
+        margin: auto;
+        margin-left: 15px;
+        margin-top: 2px;
+        padding: 5px;
+        color: #3489B8;
+        font-weight: bold;
+        font-size: 14pt;
+    }
+
+    .date_bg img {
+        margin-right: 5px;
+        margin-top: -5px;
+    }
+
+    /*內文 日期下拉式選單 文字顯示*/
+    .date_select input {
+        top: 0;
+        width: 62%;
+        height: 70%;
+        font-weight: bold;
+        font-size: 14pt;
+        margin-top: 7px;
+        margin-left: 35%;
+        text-align: center;
+        border: none;
+        border-radius: 30px;
+    }
+
+    input[type="date"]::-webkit-datetime-edit {
+        /* content: '起始时间'; */
+        color: #3489b8 padding-left: 10px;
+    }
+
+
+    input[type="date"] {
+        color: #3489b8;
+        font-weight: bold;
+        font-size: 14pt;
+        border: 0px;
+        background-color: #0000;
+        margin: auto;
+        padding: 5px;
+    }
+
+    /*內文 日曆CSS */
+    .ui-widget-content {
+        width: 16% !important;
+        margin-top: 1%;
+        margin-left: -5.8%;
+        border: 0 !important;
+        border-radius: 10px !important;
+        background: none !important;
+        background-color: #e8ecf0 !important;
+        box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+        color: #3489B8 !important;
+    }
+
+    .ui-widget-header {
+        border: 0 !important;
+        background: none !important;
+        color: #3489B8 !important;
+    }
+
+        .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+            width: 75%;
+            height: 30px;
+            margin: 0 auto !important;
+            border: 0 !important;
+            background: none !important;
+            color: #3489B8 !important;
+            font-weight: bold !important;
+            text-align: center !important;
+        }
+
+    .ui-state-default {
+        padding-top: 6px !important;
+    }
+
+        .ui-state-default:hover {
+            border: 0 !important;
+            border-radius: 20px !important;
+            background: none !important;
+            background-color: #3489B8 !important;
+            color: #f8f9fa !important;
+            font-weight: bold !important;
+            text-align: center !important;
+        }
+
+
+    /*內文 午餐時段按鈕*/
+    .morning_time {
+    }
+
+        .morning_time .time-button {
+            width: 18%;
+            background: #e8ecf0;
+            border: none;
+            border-radius: 30px;
+            padding: 5px 25px;
+            margin-left: 10px;
+            color: #595757;
+            margin-bottom: 20px;
+        }
+
+            .morning_time .time-button:hover {
+                box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+            }
+
+        /*內文 午餐時段按鈕 點選後更改CSS*/
+        .morning_time .active {
+            background-color: #3489B8;
+            box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 30px;
+            padding: 5px 25px;
+            margin-left: 10px;
+            color: white;
+        }
+
+    /*內文 晚餐時段按鈕*/
+    .dinner_time .time-button {
+        width: 18%;
+        background: #e8ecf0;
+        border: none;
+        border-radius: 30px;
+        padding: 5px 25px;
+        margin-left: 10px;
+        margin-bottom: 20px;
+        color: #595757;
+    }
+
+        .dinner_time .time-button:hover {
+            box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+        }
+
+    /*內文 晚餐時段按鈕 點選後更改CSS*/
+    .dinner_time .active {
+        background-color: #3489B8;
+        box-shadow: 0 0 5px 0 rgba(0,0,0,0.15), 0 0px 5px 0 rgba(0,0,0,0.15);
+        border: none;
+        border-radius: 30px;
+        padding: 5px 25px;
+        margin-left: 10px;
+        color: white;
+    }
+
+    /*內文 預約訂位按鈕*/
+    #center_btn {
+        text-align: center;
+    }
+
+    .center {
+        width: 20%;
+        padding: 5px 15px;
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        background: #BC3432;
+        color: #fff;
+        font-weight: 600;
+        font-size: 14pt;
+        box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    /*內文 波浪分隔線 依尺寸變換*/
+    #demarcation01 img:nth-child(1) {
+        display: block;
+    }
+
+    #demarcation01 img:nth-child(2) {
+        display: none;
+    }
+
+    .bg_wave {
+        width: 100%;
+    }
+
+    /*菜單*/
+    #menu {
+        margin-top: -19%;
+        padding-top: 20%;
+        height: 1500px;
+    }
+
+    /*菜單標題*/
+    .menu_title {
+        position: absolute;
+        color: #3489B8;
+        font-size: 40px;
+        font-weight: 600;
+        margin-top: -9.5%;
+        margin-left: 2.5%;
+    }
+
+    /*菜單 相片輪播*/
+    .flexslider {
+        width: 70% !important;
+        margin: 0px auto !important;
+        margin-top: -3% !important;
+        border-radius: 35px;
+        box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    }
+
+        .flexslider img {
+            height: 900px;
+            border-radius: 35px;
+        }
+
+    .flex-direction-nav a {
+        height: 70% !important;
+        width: 100% !important;
+    }
+
+    .fancybox-slide--iframe .fancybox-content {
+        width: 25% !important;
+        height: 50% !important;
+    }
+
+    .rname{
+        font-size: 30px;
+        margin: 40% 11% 10% 10%;
+    }
+}

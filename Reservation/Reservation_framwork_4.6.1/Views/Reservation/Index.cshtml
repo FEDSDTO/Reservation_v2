@@ -1,0 +1,369 @@
+﻿@using Reservation.Models.ViewModels
+@model ReservationIndex
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Reservation.Models.LayResult _LayResults = ViewBag.LayInfor;
+    Reservation.Models.ViewModels.GroupsAPI_result _Results = ViewBag.Infor;
+    List<Reservation.Models.ViewModels.bookingInfos> _BookingResults = ViewBag.BookingTime;
+}
+
+<div class="content">
+    <p id="raservation_title">預約資料填寫</p>
+    <form id="ReservationForm" action="@Url.Action("Reservation_info", "Reservation")" method="post">
+        <div class="raservation_infomation">
+            <p>訂位人數</p>
+            <div class="col-xs-12 people_block">
+                <div class="people_bg">
+                    <div class="people_hide_select">
+                        <div class=""><img src="~/IMG/icon/people_icon.png">大人<div id="people">2</div><i class="fa fa-angle-down"></i></div>
+                        <ul id="people_ul">
+                            @for (int item = _Results.minBookingGroupSize; item <= _Results.maxBookingGroupSize; item++)
+                            {
+                                <li id="people_1" onclick="getPaging(this.id, this.value)" class="select_data" value="@item">@item</li>
+                            }
+                        </ul>
+                        <input type="hidden" id="adults" name="adults" value="" />
+                        @*@Html.Hidden("adults")*@
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 people_block" id="child_select">
+                <div class="people_bg">
+                    <div class="child_hide_select">
+                        <div class=""><img src="~/IMG/icon/child_icon.png" />小孩<div id="child"></div><i class="fa fa-angle-down"></i></div>
+                        <ul id="child_ul">
+                            @for (int item = _Results.minBookingGroupSize; item <= _Results.maxBookingGroupSize - 1; item++)
+                            {
+                                <li id="child_1" onclick="getPaging(this.id, this.value)" class="select_data child_li" value="@item">@item</li>
+                            }
+                        </ul>
+                        <input type="hidden" id="children" name="children" value="" />
+                        @*@Html.Hidden("children")*@
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 date_block">
+                <div class="date_bg">
+                    <p><img src="~/IMG/icon/calendar.png" />日期</p>
+                </div>
+                <div class="date_select">
+                    <input type="text" id="bookingDate" name="bookingDate" autocomplete="off">
+                    @*@Html.Hidden("bookingDate")*@
+                </div>
+            </div>
+            <div>
+                <hr>
+            </div>
+            <div class="raservation_time">
+                <p id="time">預約時間</p>
+                <p id="wanning" style="display:none;color:red">本日已無可預約時段</p>
+                <p id="lunchtext">午餐時段</p>
+                <div class="morning_time">
+
+                </div>
+                <p id="dinnertext">晚餐時段</p>
+                <div class="dinner_time">
+
+                </div>
+                <input type="hidden" id="bookingTime" name="bookingTime" value="">
+                <input type="hidden" id="loc" name="loc" value="">
+            </div>
+            <div id="center_btn">
+                <button type="submit" class="center" id="Reserve" onclick="return ReserveBtn()"> 我要預約 </button>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="demarcation01">
+    <img class="bg_wave" src="~/IMG/bg_1.png" />
+    <img class="bg_mb_wave" src="~/IMG/bg_mb_1.png" />
+</div>
+@if (_Results.Menus.Count > 0)
+{
+    <div id="menu">
+        <div class="content">
+            <div id="menu_title" class="menu_title">菜單</div>
+            <div class="flexslider" style="width:350px; margin-left:100px;">
+                <ul class="slides">
+                    @foreach (string menuImg in _Results.Menus)
+                    {
+                        <li><img class="d-block w-100 h-25" src="@menuImg" alt="菜單" /></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="demarcation02">
+        <img class="bg_mb_wave" src="~/IMG/bg_mb_2.png" />
+    </div>
+}
+else
+{
+    <div id="menu">
+        <div class="content">
+            <div id="menu_title" class="menu_title">菜單</div>
+            <div class="flexslider" style="width:70% !important; margin-left:100px;">
+                <p style="color: #595757; margin-left:20px" >該餐廳未提供線上菜單</p>
+            </div>
+        </div>
+    </div>
+}
+
+<div id="res_mb_info">
+    <div class="content">
+        <div class="res_mb_title">餐廳資訊</div>
+        <h3>餐廳位置</h3>
+        <p>@_LayResults.Address</p>
+        <hr>
+        <h3>料理類型</h3>
+        <p>@string.Join("、", _LayResults.Company.Tags.Select(t => t.Name))</p>
+        <hr>
+        <h3>店家電話</h3>
+        <p><a href="tel:@_LayResults.PhoneNumber">@_LayResults.PhoneNumber</a></p>
+        <hr>
+        <h3>營業時間</h3>
+        @foreach (var open in _LayResults.OpeningTimes)
+        {
+            <p>@open.From-@open.To</p>
+        }
+    </div>
+</div>
+
+
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/sweetalert.js"></script>
+<script type="text/javascript">
+
+    //預設今天日期
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+    if (dd < 10) { dd = '0' + dd } if (mm < 10) { mm = '0' + mm }
+    today = yyyy + '-' + mm + '-' + dd;
+    $('#bookingDate').attr('value', today);
+
+    //日期
+    $(function () {
+        var _minDate = '@_Results.minReservationOffset';
+        var _maxDate = '@_Results.maxReservationOffset';
+        $('#bookingDate').datepicker({ minDate: _minDate, maxDate: _maxDate - 1 });
+        $('#bookingDate').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            clearBtn: true,
+            calendarWeeks: true,
+            todayHighlight: true,
+            language: 'zh-TW'
+        }).on("change", function () {
+            var a = $('#adults').val();
+            var c = $('#children').val();
+            var bd = $(this).val();
+            var mix = 0;
+            if (a != "") {
+                if (c != "")
+                    mix = parseInt(a) + parseInt(c);
+                else
+                    mix = parseInt(a);
+                checkInfo(mix, bd);
+            }
+        });
+    });
+
+    //隱藏小孩下拉式選單
+    var c_hid = '@_Results.webKidsSelectorHidden';
+    if (c_hid == 'False') {
+        var _child = document.getElementById('child_select');
+        _child.style.display = 'none';
+    };
+
+    //預設訂位時間
+    var book = '@_BookingResults';
+    if (book != null) {
+        var bd = $('#bookingDate').val();
+        var a = $('#people').text();
+        checkInfo(a,bd);
+    }
+
+    //訂位時間 (塞值 & 點選btn顏色改變)
+    function getTime_morning(index, val) {
+        $('.dinner_time .time-button').siblings().removeClass("active");
+        $('.morning_time .time-button').eq(index).addClass("active").siblings().removeClass("active");
+        $('#bookingTime').val(val);
+    };
+    function getTime_dinner(index, val) {
+        $('.morning_time .time-button').siblings().removeClass("active");
+        $('.dinner_time .time-button').eq(index).addClass("active").siblings().removeClass("active");
+        $('#bookingTime').val(val);
+    };
+
+
+    //控制大人人數
+    function getNewOptions_c(val) {
+        $('#children').val(val);
+        var _child = val;
+        var min = '@_Results.minBookingGroupSize';
+        var max = '@_Results.maxBookingGroupSize';
+        $('#people_ul').empty();
+        if (_child >= min) {
+            getHtmlLis("people", 1, max - _child);
+        }
+        else {
+            getHtmlLis("people", min - _child, max - _child);
+        }
+    }
+    //控制小孩人數
+    var default_a = $('#people').text();
+    if (default_a != "") {
+        getNewOptions_a(default_a);
+    }
+    function getNewOptions_a(val) {
+        $('#adults').val(val);
+        var _adult = val;
+        var min = '@_Results.minBookingGroupSize';
+        var max = '@_Results.maxBookingGroupSize';
+        $('#child_ul').empty();
+        if (_adult >= min) {
+            getHtmlLis("child", 0, max - _adult);
+        }
+        else {
+            getHtmlLis("child", min - _adult, max - _adult - 1);
+        }
+    }
+    //改變下拉式選單內容
+    function getHtmlLis(type, min, max) {
+        var str = "#" + type + "_ul";
+        for (var i = min; i <= max; i++) {
+            $(str).append('<li id="' + type + '_' + i + '" onclick="getPaging(this.id, this.value)" class="select_data" value="' + i + '">' + i + '</li>');
+        }
+    };
+    //顯示選取的數量
+    function getPaging(type, val) {
+        var str = type.split("_", 1);
+        var mix = 0;
+        var bd = $('#bookingDate').val();
+        if (str == "child") {
+            $('#child').text(val);
+            getNewOptions_c(val);
+            var a_num = $('#people').text();
+            if (a_num != "") {
+                mix = parseInt(a_num) + parseInt(val);
+                if (bd != "")
+                    checkInfo(mix, bd);
+            }
+        } else if (str == "people") {
+            $('#people').text(val);
+            getNewOptions_a(val);
+            var c_num = $('#child').text();
+            if (c_num != "")
+                mix = parseInt(c_num) + parseInt(val);
+            else
+                mix = val;
+
+            if (bd != "")
+                checkInfo(mix, bd);
+        }
+    };
+
+    //人數&日期選完後 -> 訂位時間
+    function checkInfo(numPeople, date) {
+        if (numPeople != "" && date != "") {
+            var data = new FormData();
+            data.append('num', numPeople);
+            data.append('date', date);
+            data.append('loc', location.href);
+
+            $.ajax({
+                url: '@Url.Action("CheckInfo", "Reservation")',
+                type: 'POST',
+                data: data,
+                dataType: "json",
+                processData: false,
+                contentType: false
+            }).done(function (result) {
+                var count = Object.keys(result).length;
+                //清空訂位時間
+                $('.morning_time').empty();
+                $('.dinner_time').empty();
+                if (count > 0) {
+                    document.getElementById('wanning').style.display = 'none';
+                    document.getElementById("Reserve").disabled = false;
+                    document.getElementById("Reserve").style.background = "#BC3432"; 
+                    var y = 0;
+                    var x = 0;
+                    var _aTime = false;
+                    var _pTime = false;
+                    for (var i = 0; i < count; i++) {
+                        var _time = result[i].time;
+                        var _status = result[i].status;
+                        var _timePeriod = result[i].timePeriod;
+
+                        //新增訂位時間
+                        if (_timePeriod == "AM") {
+                            $('.morning_time').append('<button type="button"  id="' + x + '" class="time-button" value="' + _time + '" onclick="getTime_morning(this.id, this.value)"> ' + _time + ' </button>');
+                            _aTime = true;
+                            x++;
+                        }
+                        else if (_timePeriod == "PM") {
+                            $('.dinner_time').append('<button type="button" id="' + y +'" class="time-button" value="' + _time + '" onclick="getTime_dinner(this.id, this.value)" > ' + _time + ' </button>');
+                            _pTime = true;
+                            y++;
+                        }
+                    }
+                    if (_aTime == false)
+                        document.getElementById('lunchtext').style.display = 'none';
+                    else
+                        document.getElementById('lunchtext').style.display = '';
+
+                    if (_pTime == false)
+                        document.getElementById('dinnertext').style.display = 'none';
+                    else
+                        document.getElementById('dinnertext').style.display = '';
+                }
+                else {
+                    document.getElementById('lunchtext').style.display = 'none';
+                    document.getElementById('dinnertext').style.display = 'none';
+                    document.getElementById('wanning').style.display = '';
+                    document.getElementById("Reserve").disabled = true;
+                    document.getElementById("Reserve").style.background = "#b0b1b1"; 
+                }
+            });
+        };
+    };
+
+    //預約按鈕
+    function ReserveBtn() {
+        var _a = $('#adults').val();
+        var _bd = $('#bookingDate').val();
+        var _bt = $('#bookingTime').val();
+
+        var _at = "";
+        var _bdt = "";
+        var _btt = "";
+        var text = "訂位資訊不完整"
+
+        if (_a == "" || _bd == "" || _bt == "") {
+            if (_a == "") {
+                _at = "『大人數量』" + "<br>" ;
+            }
+            if (_bd == "") {
+                _bdt = "『訂位日期』" + "<br>" ;
+            }
+            if (_bt == "") {
+                _btt = "『訂位時間』" + "<br>";
+            }
+
+            swal({
+                title: _at + _bdt + _btt + text,
+                type: "error",
+            });
+            return false;
+        }
+
+        $('#loc').val(location.href);
+    };
+</script>
+

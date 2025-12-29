@@ -1,0 +1,115 @@
+﻿body {
+    background: #F1F1F1;
+}
+
+.title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    text-align: center;
+    background-color:;
+    width: 100%;
+    height: 17%;
+    background: linear-gradient(to bottom right,#9E93EA,#41B6E4,#0764EE);
+    border-radius: 0px 0px 30px 30px;
+    padding-top: 10%;
+    box-shadow: 0 0px 10px #989898;
+}
+
+    .title span {
+        font-size: 24pt;
+        font-weight: bolder;
+        color: #fff;
+    }
+
+.btn_group {
+    width: 100%;
+    margin-top: 160px;
+    text-align: center;
+}
+
+    .btn_group button {
+        width: 20%;
+        padding: 7px 10px;
+        margin: 20px 5px 15px 5px;
+        color: #3489B8;
+        font-size: 12pt;
+        font-weight: bold;
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        border: 0px;
+        border-radius: 20px;
+        box-shadow: 0 -5px 3px #fff, -5px 0 3px #fff, 2px 0 3px #777, 0 2px 3px #777;
+    }
+
+        .btn_group button.active {
+            width: 20%;
+            padding: 7px 10px;
+            margin: 20px 5px 15px 5px;
+            color: #ffffff;
+            font-weight: bold;
+            background: #3489B8;
+            border: 0px;
+            border-radius: 20px;
+            box-shadow: 0 -5px 3px #fff, -5px 0 3px #fff, 2px 0 3px #777, 0 2px 3px #777;
+        }
+
+.record {
+    width: 90%;
+    margin: auto;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+    border-radius: 20px;
+    box-shadow: 0 -5px 3px #fff, -5px 0 3px #fff, 2px 0 3px #777, 0 2px 3px #777;
+}
+
+.record_block {
+    margin: 20px 0px;
+    padding: 5px 25px 10px 25px;
+}
+
+.record_title {
+    width: 40%;
+    display: inline-block;
+}
+
+.data {
+    width: 50%;
+    display: inline-block;
+    text-align: right;
+    margin-left: -20px;
+    position: absolute;
+}
+
+.title p {
+    color: #595757;
+    font-weight: bold;
+}
+
+.data p {
+    margin-top: 18.5px !important;
+    color: #3489B8;
+    font-weight: bold;
+}
+
+.data .record_note {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.content td {
+    color: #3489B8 !important;
+}
+
+
+.time, .restaurants_name {
+    color: #C6332C !important;
+}

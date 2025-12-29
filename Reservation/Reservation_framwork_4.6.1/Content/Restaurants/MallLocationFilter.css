@@ -1,0 +1,651 @@
+﻿html {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+body {
+    width: 97%;
+}
+
+h3 {
+    color: #DF0716;
+}
+
+h2 {
+    color: #DF0716;
+}
+
+.mall {
+    width: 100%;
+    margin: 10px 0px 40px 10px;
+}
+
+.mall_bg {
+    display: inline-block;
+    position: relative;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    vertical-align: top;
+}
+
+#mall {
+    display: inline-block;
+    font-weight: bold;
+    color: #3489B8;
+}
+
+i {
+    display: inline-block;
+    font-weight: bold !important;
+    color: #3489B8;
+    float: right;
+    vertical-align: top;
+}
+
+.mall_bg ul {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    list-style-type: none;
+}
+
+    .mall_bg ul li {
+        display: none;
+        color: #3489B8;
+    }
+
+/*內文 下拉式選單JS 換的CSS*/
+.mall_bg.switchDisplay ul, .county_bg.switchDisplay ul, .dist_bg.switchDisplay ul {
+    display: block;
+}
+
+    .mall_bg.switchDisplay ul li, .county_bg.switchDisplay ul il, .dist_bg.switchDisplay ul il {
+        display: block;
+    }
+
+        .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+            background-color: #3489B8;
+            color: #fff;
+        }
+
+.mall_bg.switchDisplay ul, .county_bg.switchDisplay ul, .dist_bg.switchDisplay ul {
+    display: block;
+}
+
+    .mall_bg.switchDisplay ul li, .county_bg.switchDisplay ul il, .dist_bg.switchDisplay ul il {
+        display: block;
+    }
+
+        .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+            background-color: #3489B8;
+            color: #fff;
+        }
+
+.mall button {
+    display: inline-block;
+    font-weight: bold;
+    color: #3489B8;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    vertical-align: top;
+    border: none;
+}
+
+    .mall button:hover {
+        background: #3489B8;
+        color: #fff;
+    }
+
+hr {
+    border-color: #cbcbcb;
+    border-top: none;
+    border-left: none;
+}
+
+
+/*地址選擇*/
+.location {
+    width: 100%;
+}
+
+.select_block {
+    width: 100%;
+}
+
+    .select_block div {
+        display: inline-block;
+        vertical-align: top;
+    }
+
+#county, #dist {
+    display: inline-block;
+    font-weight: bold;
+    color: #3489B8;
+}
+
+.county_bg, .dist_bg {
+    position: relative;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+}
+
+    .county_bg ul {
+        z-index: 1;
+        overflow-y: auto;
+        display: none;
+        position: absolute;
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+        list-style-type: none;
+    }
+
+        .county_bg ul li {
+            /*display: none;*/
+            text-align: center;
+            color: #3489B8;
+        }
+
+    .dist_bg ul {
+        z-index: 1;
+        overflow-y: auto;
+        display: none;
+        position: absolute;
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+        list-style-type: none;
+    }
+
+        .dist_bg ul li {
+            /*display: none;*/
+            text-align: center;
+            color: #3489B8;
+        }
+
+/*輸入詳細地址*/
+.input_block .add_bg input {
+    color: #3489B8;
+    background-color: #E8ECF0;
+    border: none;
+    box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+}
+
+.location button {
+    font-weight: bold;
+    color: #3489B8;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    vertical-align: top;
+    border: none;
+    transform: translate(-50%,0%);
+}
+
+    .location button:hover {
+        background: #3489B8;
+        color: #fff;
+    }
+
+@media (min-width: 250px) {
+    h3 {
+        font-size: 15pt;
+    }
+
+    h2 {
+        font-size: 18pt;
+        margin: 44% 0% 5% 0%;
+    }
+
+    .mall {
+        margin: 10% 0% 0% 0%;
+    }
+
+    .mall_bg {
+        width: 97%;
+        height: 10%;
+        margin: 5% 0% 5% 0%;
+        border-radius: 50px;
+    }
+
+    #mall {
+        font-size: 15pt;
+        width: 70%;
+        margin: 15px 0px 0px 13px;
+    }
+
+    i {
+        font-size: 20pt !important;
+        margin: 15px 20px 0px 0px;
+    }
+
+    .mall_bg ul {
+        z-index: 1;
+        width: 92%;
+        height: 257%;
+        overflow-y: auto;
+        border-radius: 20px;
+        top: 90%;
+        padding: 10px 10px;
+    }
+
+        .mall_bg ul li {
+            font-size: 15pt;
+            padding: 5px 5px 10px 5px;
+        }
+
+    /*內文 下拉式選單JS 換的CSS*/
+    .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+        border-radius: 30px;
+        padding: 5px 5px;
+    }
+
+    .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+        border-radius: 30px;
+        padding: 5px 5px;
+    }
+
+    .mall button {
+        width: 54%;
+        height: 9%;
+        margin: 10% 0%;
+        font-size: 15pt;
+        border-radius: 39px;
+    }
+
+    hr {
+        width: 90%;
+    }
+
+
+    /*地址選擇*/
+    .location {
+        margin: 0px 0px 0px 10px;
+    }
+
+    .select_block {
+        margin: 0px 0px 10px 0px;
+    }
+
+        .select_block div {
+            width: 42%;
+            margin: 0px 15px 0px 0px;
+        }
+
+    #county, #dist {
+        font-size: 10pt;
+        width: 65%;
+        margin: 9px 0px 0px 15px;
+    }
+
+    .select_block i {
+        margin: 10px 12px 0px 0px;
+    }
+
+    .county_bg, .dist_bg {
+        height: 12%;
+        width: 100% !important;
+        border-radius: 50px;
+    }
+
+        .county_bg ul {
+            z-index: 1;
+            width: 85%;
+            height: 200%;
+            border-radius: 15px;
+            top: 90%;
+            padding: 5px 10px;
+        }
+
+            .county_bg ul li {
+                font-size: 10pt;
+                padding: 5px 0px 5px 0px;
+            }
+
+        .dist_bg ul {
+            z-index: 1;
+            width: 85%;
+            height: 200%;
+            border-radius: 15px;
+            top: 90%;
+            padding: 5px 10px;
+        }
+
+            .dist_bg ul li {
+                font-size: 10pt;
+                padding: 5px 0px 5px 0px;
+            }
+
+    /*輸入詳細地址*/
+    .input_block .add_bg input {
+        width: 92%;
+        height: 12%;
+        margin: 0px 0px 10px 0px;
+        padding: 0px 10px;
+        font-size: 10pt;
+        border-radius: 50px;
+    }
+
+    .location button {
+        width: 30%;
+        height: 12%;
+        margin: 0px 45%;
+        border-radius: 20px;
+    }
+}
+
+@media (min-width:260px) {
+    h3 {
+        font-size: 12pt;
+    }
+
+    h2 {
+        font-size: 16pt;
+        margin: 6% 0% 5% 5%;
+    }
+
+    .mall {
+        margin: 10% 0% 0% 5%;
+    }
+
+    .mall_bg {
+        width: 87%;
+        height: 12%;
+        margin: 5% 0% 0% 0%;
+        border-radius: 50px;
+    }
+
+    #mall {
+        font-size: 10pt;
+        width: 70%;
+        margin: 5% 0px 0px 16px;
+    }
+
+    i {
+        font-size: 12pt !important;
+        margin: 5% 20px 0px 0px;
+    }
+
+    .mall_bg ul {
+        z-index: 1;
+        width: 90%;
+        height: 210%;
+        overflow-y: auto;
+        border-radius: 15px;
+        top: 90%;
+        padding: 10px 10px;
+    }
+
+        .mall_bg ul li {
+            font-size: 10pt;
+            padding: 5px 5px 10px 5px;
+        }
+
+    /*內文 下拉式選單JS 換的CSS*/
+    .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+        border-radius: 30px;
+        padding: 5px 5px;
+    }
+
+    .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+        border-radius: 30px;
+        padding: 5px 5px;
+    }
+
+    .mall button {
+        width: 35%;
+        height: 12%;
+        margin: 10% 0%;
+        font-size: 10pt;
+        border-radius: 20px;
+    }
+
+    hr {
+        width: 90%;
+    }
+
+
+    /*地址選擇*/
+    .location {
+        margin: 0px 0px 0px 10px;
+    }
+
+    .select_block {
+        margin: 0px 0px 10px 0px;
+    }
+
+        .select_block div {
+            width: 42%;
+            margin: 0px 15px 0px 0px;
+        }
+
+    #county, #dist {
+        font-size: 10pt;
+        width: 65%;
+        margin: 9px 0px 0px 15px;
+    }
+
+    .select_block i {
+        margin: 10px 12px 0px 0px;
+    }
+
+    .county_bg, .dist_bg {
+        height: 12%;
+        width: 100% !important;
+        border-radius: 50px;
+    }
+
+        .county_bg ul {
+            z-index: 1;
+            width: 85%;
+            height: 200%;
+            border-radius: 15px;
+            top: 90%;
+            padding: 5px 10px;
+        }
+
+            .county_bg ul li {
+                font-size: 10pt;
+                padding: 5px 0px 5px 0px;
+            }
+
+        .dist_bg ul {
+            z-index: 1;
+            width: 85%;
+            height: 200%;
+            border-radius: 15px;
+            top: 90%;
+            padding: 5px 10px;
+        }
+
+            .dist_bg ul li {
+                font-size: 10pt;
+                padding: 5px 0px 5px 0px;
+            }
+
+    /*輸入詳細地址*/
+    .input_block .add_bg input {
+        width: 92%;
+        height: 12%;
+        margin: 0px 0px 10px 0px;
+        padding: 0px 10px;
+        font-size: 10pt;
+        border-radius: 50px;
+    }
+
+    .location button {
+        width: 30%;
+        height: 12%;
+        margin: 0px 45%;
+        border-radius: 20px;
+    }
+}
+
+@media (min-width: 500px) {
+    h3 {
+        margin: 5% 0%;
+        font-size: 15pt;
+    }
+
+    h2 {
+        font-size: 20pt;
+        margin: 15% 0% 5% 0%;
+    }
+
+    .mall {
+        margin: 5% 0%;
+    }
+
+    .mall_bg {
+        width: 98%;
+        height: 10%;
+        border-radius: 50px;
+        margin: 3% 0% 5% 0%;
+    }
+
+    #mall {
+        width: 70%;
+        font-size: 12pt;
+        margin: 11px 0px 0px 29px;
+    }
+
+    i {
+        font-size: 16pt !important;
+        margin: 11px 15px 0px 0px;
+    }
+
+    .mall_bg ul {
+        z-index: 1;
+        width: 93%;
+        height: 300%;
+        border-radius: 20px;
+        top: 90%;
+        padding: 10px 20px;
+    }
+
+        .mall_bg ul li {
+            font-size: 12pt;
+            padding: 10px 10px 10px 10px;
+        }
+
+    /*內文 下拉式選單JS 換的CSS*/
+    .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+        border-radius: 30px;
+        padding: 10px 10px;
+    }
+
+    .mall_bg.switchDisplay ul li:hover, .county_bg.switchDisplay ul li:hover, .dist_bg.switchDisplay ul li:hover {
+        border-radius: 30px;
+        padding: 10px 10px;
+    }
+
+    .mall button {
+        width: 20%;
+        height: 10%;
+        margin: 3% 0% 5% 0%;
+        font-size: 11pt;
+        border-radius: 20px;
+    }
+
+    hr {
+        width: 90%;
+    }
+
+
+    /*地址選擇*/
+    .location {
+        margin: 10px 0px 40px 10px;
+    }
+
+    .select_block {
+        margin: 20px 0px 20px 5px;
+    }
+
+        .select_block div {
+            width: 45%;
+            margin: 0px 15px 0px 0px;
+        }
+
+    #county, #dist {
+        width: 70%;
+        margin: 11px 0px 0px 15px;
+    }
+
+    .county_bg, .dist_bg {
+        height: 10%;
+        width: 100% !important;
+        border-radius: 50px;
+    }
+
+        .county_bg ul {
+            z-index: 1;
+            width: 85.5%;
+            height: 200%;
+            border-radius: 20px;
+            top: 90%;
+            padding: 10px 20px;
+        }
+
+            .county_bg ul li {
+                padding: 10px 0px 10px 0px;
+            }
+
+        .dist_bg ul {
+            z-index: 1;
+            width: 85.5%;
+            height: 200%;
+            border-radius: 20px;
+            top: 90%;
+            padding: 10px 20px;
+        }
+
+            .dist_bg ul li {
+                padding: 10px 0px 10px 0px;
+            }
+
+    /*輸入詳細地址*/
+    .input_block .add_bg input {
+        width: 94%;
+        height: 10%;
+        margin: 0px 0px 20px 5px;
+        padding: 0px 20px;
+        font-size: 11pt;
+        border-radius: 50px;
+    }
+
+    .location button {
+        width: 20%;
+        height: 10%;
+        margin: 0px 48%;
+        border-radius: 20px;
+    }
+}

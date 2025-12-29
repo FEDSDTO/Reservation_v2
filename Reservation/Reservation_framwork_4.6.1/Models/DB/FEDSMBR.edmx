@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="FEDSMBRModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Member">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Cellphone" Type="varchar" MaxLength="20" />
+          <Property Name="Email" Type="varchar" MaxLength="100" />
+          <Property Name="Account" Type="varchar" MaxLength="100" />
+          <Property Name="Password" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" />
+          <Property Name="Gender" Type="varchar" MaxLength="10" />
+          <Property Name="Birthday" Type="datetime" />
+          <Property Name="RocId" Type="varchar" MaxLength="20" />
+          <Property Name="ZipCode" Type="varchar" MaxLength="5" />
+          <Property Name="City" Type="nvarchar" MaxLength="50" />
+          <Property Name="Area" Type="nvarchar" MaxLength="50" />
+          <Property Name="Road" Type="nvarchar" MaxLength="50" />
+          <Property Name="Address" Type="nvarchar" MaxLength="200" />
+          <Property Name="MobileCarrier" Type="char" MaxLength="8" />
+          <Property Name="NotifySMS" Type="int" Nullable="false" />
+          <Property Name="NotifyDM" Type="int" Nullable="false" />
+          <Property Name="FbId" Type="varchar" MaxLength="100" />
+          <Property Name="GeId" Type="varchar" MaxLength="100" />
+          <Property Name="LineId" Type="nvarchar(max)" />
+          <Property Name="AppleId" Type="varchar" MaxLength="100" />
+          <Property Name="HgpId" Type="varchar" MaxLength="32" />
+          <Property Name="ApId" Type="nvarchar" MaxLength="20" />
+          <Property Name="TempHgCardNo" Type="varchar" MaxLength="50" />
+          <Property Name="HgCardNo" Type="varchar" MaxLength="50" />
+          <Property Name="HgAgreeDate" Type="datetime" />
+          <Property Name="HgValidDate" Type="datetime" />
+          <Property Name="RealValidDate" Type="datetime" />
+          <Property Name="PdpAgreeDate" Type="datetime" />
+          <Property Name="PersonContactId" Type="nvarchar(max)" />
+          <Property Name="EventNo" Type="nvarchar" MaxLength="20" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="LastAccessIP" Type="varchar" MaxLength="20" />
+          <Property Name="Status" Type="int" Nullable="false" />
+          <Property Name="Note" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityContainer Name="FEDSMBRModelStoreContainer">
+          <EntitySet Name="Member" EntityType="Self.Member" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="FEDSMBRModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Member">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Cellphone" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Account" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Password" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Gender" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Birthday" Type="DateTime" Precision="3" />
+          <Property Name="RocId" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ZipCode" Type="String" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="City" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Area" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Road" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="MobileCarrier" Type="String" MaxLength="8" FixedLength="true" Unicode="false" />
+          <Property Name="NotifySMS" Type="Int32" Nullable="false" />
+          <Property Name="NotifyDM" Type="Int32" Nullable="false" />
+          <Property Name="FbId" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="GeId" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="LineId" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="AppleId" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="HgpId" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="ApId" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="TempHgCardNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HgCardNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="HgAgreeDate" Type="DateTime" Precision="3" />
+          <Property Name="HgValidDate" Type="DateTime" Precision="3" />
+          <Property Name="RealValidDate" Type="DateTime" Precision="3" />
+          <Property Name="PdpAgreeDate" Type="DateTime" Precision="3" />
+          <Property Name="PersonContactId" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="EventNo" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="LastAccessIP" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Status" Type="Int32" Nullable="false" />
+          <Property Name="Note" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityContainer Name="FEDSMBREntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Member" EntityType="Self.Member" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="FEDSMBRModelStoreContainer" CdmEntityContainer="FEDSMBREntities">
+          <EntitySetMapping Name="Member">
+            <EntityTypeMapping TypeName="FEDSMBRModel.Member">
+              <MappingFragment StoreEntitySet="Member">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Cellphone" ColumnName="Cellphone" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Account" ColumnName="Account" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Gender" ColumnName="Gender" />
+                <ScalarProperty Name="Birthday" ColumnName="Birthday" />
+                <ScalarProperty Name="RocId" ColumnName="RocId" />
+                <ScalarProperty Name="ZipCode" ColumnName="ZipCode" />
+                <ScalarProperty Name="City" ColumnName="City" />
+                <ScalarProperty Name="Area" ColumnName="Area" />
+                <ScalarProperty Name="Road" ColumnName="Road" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="MobileCarrier" ColumnName="MobileCarrier" />
+                <ScalarProperty Name="NotifySMS" ColumnName="NotifySMS" />
+                <ScalarProperty Name="NotifyDM" ColumnName="NotifyDM" />
+                <ScalarProperty Name="FbId" ColumnName="FbId" />
+                <ScalarProperty Name="GeId" ColumnName="GeId" />
+                <ScalarProperty Name="LineId" ColumnName="LineId" />
+                <ScalarProperty Name="AppleId" ColumnName="AppleId" />
+                <ScalarProperty Name="HgpId" ColumnName="HgpId" />
+                <ScalarProperty Name="ApId" ColumnName="ApId" />
+                <ScalarProperty Name="TempHgCardNo" ColumnName="TempHgCardNo" />
+                <ScalarProperty Name="HgCardNo" ColumnName="HgCardNo" />
+                <ScalarProperty Name="HgAgreeDate" ColumnName="HgAgreeDate" />
+                <ScalarProperty Name="HgValidDate" ColumnName="HgValidDate" />
+                <ScalarProperty Name="RealValidDate" ColumnName="RealValidDate" />
+                <ScalarProperty Name="PdpAgreeDate" ColumnName="PdpAgreeDate" />
+                <ScalarProperty Name="PersonContactId" ColumnName="PersonContactId" />
+                <ScalarProperty Name="EventNo" ColumnName="EventNo" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="LastAccessIP" ColumnName="LastAccessIP" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Note" ColumnName="Note" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

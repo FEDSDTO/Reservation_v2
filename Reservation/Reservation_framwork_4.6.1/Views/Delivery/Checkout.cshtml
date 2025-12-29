@@ -1,0 +1,143 @@
+﻿
+@{
+    ViewBag.Title = "order_meal";
+    Layout = null;
+}
+
+<link href="~/Content/Delivery/checkout.css" rel="stylesheet" />
+<link href="~/Content/Reservation/Raservation.css" rel="stylesheet" />
+<link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+
+<div class="checkout_list">
+    <p>外帶餐廳</p>
+    <div class="store">
+        <div class="store_img">
+            <img src="~/IMG/logo.png" />
+        </div>
+        <div class="store_info">
+            <p>金色三麥</p>
+            <p>MegaCity 板橋大遠百 9f</p>
+        </div>
+    </div>
+    <div class="arrival_time">
+        <p>預計送達時間</p>
+        <div id="option_block" class="option">
+            <p class="date_value">5/27</p> <p class="time_value">14:00</p><i class="fa fa-angle-down"></i>
+        </div>
+
+        <div id="option_back" class="option">
+            <p class="date_value">5/27</p> <p class="time_value">14:00</p><i class="fa fa-angle-up"></i>
+        </div>
+
+        <div class="datetime_block">
+            <div class="date">
+                <button class="date-button">5/27</button>
+                <button class="date-button">5/28</button>
+                <button class="date-button">5/29</button>
+                <button class="date-button">5/30</button>
+            </div>
+            <div class="time">
+                <button class="time-button"> 11:00 </button>
+                <button class="time-button"> 11:30 </button>
+                <button class="time-button"> 12:00 </button>
+                <button class="time-button"> 12:30 </button>
+                <button class="time-button"> 13:00 </button>
+                <button class="time-button"> 13:30 </button>
+                <button class="time-button"> 14:00 </button>
+                <button class="time-button"> 14:30 </button>
+                <button class="time-button"> 15:00 </button>
+                <button class="time-button"> 15:30 </button>
+                <button class="time-button"> 16:00 </button>
+                <button class="time-button"> 16:30 </button>
+            </div>
+        </div>
+    </div>
+    <div class="meal_list">
+        <div class="meal">
+            <div class="meal_count">1</div>
+            <div class="meal_name">楊枝甘露</div>
+            <div class="price_remove">
+                <p class="price">NT $168</p>
+                <p class="remove">移除</p>
+            </div>
+        </div>
+    </div>
+    <div class="count">
+        <div class="count_block">
+            <div class="title">小計</div>
+            <div class="price">NT $168</div>
+        </div>
+        <div class="count_block">
+            <div class="title">運費</div>
+            <div class="price">NT $0</div>
+        </div>
+        <div class="count_block">
+            <div class="title">總計</div>
+            <div class="price">NT $168</div>
+        </div>
+    </div>
+    <div class="annotation">
+        <p>訂單備註</p>
+        <textarea id="order_annotation" name="annotation" rows="4" cols="50"></textarea>
+    </div>
+    <div class="check_btn">
+        <button class="btn" id="check_btn" type="button">前往結帳</button>
+    </div>
+</div>
+
+
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+
+<script>
+    $('.date-button').on('click', function () {
+        var child_lis = document.getElementsByClassName('date-button');
+
+        for (i = 0; i < child_lis.length; i++) {
+            $('.date_value').text(this.innerHTML);
+        }
+    });
+
+    $('.time-button').on('click', function () {
+        var child_lis = document.getElementsByClassName('time-button');
+
+        for (i = 0; i < child_lis.length; i++) {
+            $('.time_value').text(this.innerHTML);
+        }
+    });
+
+
+
+    $(function () {
+        $('.date-button').click(function () {
+            $('.date-button').eq($(this).index()).addClass("active").siblings().removeClass("active");
+        });
+    });
+    $(function () {
+        $('.time-button').click(function () {
+            $('.time-button').eq($(this).index()).addClass("active").siblings().removeClass("active");
+        });
+    });
+
+
+
+    $(function () {
+        $("#option_block").click(function () {
+            $("#option_block").css("display", "none");
+            $("#option_back").css("display", "block");
+        });
+
+        $("#option_back").click(function () {
+            $("#option_back").css("display", "none");
+            $("#option_block").css("display", "block");
+        });
+    });
+
+    $(function () {
+        $(".option").click(function () {
+            $(".datetime_block").slideToggle("slow");
+        });
+    });
+
+
+
+</script> 

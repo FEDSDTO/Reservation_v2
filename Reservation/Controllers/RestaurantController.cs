@@ -1,22 +1,27 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
-using Reservation.Models.DB;
+using Reservation.Models.EFMemeberModels;
+using Reservation.Models.EFRestaurantModels;
 using Reservation.Models.ViewModels;
+using Reservation.Service;
 
 namespace Reservation.Controllers
 {
     public class RestaurantController : Controller
     {
-        // 模擬數據服務（後續可替換為資料庫）
-        private List<Branch> GetBranches()
+        private readonly RestaurantContext _restaurantContext;
+        private readonly MemberContext _memberContext;
+        private readonly RestaurantService _restaurantService;
+        private const string TokenCookieName = "MemberToken";
+
+        public RestaurantController(
+            RestaurantContext restaurantContext,
+            MemberContext memberContext,
+            RestaurantService restaurantService)
         {
-            return new List<Branch>
-            {
-                new Branch { Id = 1, Name = "遠百信義A13" },
-                new Branch { Id = 2, Name = "板橋大遠百" },
-                new Branch { Id = 3, Name = "台中大遠百" }
-            };
+            _restaurantContext = restaurantContext;
+            _memberContext = memberContext;
+            _restaurantService = restaurantService;
         }
 
         private List<Category> GetCategories()
@@ -30,210 +35,95 @@ namespace Reservation.Controllers
             };
         }
 
-        private List<Restaurant> GetRestaurants()
+        public async Task<IActionResult> Index(string? groupId, int? categoryId)
         {
-            return new List<Restaurant>
+            var mallGroups = await _restaurantService.GetMallsAsync();
+            
+            var branchDict = new Dictionary<string, int>();
+            var groupIdToBranchId = new Dictionary<string, int>();
+            var branches = new List<Branch>();
+            
+            for (int i = 0; i < mallGroups.Count; i++)
             {
-                new Restaurant 
+                var branch = new Branch 
                 { 
-                    Id = 1, 
-                    Name = "1010湘食堂", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "4F懷舊食光埕",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = true,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 2, 
-                    Name = "新馬辣經典麻辣鍋", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號4樓",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = true
-                },
-                new Restaurant 
-                { 
-                    Id = 3, 
-                    Name = "筷炒台式餐館", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號7樓",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 4, 
-                    Name = "四川吳抄手", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號14樓（遠東信義A13）",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 5, 
-                    Name = "寰隆餐飲企業", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號4樓",
-                    Phone = "02-2729-1234",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 2,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 6, 
-                    Name = "香米泰國料理", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號30樓",
-                    Phone = "02-2729-5678",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 3,
-                    IsPopular = false,
-                    IsNew = false
-                }
-            };
-        }
-
-        // GET: /Restaurant/Index
-        public IActionResult Index(int? branchId, int? categoryId)
-        {
-            var allBranches = GetBranches();
-            var allCategories = GetCategories();
-            var allRestaurants = GetRestaurants();
-
-            // 篩選邏輯
-            var filteredRestaurants = allRestaurants.AsQueryable();
-
-            // 分店篩選
-            if (branchId.HasValue)
-            {
-                filteredRestaurants = filteredRestaurants.Where(r => r.BranchId == branchId.Value);
+                    Id = i + 1,
+                    Name = mallGroups[i].Name 
+                };
+                branches.Add(branch);
+                branchDict[mallGroups[i].GroupId] = branch.Id;
+                groupIdToBranchId[mallGroups[i].GroupId] = branch.Id;
             }
 
-            // 類別篩選（0 表示所有餐廳）
-            if (categoryId.HasValue && categoryId.Value != 0)
+            var allCategories = GetCategories();
+            var restaurantCards = new List<RestaurantCardModel>();
+            
+            // 直接使用 groupId，不需要轉換
+            if (!string.IsNullOrWhiteSpace(groupId))
             {
-                filteredRestaurants = filteredRestaurants.Where(r => r.CategoryId == categoryId.Value);
+                restaurantCards = await _restaurantService.GetRestaurantsAsync(groupId);
             }
 
             var viewModel = new RestaurantListViewModel
             {
-                Branches = allBranches,
+                Branches = branches,
                 Categories = allCategories,
-                Restaurants = filteredRestaurants.ToList(),
-                SelectedBranchId = branchId,
-                SelectedCategoryId = categoryId
+                RestaurantCards = restaurantCards,
+                SelectedGroupId = groupId,
+                SelectedBranchId = !string.IsNullOrWhiteSpace(groupId) && groupIdToBranchId.ContainsKey(groupId) 
+                    ? groupIdToBranchId[groupId] 
+                    : null,
+                SelectedCategoryId = categoryId,
+                GroupIdToBranchId = groupIdToBranchId
             };
 
             return View(viewModel);
         }
         
-        public IActionResult QueryRecord(int? branchId)
+        public async Task<IActionResult> QueryRecord(int? branchId)
         {
-            var allBranches = GetBranches();
-            var allRestaurants = GetRestaurants();
-
-            var reservationRecords = new List<ReservationRecord>
+            var mallGroups = await _restaurantService.GetMallsAsync();
+            
+            var branchDict = new Dictionary<string, int>();
+            var branches = new List<Branch>();
+            
+            for (int i = 0; i < mallGroups.Count; i++)
             {
-                 new ReservationRecord
+                var branch = new Branch 
+                { 
+                    Id = i + 1,
+                    Name = mallGroups[i].Name 
+                };
+                branches.Add(branch);
+                branchDict[mallGroups[i].GroupId] = branch.Id;
+            }
+
+            var reservationRecords = new List<ReservationRecord>();
+            var waitingRecords = new List<WaitingRecord>();
+
+            if (branchId.HasValue)
+            {
+                var selectedGroupId = branchDict.FirstOrDefault(x => x.Value == branchId.Value).Key;
+                if (!string.IsNullOrEmpty(selectedGroupId))
                 {
-                    ReservationId = 1,
-                    RestaurantId = 1,
-                    RestaurantName = "1010湘食堂",
-                    RestaurantImageUrl = "~/Image/1.jpg",
-                    RestaurantLocation = "4F懷舊食光埕",
-                    RestaurantPhone = "02-2729-0597",
-                    ReservationDate = new DateTime(2025, 12, 25),
-                    DayOfWeek = "星期四",
-                    AdultCount = 2,
-                    ChildCount = 0,
-                    Status = "完成"
-                },
-                new ReservationRecord
-                {
-                    ReservationId = 2,
-                    RestaurantId = 2,
-                    RestaurantName = "新馬辣經典麻辣鍋",
-                    RestaurantImageUrl = "~/Image/1.jpg",
-                    RestaurantLocation = "台北市信義區松仁路58號4樓",
-                    RestaurantPhone = "02-2729-0597",
-                    ReservationDate = new DateTime(2025, 12, 26),
-                    DayOfWeek = "星期五",
-                    AdultCount = 4,
-                    ChildCount = 1,
-                    Status = "未入座"
-                },
-                new ReservationRecord
-                {
-                    ReservationId = 3,
-                    RestaurantId = 3,
-                    RestaurantName = "筷炒台式餐館",
-                    RestaurantImageUrl = "~/Image/1.jpg",
-                    RestaurantLocation = "台北市信義區松仁路58號7樓",
-                    RestaurantPhone = "02-2729-0597",
-                    ReservationDate = new DateTime(2025, 12, 27),
-                    DayOfWeek = "星期六",
-                    AdultCount = 2,
-                    ChildCount = 0,
-                    Status = "已取消"
+                    var restaurantCards = await _restaurantService.GetRestaurantsAsync(selectedGroupId);
                 }
-            };
-
-            var WaitingRecords = new List<WaitingRecord>();
-
-            if(branchId.HasValue)
-            {
-                var branchRestaurantId = allRestaurants
-                .Where(r=>r.BranchId == branchId.Value)
-                .Select(r=>r.Id)
-                .ToList();
-
-                reservationRecords = reservationRecords
-                .Where(r=>branchRestaurantId.Contains(r.RestaurantId))
-                .ToList();
-
-                WaitingRecords = WaitingRecords
-                .Where(w=>branchRestaurantId.Contains(w.RestaurantId))
-                .ToList();
             }
 
             var viewModel = new RecordQueryViewModel
             {
-                Branches = allBranches,
+                Branches = branches,
                 SelectedBranchId = branchId,
                 ReservationRecords = reservationRecords,
-                WaitingRecords = WaitingRecords
+                WaitingRecords = waitingRecords
             };
 
             return View(viewModel);
         }
-        // 候位功能
+
         public IActionResult Queue(int id)
         {
-            // TODO: 實作候位邏輯
             return View();
         }
     }
 }
-

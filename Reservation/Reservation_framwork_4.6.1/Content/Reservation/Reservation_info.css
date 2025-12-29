@@ -1,0 +1,1034 @@
+﻿:root {
+    --background-color: #F1F1F1;
+}
+
+
+
+body {
+    width: 100%;
+}
+
+header {
+    background: #F1F1F1;
+    width: 100%;
+}
+
+/*logo周圍icon控制*/
+.reservation_icon {
+    position: absolute;
+    filter: brightness(0.85);
+}
+
+.waiting_icon {
+    position: absolute;
+}
+
+.delivery_icon {
+    position: absolute;
+}
+
+.takeout_icon {
+    position: absolute;
+}
+
+.fc_icon {
+    position: absolute;
+}
+
+#reservation_btn {
+    box-shadow: 3px 0 3px #1c1c1c52 inset, 0 3px 3px #1c1c1c63 inset,0 -5px 7px #cac9c9 inset, -10px 0 15px #cac9c9 inset;
+}
+
+#waiting_btn {
+    box-shadow: 0 0px 5px #989898 !important;
+}
+
+#delivery_btn {
+}
+
+#takeout_btn {
+}
+
+#fc_btn {
+}
+
+/*左側 移動畫面的按鈕*/
+#restaurant_index {
+}
+
+#restaurant_status {
+}
+
+#recommend {
+    display: contents !important;
+}
+
+#restaurant_menu {
+}
+
+
+/*內文*/
+#raservation_title {
+    margin: 10px 10px 40px 10px;
+}
+
+.content h3 {
+    display: inline-block;
+    color: #3489B8;
+    font-weight: bold;
+}
+
+
+.waiting_infomation p {
+    color: #595757;
+}
+
+.pdt_info {
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border: 0px;
+}
+
+.info_title {
+    display: inline-block;
+}
+
+.info_content {
+    display: inline-block;
+}
+
+    .info_content p {
+        display: inline-block;
+    }
+
+
+/*內文 性別稱謂  下拉式選單*/
+.gender_block, .phone_block {
+    position: relative;
+}
+
+.gender_bg {
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+}
+
+.gender_hide_select {
+    position: relative;
+}
+
+#gender_select {
+    display: inline-block;
+}
+
+    #gender_select input {
+        color: #5e5757;
+        font-weight: bold;
+        border: none;
+        background: none;
+        display: inline-block;
+    }
+
+.gender_title {
+    color: #5e5757 !important;
+}
+
+#gender_info {
+    display: inline-block;
+    text-align: right;
+    color: #3489B8;
+}
+
+.down_icon {
+    display: inline-block;
+}
+
+.gender_title i {
+    color: #3489B8;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    padding: 5px 8px;
+}
+
+.gender_hide_select ul {
+    position: absolute;
+    z-index: 1;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+}
+
+    .gender_hide_select ul li {
+        display: none;
+        text-align: center;
+        color: #3489B8;
+    }
+
+
+        .gender_hide_select ul li a:link, .gender_hide_select ul li a:visited {
+            text-decoration: none;
+            color: #3489B8;
+        }
+
+
+        .gender_hide_select ul li a:hover, .gender_hide_select ul li a:active {
+            color: #fff;
+        }
+
+/*內文 人數下拉式選單 隱藏區塊 以此呼叫下拉式*/
+ul.switchDisplay li {
+    display: block;
+}
+
+.option_block .switchDisplay {
+    display: none;
+    text-align: center;
+}
+
+
+.phone_select input {
+    color: #595757;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+}
+
+
+.purpose_radio {
+    display: inline-block;
+    position: relative;
+}
+
+input[type="radio"] {
+    opacity: 0;
+}
+
+label {
+    position: absolute;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 1px 0 2px #c1c1c173 inset, 0 1px 2px #c1c1c173 inset,0 -1px 1px #fff inset, -1px 0 1px #fff inset;
+    cursor: pointer;
+}
+
+/*设置选中的input的样式    參考網址:https://www.cnblogs.com/xinheng/p/9492284.html */
+/* + 是兄弟选择器,获取选中后的label元素*/
+input:checked + label {
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 1px 0 2px #c1c1c173 inset, 0 1px 2px #c1c1c173 inset,0 -1px 1px #fff inset, -1px 0 1px #fff inset;
+}
+    /*添加的加号与label进行拼接(一个矩形边框去掉上和左的边框),再旋转45度*/
+    input:checked + label::after {
+        position: absolute;
+        content: "";
+        background-color: #3489B8;
+        box-shadow: 0 -1px 2px #fff, -1px 0 2px #fff, 1px 0 2px #777, 0 1px 2px #777;
+    }
+
+.remarks_block {
+    position: relative;
+}
+
+.remarks #remarks_textarea {
+    color: #595757;
+    resize: none;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+}
+
+
+/*內文 預約訂位按鈕*/
+#center_btn {
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+    background: #BC3432;
+    color: #fff;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    border: 0px;
+}
+
+#back_btn {
+    text-align: center;
+}
+
+.back {
+    text-align: center;
+    background: #b0b1b1;
+    color: #fff;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    border: 0px;
+}
+
+
+@media (max-width: 767px) {
+    /*內文 訂位標題*/
+    #raservation_title {
+        margin-left: 20px;
+        margin-bottom: 10px;
+    }
+
+    .content h3 {
+        font-weight: bold;
+        font-size: 12pt;
+        margin: 10px 10px 10px 10px;
+    }
+
+
+    .waiting_infomation {
+        margin: auto;
+        padding: 10px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+        .waiting_infomation p {
+            font-size: 12pt;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+
+    /*內文 訂位人數日期時間 */
+    .pdt_info {
+        width: 90%;
+        margin: auto;
+        margin-top: 30px;
+        border-radius: 15px;
+        padding: 10px;
+        background: #fff !important;
+    }
+
+    .info {
+        width: 100%;
+    }
+
+    .info_title {
+        width: 30%;
+    }
+
+    .info_content {
+        width: 65%;
+        text-align: right;
+    }
+
+    .people_info > h3 {
+        display: block;
+        margin: 20px 10px 20px 20px;
+    }
+
+
+    /*內文 性別稱謂  下拉式選單*/
+    .gender_block, .phone_block, .purpose_block {
+        margin-left: 10px;
+        margin-top: 30px;
+        width: 95%;
+    }
+
+        .gender_block > h3 {
+            margin-bottom: 20px;
+        }
+
+        .phone_block h3, .purpose_block h3 {
+            margin-bottom: 20px;
+        }
+
+    .gender_bg {
+        width: 100%;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .gender_hide_select {
+        margin-left: 10px;
+    }
+
+    #gender_select {
+        width: 62%;
+    }
+
+        #gender_select input {
+            width: 100%;
+            padding: 10px 10px;
+        }
+
+    .gender_title {
+        width: 100%;
+    }
+
+    #gender_info {
+        width: 20%;
+        margin-right: 15px;
+        font-weight: 600;
+    }
+
+    .down_icon {
+        width: 10%;
+    }
+
+    .gender_title i {
+        font-weight: 600;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .gender_hide_select ul {
+        width: 103%;
+        margin-top: 10px;
+        margin-left: -10px;
+        z-index: 1;
+        border-radius: 20px;
+        padding: 0px;
+    }
+
+        .gender_hide_select ul li {
+            margin-top: 10px;
+            font-size: 14pt;
+            font-weight: 600;
+        }
+
+            .gender_hide_select ul li a {
+                width: 100%;
+            }
+
+    /*內文 人數下拉式選單 隱藏區塊 以此呼叫下拉式*/
+    ul.switchDisplay li {
+        width: 102%;
+        margin-top: 10px;
+        margin-left: -18px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+    }
+
+    .option_block .switchDisplay {
+        width: 100%;
+        padding: 5px 10px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+
+    /*內文 電話輸入 */
+    .phone_select input {
+        width: 100%;
+        height: 40px;
+        color: #595757;
+        font-weight: 600;
+        padding-left: 20px;
+        /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        border: 0px;
+        border-radius: 30px;
+        box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+    }
+
+    /*內文 用餐目的 */
+    .purpose {
+    }
+
+    .purpose_radio {
+        line-height: 30px;
+        margin: 10px 10px 10px 10px;
+    }
+
+    input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        opacity: 0;
+        margin-right: 10px;
+    }
+
+    label {
+        left: 5px;
+        top: 3px;
+        width: 20px;
+        height: 20px;
+        border-radius: 30px;
+    }
+
+    /*设置选中的input的样式    參考網址:https://www.cnblogs.com/xinheng/p/9492284.html */
+    /* + 是兄弟选择器,获取选中后的label元素*/
+    input:checked + label {
+        border: 0px;
+        border-radius: 30px;
+    }
+        /*添加的加号与label进行拼接(一个矩形边框去掉上和左的边框),再旋转45度*/
+        input:checked + label::after {
+            content: "";
+            border-radius: 15px;
+            width: 60%;
+            height: 60%;
+            margin: 4px;
+        }
+
+    .remarks_block {
+        margin: 30px 10px 30px 10px;
+        width: 122%;
+    }
+
+    .remarks #remarks_textarea {
+        width: 78%;
+        margin-top: 20px;
+        padding: 20px;
+        font-weight: 600;
+        border: 0px;
+        border-radius: 20px;
+    }
+
+    /*內文 預約訂位按鈕*/
+    .center {
+        width: 30% !important;
+        padding: 5px 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .back {
+        width: 30% !important;
+        padding: 5px 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+}
+
+
+@media (min-width: 768px) {
+    /*內文 訂位白色區塊 */
+    .content {
+        width: 53.5% !important;
+        margin-top: 5.5%;
+        margin-left: 37% !important;
+    }
+
+        .content h3 {
+            font-weight: bold;
+            font-size: 12pt;
+            margin: 10px;
+        }
+
+
+    .waiting_infomation {
+        background-color: #fff;
+        margin: auto;
+        padding: 10px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+        .waiting_infomation p {
+            font-size: 12pt;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+
+    /*內文 訂位人數日期時間 */
+    .pdt_info {
+        width: 90%;
+        margin: auto;
+        margin-top: 30px;
+        border-radius: 15px;
+        padding: 10px;
+    }
+
+    .info {
+        width: 100%;
+    }
+
+    .info_title {
+        width: 30%;
+    }
+
+    .info_content {
+        width: 65%;
+        text-align: right;
+    }
+
+    .people_info > h3 {
+        display: block !important;
+        margin: 10px 10px 10px 20px !important;
+    }
+
+    /*內文 性別稱謂  下拉式選單*/
+    .gender_block, .phone_block, .purpose_block {
+        margin-left: 10px;
+        margin-top: 30px;
+        width: 45%;
+    }
+
+        .gender_block > h3 {
+            margin-bottom: 20px;
+        }
+
+        .phone_block h3, .purpose_block h3 {
+            margin-bottom: 20px;
+        }
+
+    .gender_bg {
+        width: 100%;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .gender_hide_select {
+        margin-left: 10px;
+    }
+
+    #gender_select {
+        width: 45%;
+    }
+
+        #gender_select input {
+            width: 100%;
+            padding: 10px 10px;
+        }
+
+    .gender_title {
+        width: 100%;
+    }
+
+    #gender_info {
+        width: 20%;
+        margin-right: 15px;
+        font-weight: 600;
+    }
+
+    .down_icon {
+        width: 10%;
+    }
+
+    .gender_title i {
+        font-weight: 600;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .gender_hide_select ul {
+        width: 105%;
+        margin-top: 10px;
+        margin-left: -10px;
+        z-index: 1;
+        border-radius: 20px;
+    }
+
+        .gender_hide_select ul li {
+            margin-top: 10px;
+            font-size: 14pt;
+            font-weight: 600;
+        }
+
+            .gender_hide_select ul li a {
+                width: 100%;
+            }
+
+    /*內文 人數下拉式選單 隱藏區塊 以此呼叫下拉式*/
+    ul.switchDisplay li {
+        width: 108%;
+        margin-top: 10px;
+        margin-left: -23px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+    }
+
+    .option_block .switchDisplay {
+        width: 100%;
+        padding: 5px 10px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+
+    /*內文 電話輸入 */
+    .phone_select input {
+        width: 100%;
+        height: 40px;
+        color: #595757;
+        font-weight: 600;
+        padding-left: 20px;
+        /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        border: 0px;
+        border-radius: 30px;
+        box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+    }
+
+    /*內文 用餐目的 */
+    .purpose {
+    }
+
+    .purpose_radio {
+        line-height: 30px;
+        margin: 10px 10px 10px 10px;
+    }
+
+    input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        opacity: 0;
+        margin-right: 10px;
+    }
+
+    label {
+        left: 5px;
+        top: 3px;
+        width: 20px;
+        height: 20px;
+        border-radius: 30px;
+    }
+
+    /*设置选中的input的样式    參考網址:https://www.cnblogs.com/xinheng/p/9492284.html */
+    /* + 是兄弟选择器,获取选中后的label元素*/
+    input:checked + label {
+        border: 0px;
+        border-radius: 30px;
+    }
+        /*添加的加号与label进行拼接(一个矩形边框去掉上和左的边框),再旋转45度*/
+        input:checked + label::after {
+            content: "";
+            border-radius: 15px;
+            width: 60%;
+            height: 60%;
+            margin: 4px;
+        }
+
+    .remarks_block {
+        margin: 30px 10px 30px 10px;
+        width: 122%;
+    }
+
+    .remarks #remarks_textarea {
+        width: 80%;
+        margin-top: 20px;
+        padding: 20px;
+        font-weight: 600;
+        border: 0px;
+        border-radius: 20px;
+    }
+
+    /*內文 預約訂位按鈕*/
+    .center {
+        width: 30% !important;
+        padding: 5px 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .back {
+        width: 30% !important;
+        padding: 5px 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+}
+
+@media (min-width: 992px) {
+    #gender_select {
+        width: 50%;
+    }
+
+        #gender_select input {
+            width: 100%;
+            padding: 10px 10px;
+        }
+
+    .gender_title {
+        width: 100%;
+    }
+
+    #gender_info {
+        width: 25%;
+        margin-right: 15px;
+        font-weight: 600;
+    }
+
+    .down_icon {
+        width: 10%;
+    }
+}
+
+@media (min-width: 1200px) {
+    /*內文 訂位白色區塊 */
+    .content {
+        width: 53.5% !important;
+        margin-top: 1.5%;
+        margin-left: 34% !important;
+    }
+
+        .content h3 {
+            display: inline-block;
+            color: #3489B8;
+            font-weight: bold;
+            font-size: 14pt;
+            margin: 10px;
+        }
+
+
+    .waiting_infomation {
+        background-color: #fff;
+        margin: auto;
+        padding: 10px;
+        border-radius: 20px;
+        margin-bottom: 100px;
+    }
+
+        .waiting_infomation p {
+            color: #595757;
+            font-size: 12pt;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+
+    /*內文 訂位人數日期時間 */
+    .people_info > h3 {
+        display: block !important;
+        margin: 10px 10px 10px 20px !important;
+    }
+
+    /*內文 性別稱謂  下拉式選單*/
+    .gender_block, .phone_block, .purpose_block {
+        margin-left: 10px;
+        margin-top: 30px;
+        width: 25%;
+    }
+
+        .gender_block > h3 {
+            margin-bottom: 20px;
+        }
+
+        .phone_block h3, .purpose_block h3 {
+            margin-bottom: 20px;
+        }
+
+    .gender_bg {
+        width: 100%;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .gender_hide_select {
+        margin-left: 10px;
+    }
+
+    #gender_select {
+        width: 56%;
+    }
+
+        #gender_select input {
+            width: 100%;
+            padding: 10px 10px;
+        }
+
+    .gender_title {
+        width: 100%;
+    }
+
+    #gender_info {
+        width: 20%;
+        margin-right: 15px;
+        font-weight: 600;
+    }
+
+    .down_icon {
+        width: 10%;
+    }
+
+    .gender_title i {
+        font-weight: 600;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .gender_hide_select ul {
+        width: 105%;
+        margin-top: 10px;
+        margin-left: -10px;
+        z-index: 1;
+        border-radius: 20px;
+    }
+
+        .gender_hide_select ul li {
+            margin-top: 10px;
+            font-size: 14pt;
+            font-weight: 600;
+        }
+
+            .gender_hide_select ul li a {
+                width: 100%;
+            }
+
+    /*內文 人數下拉式選單 隱藏區塊 以此呼叫下拉式*/
+    ul.switchDisplay li {
+        width: 108%;
+        margin-top: 10px;
+        margin-left: -23px;
+        margin-bottom: 10px;
+    }
+
+
+
+    .option_block .switchDisplay {
+        width: 100%;
+        padding: 5px 10px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+        margin-left: -32px;
+        margin-bottom: 10px;
+    }
+
+
+    /*內文 電話輸入 */
+    .phone_select input {
+        width: 100%;
+        height: 40px;
+        color: #595757;
+        font-weight: 600;
+        padding-left: 20px;
+        /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#e8ecf0+0,eceff4+50,eceff4+100 */
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        border: 0px;
+        border-radius: 30px;
+        box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+    }
+
+    /*內文 用餐目的 */
+    .purpose {
+    }
+
+    .purpose_radio {
+        line-height: 30px;
+        margin: 10px 10px 10px 10px;
+    }
+
+    input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        opacity: 0;
+        margin-right: 10px;
+    }
+
+    label {
+        left: 5px;
+        top: 3px;
+        width: 20px;
+        height: 20px;
+        border-radius: 30px;
+    }
+
+    /*设置选中的input的样式    參考網址:https://www.cnblogs.com/xinheng/p/9492284.html */
+    /* + 是兄弟选择器,获取选中后的label元素*/
+    input:checked + label {
+        border: 0px;
+        border-radius: 30px;
+    }
+        /*添加的加号与label进行拼接(一个矩形边框去掉上和左的边框),再旋转45度*/
+        input:checked + label::after {
+            content: "";
+            border-radius: 15px;
+            width: 60%;
+            height: 60%;
+            margin: 4px;
+        }
+
+    .remarks_block {
+        margin: 30px 10px 30px 10px;
+        width: 122%;
+    }
+
+    .remarks #remarks_textarea {
+        width: 80%;
+        margin-top: 20px;
+        padding: 20px;
+        font-weight: 600;
+        border: 0px;
+        border-radius: 20px;
+    }
+
+    /*內文 預約訂位按鈕*/
+    .center {
+        width: 30% !important;
+        padding: 5px 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+
+    .back {
+        width: 30% !important;
+        padding: 5px 15px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 14pt;
+        border: 0px;
+        border-radius: 30px;
+    }
+}

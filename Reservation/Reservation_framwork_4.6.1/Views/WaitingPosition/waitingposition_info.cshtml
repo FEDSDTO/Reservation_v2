@@ -1,0 +1,172 @@
+﻿@using Reservation.ViewModels.WaitingPosition;
+@model WaitingPositionModel
+@{
+    ViewBag.Title = "Reservation_info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section styles{
+    <link href="~/Content/Reservation/Raservation.css" rel="stylesheet" />
+    <link href="~/Content/waiting_position/waitingposition_info.css" rel="stylesheet" />
+}
+
+@using (Html.BeginForm("Waitingposition_info", "WaitingPosition", FormMethod.Post, new { id = "SubmitForm" }))
+{
+    <div class="content">
+        <h3 id="waiting_title">候位資料填寫</h3>
+        <div class="waiting_infomation">
+            @*<h3>親愛的會員 </h3><h3>許瑞揚</h3><h3> 您好:</h3> // 會員資訊 *@
+            <div class="people_info">
+                <h3 class="title">候位人數</h3>
+                <div class="col-xs-12 people_block">
+                    <div class="people_bg">
+                        <div class="people_hide_select">
+                            <div class="">
+                                <img src="~/IMG/icon/people_icon.png">大人
+                                <div id="people">1</div>
+                                <i class="fa fa-angle-down"></i>
+                            </div>
+                            <ul id="people_ul">
+                                @for (int item = 1; item <= Model.MaxWaitingGroupSize; item++)
+                                {
+                                    <li class="select_data" onclick="changChild(@Model.MaxWaitingGroupSize, @item);" value="@item">@item</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                @*@if (Model.MaxWaitingGroupSize > 1)
+                {
+                    <div class="col-xs-12 people_block">
+                        <div class="people_bg">
+                            <div class="child_hide_select">
+                                <div class=""><img src="~/IMG/icon/child_icon.png" />小孩<div id="child">0</div><i class="fa fa-angle-down"></i></div>
+                                <ul id="child_ul">
+                                    @for (int item = 1; item <= Model.MaxWaitingGroupSize - 1; item++)
+                                    {
+                                        <li class="select_data" value="@item">@item</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }*@
+            </div>
+            <div class="gender_block">
+                <h3>候位者姓名</h3>
+                <div class="gender_bg">
+                    <div class="gender_hide_select">
+                        <div class="gender_title">
+                            <input type="text" id="contactName" name="waitingPositionOrder.CustomerName" />
+                            <div class="gender_info">
+                                <div id="gender_info"></div>
+                                <i class="fa fa-angle-down"></i>
+                            </div>
+                        </div>
+                        <ul id="gender_ul">
+                            <li id="gender_1" class="select_data" value="0">先生</li>
+                            <li id="gender_2" class="select_data" value="1">小姐</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="phone_block">
+                <h3>候位者電話</h3>
+                <div class="phone_select">
+                    <input type="text" id="customerPhone" name="waitingPositionOrder.Phone">
+                </div>
+            </div>
+            @*<div class="remarks_block">
+                <h3>候位備註</h3>
+                <div class="remarks">
+                    <textarea id="remarks_textarea" name="waitingPositionOrder.CustomerNote" rows="4" cols="50"></textarea>
+                </div>
+            </div>*@
+            <div id="center_btn">
+                <input type="hidden" id="groupId" name="groupId" value="@Model.GroupId" />
+                <input type="hidden" id="companyId" name="companyId" value="@Model.CompanyId" />
+                <input type="hidden" id="branchId" name="branchId" value="@Model.id" />
+                <input type="hidden" id="Gender" name="waitingPositionOrder.Gender" value="2" />
+                <input type="hidden" id="GroupSize" name="waitingPositionOrder.GroupSize" value="0" />
+                <input type="hidden" id="NumberOfKidChairs" name="waitingPositionOrder.NumberOfKidChairs" value="0" />
+                <input type="button" onclick="SubmitReserve();" class="center" value="我要候位">
+            </div>
+            <div id="back_btn">
+                <button type="button" onclick="window.history.go(-1);" class="back"> 回上頁 </button>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts{
+    <script>
+        $(function () {
+            $('.gender_info').on('click', function () {
+                $('#gender_ul').toggleClass('switchDisplay');
+                $('#gender_ul').siblings().toggleClass('switchDisplay');
+            });
+
+            //將點選的值 丟到上面
+            $('.gender_hide_select li').on('click', function () {
+                $('#gender_info').text(this.innerHTML);
+                $('#Gender').val($(this).val());
+            });
+        });
+
+        //預約按鈕
+        function SubmitReserve() {
+            var groupSize = $('#people').html();
+            var numberOfKidChairs = $('#child').html();
+            var _name = $('#contactName').val();
+            var _phone = $('#customerPhone').val();
+
+            if (numberOfKidChairs != null && numberOfKidChairs > 1)
+                $('#NumberOfKidChairs').val(numberOfKidChairs);
+
+            var msg = "";
+
+            if (_name == "")
+                msg += "『姓名』<br>";
+
+            if (_phone == "")
+                msg += "『電話』<br>";
+
+            if (groupSize == null || groupSize < 1)
+                msg += "『預約人數』<br>";
+
+            if (msg !== "") {
+                swal({
+                    title: msg + "資訊不完整",
+                    type: "error",
+                });
+                return false;
+            };
+
+            $('#GroupSize').val(groupSize);
+            var data = new FormData($("#SubmitForm")[0]);
+
+            $.ajax({
+                url: '@Url.Action("Waitingposition_info")',
+                type: 'POST',
+                data: data,
+                dataType: "json",
+                processData: false,
+                contentType: false
+            }).done(function (r) {
+                if (r.IsSuccess) {
+                    swal({
+                        title: "預約候位成功",
+                        type: "success"
+                    });
+                }
+                else {
+                    swal({
+                        title: "預約候位失敗",
+                        text: r.Msg,
+                        type: "error"
+                    });
+                    return false;
+                }
+            });
+        };
+    </script>
+}

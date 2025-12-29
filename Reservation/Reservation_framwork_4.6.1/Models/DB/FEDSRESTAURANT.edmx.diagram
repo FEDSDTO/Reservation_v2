@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="fd05ed8e943640a18553ebc3ebd9029d" Name="Diagram1">
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.MallGroup" Width="1.5" PointX="0.75" PointY="1.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.MemberReserve" Width="1.5" PointX="2.75" PointY="7" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.MemberReserveLog" Width="1.5" PointX="5" PointY="8.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.MemberWaiting" Width="1.5" PointX="5.75" PointY="1.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.MemberWaitingLog" Width="1.5" PointX="8" PointY="2.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.Restaurant" Width="1.5" PointX="0.75" PointY="6.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.RestaurantBranch" Width="1.5" PointX="2.875" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.RestaurantImage" Width="1.5" PointX="7.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="FEDSRESTAURANTModel.RestaurantType" Width="1.5" PointX="9.75" PointY="5.75" IsExpanded="true" />
+        <AssociationConnector Association="FEDSRESTAURANTModel.FK_Branch_Group" ManuallyRouted="false" />
+        <AssociationConnector Association="FEDSRESTAURANTModel.FK_MemberReserveLog" ManuallyRouted="false" />
+        <AssociationConnector Association="FEDSRESTAURANTModel.FK_MemberWaitingLog" ManuallyRouted="false" />
+        <AssociationConnector Association="FEDSRESTAURANTModel.FK_Branch_Company" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,229 @@
+﻿@using Reservation.ViewModels.Restaurants;
+@model RestaurantsIndex
+@{
+    Layout = null;
+    Random r = new Random();
+    string ErrorMsg = @TempData["ErrorMsg"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" />
+    <title>遠東百貨</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="hashtag" content="#遠東百貨" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="遠東百貨" />
+    <meta property="og:description" name="description" content="" />
+    <meta property="og:url" content="https://www.feds.com.tw/" />
+    <meta property="og:image" content="https://www.feds.com.tw/content/img/shared/facebook/fb_20210528.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="474" />
+    <meta property="og:image:height" content="246" />
+    <meta property="fb:app_id" content="1906735452872609" />
+
+    @Styles.Render("~/Content/css")
+    <link rel="stylesheet" async href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <link rel="stylesheet" href="~/Content/Restaurants/Restaurants.css?@Reservation.Models.Common.GetClineVersion()" />
+</head>
+<body>
+    <header id="header" class="l-header main-header show-marquee">
+        @if (Model.Cards.Count > 0)
+        {
+            <div class="logo">
+                <img id="mall_logo" class="mall_logo" src="~/IMG/MallLogo/MallLogoReSize/@(Model.Cards[0].GroupId + ".png")" alt="mall logo" />
+            </div>
+        }
+        else
+        {
+            <div class="logo">
+                <img id="mall_logo" class="mall_logo" src="~/IMG/MallLogo/10.png" alt="mall logo" />
+            </div>
+        }
+        <div id="mall" style="display:flex; justify-content:center;">
+            <div class="ui dropdown selection custom-select">
+                <div class="default text" style="color:white">選擇分店</div>
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item" data-value="55">遠百信義A13</div>
+                    @* <div class="item" data-value="32">遠百寶慶</div>*@
+                    @*<div class="item" data-value="42">新竹大遠百</div>*@
+                    <div class="item" data-value="54">板橋大遠百</div>
+                    <div class="item" data-value="50">遠百板橋</div>
+                    <div class="item" data-value="72">遠百竹北</div>
+                    <div class="item" data-value="53">台中大遠百</div>
+                    <div class="item" data-value="52">遠百花蓮</div>
+                    <div class="item" data-value="37">遠百嘉義</div>
+                    <div class="item" data-value="48">台南大遠百</div>
+                    <div class="item" data-value="51">高雄大遠百</div>
+                </div>
+            </div>
+        </div>
+    </header>
+    @if (Model.Cards.Count > 0)
+    {
+        <div id="container" class="container">
+            <div class="rastaurant-content">
+                <ul class="rastaurant_list">
+                    @foreach (RestaurantCard card in Model.Cards)
+                    {
+                        int mr = r.Next(1, 6);
+                        <li class="list">
+                            <div class="rastaurant_pic">
+                                <div class="img-wrap" style="margin: 0 !important;">
+                                    <img src="~/IMG/HomePage/@card.GroupId/@(card.id + ".jpg")" alt="rastaurant pic" />
+                                    @*@if (card.Images.Count > 0)
+                                    {
+                                        <img src="@card.Images[0]" alt="rastaurant pic" />
+                                    }
+                                    else
+                                    {
+                                        <img src="~/IMG/MallLogo/10.png" alt="rastaurant pic" />
+                                    }*@
+                                </div>
+                                <figcaption class="desc b-hide-text"></figcaption>
+                            </div>
+                            @if (!card.WebBookingEnabled && !card.WebWaitingEnabled)
+                            {
+                                <div class="rastaurant_infomation">
+                                    <h3 class="rastaurant_title">@card.Name</h3>
+                                </div>
+                                <div class="rastaurant_notice">
+                                    <div>
+                                        <p class="rastaurant_p">*餐廳不提供線上訂位服務</p>
+                                    </div>
+                                </div>
+                                <div class="phone_btn">
+                                    <div><img src="~/IMG/icon/tele_icon.png" alt="telephone" /><p class="phone_btn">@card.PhoneNumber</p></div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="rastaurant_infomation">
+                                    <h3 class="rastaurant_title">@card.Name</h3>
+
+                                    @*@if (card.WebWaitingEnabled && card.WaitingInfo.Status.ToLower().Equals("open"))
+                                    {
+                                        <div>
+                                            <img src="~/IMG/icon/group_icon.png" alt="group icon" /><p>@card.WaitingCount</p><p class="rastaurant_p">組人正在等候</p>
+                                        </div>
+                                        <div>
+                                            <img src="~/IMG/icon/time_icon.png" alt="time zicon" /><p class="rastaurant_p">等候約</p><p>@card.EstimatedWaitingMinutes</p><p class="rastaurant_p">分鐘</p>
+                                        </div>
+                                    }*@
+                                </div>
+                                <div class="btn_group">
+                                    @if (card.WebBookingEnabled)
+                                    {<a href="~/Reservation/Index?id=@card.GroupId&companyId=@card.CompanyId&branchId=@card.id"><div><img src="~/IMG/icon/reservation_icon.png" alt="reservation_icon" /><p class="btn_group_p">訂位</p></div></a>}
+                                    @if (card.WebWaitingEnabled)
+                                    {<a href="~/WaitingPosition/Index?groupId=@card.GroupId&companyId=@card.CompanyId&branchId=@card.id"><div><img src="~/IMG/icon/Waiting_icon.png" alt="Waiting_icon" /><p class="btn_group_p">候位</p></div></a>}
+                                    @*@if (card.WebDeliveryEnabled.HasValue && card.WebDeliveryEnabled.Value)
+                                    {<a href="#"><div><img src="~/IMG/icon/delivery_icon.png" alt="" /><p class="btn_group_p">外送</p></div></a>}
+                                    @if (card.OnlineOrderEnabled.HasValue && card.OnlineOrderEnabled.Value)
+                                    {<a href="#"><div><img src="~/IMG/icon/takeout_icon.png" alt="" /><p class="btn_group_p">外帶</p></div></a>}
+                                    @if (card.EasyFastEnabled.HasValue && card.EasyFastEnabled.Value)
+                                    {<a href="#"><div><img src="~/IMG/icon/fc_icon.png" alt="" /><p class="fc_p">速利便</p></div></a>}*@
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
+    @Scripts.Render("~/bundles/jsbasic")
+    <script src="~/Scripts/fancybox/dist/jquery.fancybox.min.js"></script>
+    <script src="~/Scripts/jquery.flexslider.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/sweetalert.js"></script>
+    <script type="text/javascript">
+
+        $('.menu .item').on('click', function () {
+            var malllvalue = $(this).data("value");
+            console.log("點選數字:", malllvalue);
+            //window.location.href = "https://www.feds.com.tw/reservation/?id=feds-" + malllvalue;           
+            window.location.href = "http://3.114.128.31/reservation/?id=feds-" + malllvalue;
+            //window.location.href = "http://localhost:61060/reservation/?id=feds-" + malllvalue;
+        });
+
+
+        $('.ui.dropdown').dropdown();
+        var errMsg = '@ErrorMsg';
+        function imgError(e) {
+            const image = e.target;
+            image.removeEventListener('error', imgError);
+            image.src = "./IMG/HomePage/10.jpg"
+        }
+
+        document.querySelectorAll('img').forEach(img => {
+            if (img.naturalWidth === 0) {
+                img.addEventListener('error', imgError);
+                img.src = img.src;
+            }
+        });
+
+        $(document).ready(function () {
+            if (@Model.Cards.Count == 0) {
+                $('#fancy').fancybox({
+                    'toolbar': false,   // 關閉工具按鈕欄
+                    clickSlide: 'false',// 停用點擊外部關閉蓋板
+                    "touch": false,     // 停用拖曳滑動
+                    width: 500
+                }).trigger('click');
+            }
+
+            $('[data-filter]').fancybox({
+                'toolbar': false,
+                "touch": false,
+                smallBtn: 'false',
+                clickSlide: 'false',
+                closeClick: 'false',
+                touch: {
+                    vertical: false,  // 允許垂直方向拖拽
+                    momentum: false   // Continue movement after releasing mouse/touch when panning
+                },
+                iframe: {
+                    preload: false,
+                    css: {
+                        width: "50%",
+                        height:"50%",
+                    },
+                    slideShow:
+                    {
+                        autoStart: false,
+                        speed: 4000,
+                    },
+                    clickOutside: 'close',
+                },
+            });
+
+            if (errMsg != '') {
+                swal({
+                    title: errMsg,
+                    type: "error"
+                });
+            }
+        });
+        @*window.onload = function () {
+            @for(int i = 0; i < Model.Cards.Count; i++)
+            {
+                var card = Model.Cards[i];
+                <text>
+                sessionStorage.setItem('companyId_' + @i, '@card.CompanyId');
+                sessionStorage.setItem('branchId_' + @i, '@card.id');
+                </text>
+            }
+        };
+        if (window.location.reload) {
+            sessionStorage.clear();
+        };*@
+    </script>
+</body>
+</html>
+

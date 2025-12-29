@@ -1,0 +1,226 @@
+﻿@using Reservation.Models.ViewModels
+@model ReservationIndex
+@{
+    ViewBag.Title = "Reservation_info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Reservation.Models.LayResult _LayResults = ViewBag.LayInfor;
+    Reservation.Models.ViewModels.ReservationIndex _Results = ViewBag.ReservationInfo;
+}
+
+@section styles{
+    <link href="~/Content/Reservation/Raservation.css" rel="stylesheet" />
+    <link href="~/Content/Reservation/Reservation_info.css?v0.2" rel="stylesheet" />
+}
+<div class="content">
+    <h3 id="raservation_title">預約資料填寫</h3>
+    <form id="SubmitForm" action="@Url.Action("Reservation_submit", "Reservation")" method="post">
+        <div class="raservation_infomation">
+            @if (_Results.customerName != null)
+            {
+                <h3>親愛的會員 </h3><h3>@_Results.customerName</h3><h3> 您好:</h3>
+            }
+            else
+            {
+                <h3>訪客</h3><h3> 您好:</h3>
+            }
+            <div class="pdt_info">
+                <div class="info">
+                    <div class="info_title">
+                        <h3>訂位人數</h3>
+                    </div>
+                    <div class="info_content">
+                        <p id="info_people"></p>@_Results.adults<p>位大人</p> <p id="info_people">@_Results.children</p><p>位小孩</p>
+                        <input type="hidden" id="adults" name="adults" value="@_Results.adults" />
+                        <input type="hidden" id="children" name="children" value="@_Results.children" />
+                    </div>
+                </div>
+                <div class="info">
+                    <div class="info_title">
+                        <h3>訂位日期</h3>
+                    </div>
+                    <div class="info_content">
+                        <p id="info_date">@_Results.bookingDate</p>
+                        <input type="hidden" id="bookingDate" name="bookingDate" value="@_Results.bookingDate" />
+                    </div>
+                </div>
+                <div class="info">
+                    <div class="info_title">
+                        <h3>訂位時間</h3>
+                    </div>
+                    <div class="info_content">
+                        <p id="info_time">@_Results.bookingTime</p>
+                        <input type="hidden" id="bookingTime" name="bookingTime" value="@_Results.bookingTime" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="gender_block">
+                <h3>訂位姓名</h3>
+                <div class="gender_bg">
+                    <div class="gender_hide_select">
+                        <div class="gender_title">
+                            <div id="gender_select"><input type="text" id="customerName" name="customerName" value="@(_Results.customerName == null ? "" : _Results.customerName)"></div>
+                            <div id="gender_info"></div><i class="fa fa-angle-down"></i>
+                        </div>
+                        <ul id="gender_ul">
+                            <li id="gender_1" class="select_data" value="0" onclick="getGender(this.value)">先生</li>
+                            <li id="gender_2" class="select_data" value="1" onclick="getGender(this.value)">小姐</li>
+                        </ul>
+                        <input type="hidden" id="customerSex" name="customerSex" value="" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="phone_block">
+                <h3>訂位電話</h3>
+                <div class="phone_select">
+                    <input type="text" id="customerPhone" name="customerPhone">
+                </div>
+            </div>
+
+            <div class="purpose_block">
+                <h3>用餐目的</h3>
+                <div class="purpose">
+                    <div class="purpose_radio">
+                        <input id="item1" type="radio" name="item" value="聚餐" checked>
+                        <label for="item1"></label>
+                        <span>聚餐</span>
+                    </div>
+                    <div class="purpose_radio">
+                        <input id="item2" type="radio" name="item" value="開會">
+                        <label for="item2"></label>
+                        <span>開會</span>
+                    </div>
+                    <div class="purpose_radio">
+                        <input id="item3" type="radio" name="item" value="商用">
+                        <label for="item3"></label>
+                        <span>商用</span>
+                    </div>
+                    <div class="purpose_radio">
+                        <input id="item4" type="radio" name="item" value="周年慶">
+                        <label for="item4"></label>
+                        <span>周年慶</span>
+                    </div>
+                    <div class="purpose_radio">
+                        <input id="item5" type="radio" name="item" value="慶生">
+                        <label for="item5"></label>
+                        <span>慶生</span>
+                    </div>
+                </div>
+            </div>
+
+            @*<div class="remarks_block">
+                <h3>訂位備註</h3>
+                <div class="remarks">
+                    <textarea id="remarks_textarea" name="remarks" rows="4" cols="50"></textarea>
+                    <input type="hidden" id="customerNode" name="customerNode" value="" />
+                </div>
+            </div>*@
+
+            <div id="center_btn">
+                <button type="button" class="center" onclick="SubmitReserve()"> 預約訂位 </button>
+            </div>
+            <div id="back_btn">
+                <button type="button" class="back" onclick="history.back()"> 回上頁 </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+<script src="~/Scripts/sweetalert.js"></script>
+<script>
+
+    $('.gender_title').on('click', function (e) {
+
+        if ($(this).hasClass("switchDisplay") === false) {
+            $('.gender_title,.gender_hide_select ul').removeClass('switchDisplay');
+        }
+        $(this).toggleClass('switchDisplay').siblings().toggleClass('switchDisplay');
+
+        e.stopPropagation();
+    });
+
+    function getGender(val) {
+        if (val == 0)
+            $('#gender_info').text("先生");
+        else if (val == 1)
+            $('#gender_info').text("小姐");
+
+        $('#customerSex').val(val);
+    };
+
+    //預約按鈕
+    function SubmitReserve() {
+        var node = $('#remarks_textarea').val();
+        $('#customerNode').val(node);
+
+        //var form = $('#SubmitForm');
+        //var data = form.serialize();
+        var data = new FormData($("#SubmitForm")[0]);
+        var memberId = '@_Results.memberId';
+        var companyId = '@_Results.CompanyId';
+        var branchId = '@_Results.branchId';
+        data.append('memberId', memberId);
+        data.append('CompanyId', companyId);
+        data.append('branchId', branchId);
+
+        var _name = $('#customerName').val();
+        var _phone = $('#customerPhone').val();
+
+        var _nt = "";
+        var _pt = "";
+        var text = "訂位資訊不完整"
+
+        if (_name == "" || _phone == "") {
+            if (_name == "" ) {
+                _nt = "『姓名』" + "<br>" ;
+            }
+
+            if (_phone == "") {
+                _pt = "『電話』" + "<br>" ;
+            }
+
+            swal({
+                title: _nt + _pt + text,
+                type: "error",
+            });
+            return false;
+        };
+
+        $.ajax({
+            url: '@Url.Action("Reservation_submit", "Reservation")',
+            type: 'POST',
+            data: data,
+            dataType: "json",
+            processData: false,
+            contentType: false
+        }).done(function (result) {
+            if (result.IsSuccess == true) {
+                swal({
+                    title: "訂位成功",
+                    type: "success",
+                });
+            }
+            else {
+                swal({
+                    title: "訂位失敗",
+                    text: result.Message,
+                    type: "error",
+                });
+                return false
+            }
+        })
+    };
+
+    $(document).click(function () {
+        if ($(this).hasClass("switchDisplay") === false) {
+            $('.gender_title,.gender_hide_select ul').removeClass('switchDisplay');
+        }
+    });
+
+    $('#item1').click(function () {
+        console.log($(this).prop('checked'))
+    })
+
+</script>

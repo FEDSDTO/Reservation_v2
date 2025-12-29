@@ -1,0 +1,67 @@
+﻿@model Reservation.ViewModels.Restaurants.MallFilter
+@{
+    ViewBag.Title = "MallLocationFilter";
+    Layout = null;
+}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+<link rel="stylesheet" href="~/Content/Restaurants/MallLocationFilter.css?@Reservation.Models.Common.GetClineVersion()" />
+
+<h2>搜尋方式</h2>
+<div class="mall">
+    <h3>1.您想前往享用美食的分店</h3>
+    <div class="mall_bg">
+        <div id="mall">---請選擇---</div><i class="fa fa-angle-down"></i>
+        <ul id="mall_ul">
+            @foreach (var mall in Model.Malls)
+            {
+                <li class="select_data" value="@mall.GroupId">@mall.Name</li>
+            }
+        </ul>
+    </div>
+    <input type="hidden" id="groupId" />
+    <button id="redirect">立刻前往</button>
+</div>
+
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+<script type="text/javascript">
+    function closeDropdown(e) {
+        if ($(e.target).parents('.mall_bg').length === 0 && !$(e.target).hasClass('mall_bg')) {
+            $('.switchDisplay').removeClass('switchDisplay');
+        }
+    }
+
+    $(function () {
+        // UI下拉式選單
+        $('.mall_bg').on('click', function (e) {
+            $(this).toggleClass('switchDisplay')
+        });
+
+        //將點選的值 丟到上面
+        $('.mall_bg ul li').on('click', function () {
+            var people_lis = document.getElementById("mall_ul").getElementsByTagName("li");
+            for (i = 0; i < people_lis.length; i++) {
+                $('#mall').text(this.innerHTML);
+                $('#groupId').val($(this).attr("value"));
+            }
+        });
+
+        $(document).click(function (e) {
+            if ($(e.target).parents('.mall_bg').length === 0 && !$(e.target).hasClass('mall_bg')) {
+                $('.switchDisplay').removeClass('switchDisplay');
+            }
+        });
+
+        $(top.document).click(function (e) {
+            if ($(e.target).parents('.mall_bg').length === 0 && !$(e.target).hasClass('mall_bg')) {
+                $('.switchDisplay').removeClass('switchDisplay');
+            }
+        });
+
+        $('#redirect').on('click', function () {
+            if ($('#groupId').val()) {
+                top.location.href = "@Url.Action("Index")?id=" + $('#groupId').val();
+            }
+        })
+    });
+</script>

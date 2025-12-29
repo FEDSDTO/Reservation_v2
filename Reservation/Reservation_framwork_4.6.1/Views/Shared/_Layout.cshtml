@@ -1,0 +1,172 @@
+﻿@using Reservation.Models;
+@{
+    Member member_Func = new Member();
+    Layout = null;
+    Reservation.Models.LayResult _Results = ViewBag.LayInfor;
+    int memberId = member_Func.GetMemberIdByAccount(Member.GetMemberAccount());
+}
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" />
+    <title>遠東百貨</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta property="og:type" content="website">
+    <meta property="fb:app_id" content="1906735452872609" />
+    <meta property="og:title" content="遠東百貨" />
+    <meta property="og:description" name="description" content="STAY HOME輕鬆購，免出門輕鬆購物，宅在家最10在！>" />
+    <meta property="og:url" content="https://www.feds.com.tw/" />
+    <meta property="og:image" content="https://www.feds.com.tw/content/img/shared/facebook/fb_20210528.jpg" />
+    <meta name="hashtag" content="#遠東百貨" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="474" />
+    <meta property="og:image:height" content="246" />
+
+    @Styles.Render("~/Content/css")
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/Scripts/fancybox/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" async href="~/Content/bootstrap-datepicker.css" />
+    <link rel="stylesheet" async href="~/Content/bootstrap-datepicker3.css" />
+    <link rel="stylesheet" async href="~/Content/sweetalert/sweet-alert.css" />
+    <link rel="stylesheet" async href="~/Content/Reservation/Raservation.css?@Reservation.Models.Common.GetClineVersion()" />
+
+    @RenderSection("styles", required: false)
+</head>
+<body style="background-color:#F1F1F1">
+    <div class="l-body show-header " data-cut="1">
+        <header class="l-header main-header show-marquee">
+            <div class="header-wrap">
+                <img src="~/IMG/banner.png" />
+                <img src="~/IMG/HomePage/@_Results.GroupId/@_Results.id-headerImg.png" />
+                @*<div class="member_bg">
+                    <div class="member_block">
+                        <i class="fa fa-user"></i><h3 class="member_title">會員服務</h3>
+                    </div>
+                    <ul class="member_list">
+                        @if (memberId == 0)
+                        {
+                            <a class="btn" href="@Reservation.Models.Common.GetLoginUrl()"><li id="member_1" class="select_data" value="">會員登入</li></a>
+                        }
+                        <a id="record_btn" class="fancybox btn btn-outline-search m_server" data-record data-type="iframe" data-src="@Url.Action("Index","Record",  new { memberId = memberId, type = "Reserve"})"><li id="member_2" class="select_data" value="">紀錄查詢</li></a>
+                        <a href="@Url.Action("Mb_record","Record",  new { memberId = memberId, type = "Reserve"})" class="mb_record"><li id="mb_record_btn" class="select_data" value="">紀錄查詢</li></a>
+                    </ul>
+                </div>*@
+            </div>
+            <div class="list-menu">
+                <div class="row">
+                    <div class="logo_block">
+                        <div class="reservation_btm">
+                            <div class="reservation_icon">
+                                <a href="@Url.Action("Index", "Reservation")?id=@_Results.GroupId&companyId=@_Results.CompanyId&branchId=@_Results.id">
+                                    <div data-toggle="tooltip" title="預約訂位" id="reservation_btn" class="icon-button">
+                                        <img src="~/IMG/icon/reservation_icon.png" />
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="waiting_icon">
+                                <a href="@Url.Action("Index", "WaitingPosition")?groupId=@_Results.GroupId&companyId=@_Results.CompanyId&branchId=@_Results.id">
+                                    <div data-toggle="tooltip" title="預約當日候位" id="waiting_btn" class="icon-button">
+                                        <img src="~/IMG/icon/Waiting_icon.png" />
+                                    </div>
+                                </a>
+                            </div>
+                            @*<div class="delivery_icon">
+                                <button data-toggle="tooltip" title="功能尚未開放" onclick="swal({ title: '對不起！此功能尚未開放！！', type: 'info' })" id="delivery_btn" class="icon-button">
+                                    <img src="~/IMG/icon/delivery_icon.png" />
+                                </button>
+                            </div>
+                            <div class="takeout_icon">
+                                <button data-toggle="tooltip" title="功能尚未開放" onclick="swal({ title: '對不起！此功能尚未開放！！', type: 'info' })" id="takeout_btn" class="icon-button">
+                                    <img src="~/IMG/icon/takeout_icon.png" />
+                                </button>
+                            </div>
+                            <div class="fc_icon">
+                                <button data-toggle="tooltip" title="功能尚未開放" onclick="swal({ title: '對不起！此功能尚未開放！！', type: 'info' })" id="fc_btn" class="icon-button">
+                                    <img src="~/IMG/icon/fc_icon.png" />
+                                </button>
+                            </div>*@
+                        </div>
+                        @if(_Results.Company.Logo != null)
+                        { 
+                            <img class="logo" src="@_Results.Company.Logo" />
+                        }
+                        else
+                        {
+                            <div class="logo" >
+                                <p class="rname">@_Results.Name</p>
+                            </div>
+                        }
+                    </div>
+                    <div class="row-list">
+                        <div class="preorder-menu">
+                            <ul class="section-list">
+                                <li id="restaurant_index" class="section-item">
+                                    <a href="~/Restaurants/Index/@_Results.GroupId"><button class="section-button"> 首頁</button></a>
+                                </li>
+                                @*<li id="restaurant_status" class="section-item">
+                                    <a href="#"><button class="section-button"> 餐廳訂候位狀況</button></a>
+                                </li>*@
+                                @if (_Results.ShowAlternateBranches)
+                                {
+                                    <li id="recommend" class="section-item">
+                                        <a href="#AlternateWaitingBranches"> <button class="section-button"> 推薦餐廳</button></a>
+                                    </li>
+                                }
+                                @if (_Results.ShowMenu)
+                                {
+                                    <li id="restaurant_menu" class="section-item">
+                                        <a href="#menu_title"> <button class="section-button"> 菜單</button></a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="rastaurant_infomation">
+                            @if (@_Results != null)
+                            {
+                                <h3>餐廳位置</h3>
+                                <p>@_Results.Address</p>
+                                <hr />
+                                <h3>料理類型</h3>
+                                <p>@string.Join("、", _Results.Company.Tags.Select(t => t.Name))</p>
+                                <hr />
+                                <h3>店家電話</h3>
+                                <p><a href="tel:@_Results.PhoneNumber">@_Results.PhoneNumber</a></p>
+                                <hr />
+                                <h3>營業時間</h3>
+                                foreach (var open in _Results.OpeningTimes)
+                                {
+                                    <p>@open.From-@open.To</p>
+                                }
+                            }
+                            else
+                            {
+                                <h3>餐廳位置</h3>
+                                <p>遠東百貨</p>
+                                <hr />
+                                <h3>料理類型</h3>
+                                <p></p>
+                                <hr />
+                                <h3>店家電話</h3>
+                                <p></p>
+                                <hr />
+                                <h3>營業時間</h3>
+                                <p></p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        @RenderBody()
+    </div>
+
+    @Scripts.Render("~/bundles/jsbasic")
+    <script src="~/Scripts/fancybox/dist/jquery.fancybox.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <script src="~/Scripts/sweetalert.js"></script>
+    <script src="~/Scripts/Raservation.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

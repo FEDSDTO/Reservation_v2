@@ -1,0 +1,59 @@
+﻿body {
+    text-align: center;
+}
+
+h3 {
+    font-size: 18pt;
+    color: #333333;
+}
+
+.filter {
+    margin-top: 30px;
+}
+
+label span {
+    color: #4d4d4d;
+    font-weight: bolder;
+    font-size: 20px;
+}
+
+input[type=checkbox] {
+    margin-right: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 20px;
+    height: 15px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+    input[type=checkbox]:after {
+        position: absolute;
+        width: 15px;
+        height: 20px;
+        top: -2;
+        content: " ";
+        background: #e8ecf0;
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%);
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%);
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 );
+        box-shadow: 2px 0 2px #c1c1c173 inset, 0 2px 2px #c1c1c173 inset,0 2px 5px #fff inset, 2px 0 5px #fff inset;
+        color: #3876ba;
+        display: inline-block;
+        visibility: visible;
+        padding: 0px 3px;
+        border-radius: 4px;
+    }
+
+    input[type=checkbox]:checked:after {
+        content: "✓";
+        font-size: 15px;
+        font-weight: bolder;
+        text-align: center;
+        text-shadow: 0 -1px 1px #fff, -1px 0 1px #fff, 1px 0 1px #777, 0 1px 1px #777;
+    }
+
+
+
+

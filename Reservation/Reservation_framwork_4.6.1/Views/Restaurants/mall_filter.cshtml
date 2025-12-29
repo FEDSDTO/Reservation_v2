@@ -1,0 +1,89 @@
+﻿@model Reservation.ViewModels.Restaurants.MallFilter
+@{
+    ViewBag.Title = "mall_filter";
+    Layout = null;
+}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+<link rel="stylesheet" href="~/Content/Restaurants/MallLocationFilter.css?@Reservation.Models.Common.GetClineVersion()" />
+<link rel="stylesheet" href="~/Content/Restaurants/mall_filter.css" />
+
+<div class="filter_block">
+    <h3>分店選擇</h3>
+    <hr>
+    @*<div class="filter">
+            @for (int i = 0; i < Model.Malls.Count; i++)
+            {
+                <div class="filter_radio">
+                    <input id="GroupSelecter_@i" type="radio" name="GroupSelecter" value="@Model.Malls[i].GroupId">
+                    <label for="GroupSelecter_@i"></label>
+                    <span>@Model.Malls[i].Name</span>
+                </div>
+            }
+        </div>*@
+    <div class="mall">
+        <div class="mall_bg">
+            <div id="mall">---請選擇---</div><i class="fa fa-angle-down"></i>
+            <ul id="mall_ul">
+                @foreach (var mall in Model.Malls)
+                {
+                    <li class="select_data" value="@mall.GroupId">@mall.Name</li>
+                }
+            </ul>
+        </div>
+        <input type="hidden" id="groupId" />
+        <div id="center_btn">
+            <input id="redirect" type="button" class="center" onclick="refreshRestaurants()" value="確認" />
+        </div>
+    </div>
+
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        @*function refreshRestaurants() {
+            var GroupId = document.querySelector('[name=GroupSelecter]:checked').value;
+            top.location.href = "@Url.Action("Index")?id=" + GroupId;
+        };*@
+
+        function closeDropdown(e) {
+            if ($(e.target).parents('.mall_bg').length === 0 && !$(e.target).hasClass('mall_bg')) {
+                $('.switchDisplay').removeClass('switchDisplay');
+            }
+        };
+
+        function refreshRestaurants() {
+            if ($('#groupId').val()) {
+                top.location.href = "@Url.Action("Index")?id=" + $('#groupId').val();
+            }
+        };
+
+        $(function () {
+            // UI下拉式選單
+            $('.mall_bg').on('click', function (e) {
+                $(this).toggleClass('switchDisplay')
+            });
+
+            //將點選的值 丟到上面
+            $('.mall_bg ul li').on('click', function () {
+                var people_lis = document.getElementById("mall_ul").getElementsByTagName("li");
+                for (i = 0; i < people_lis.length; i++) {
+                    $('#mall').text(this.innerHTML);
+                    $('#groupId').val($(this).attr("value"));
+                }
+            });
+
+            $(document).click(function (e) {
+                if ($(e.target).parents('.mall_bg').length === 0 && !$(e.target).hasClass('mall_bg')) {
+                    $('.switchDisplay').removeClass('switchDisplay');
+                }
+            });
+
+            $(top.document).click(function (e) {
+                if ($(e.target).parents('.mall_bg').length === 0 && !$(e.target).hasClass('mall_bg')) {
+                    $('.switchDisplay').removeClass('switchDisplay');
+                }
+            });
+        });
+
+    </script>
+</div>
+

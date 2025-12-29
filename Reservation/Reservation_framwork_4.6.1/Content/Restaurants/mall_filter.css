@@ -1,0 +1,208 @@
+﻿body {
+    position: relative;
+    height: 150px;
+}
+
+h3 {
+    text-align: center;
+    font-size: 18pt;
+    color: #333333;
+}
+
+.filter {
+    overflow-y: auto;
+    margin: auto;
+    /* margin-top: 10px; */
+    /* margin-left: 20%; */
+}
+
+.filter_radio {
+    display: inline-block;
+    width: 20%;
+    height: 10%;
+    position: relative;
+    /* line-height: 25px; */
+    text-align: left;
+}
+
+    .filter_radio label {
+        position: absolute;
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        box-shadow: 1px 0 2px #c1c1c173 inset, 0 1px 2px #c1c1c173 inset,0 -1px 1px #fff inset, -1px 0 1px #fff inset;
+        cursor: pointer;
+    }
+
+input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    margin-right: 10px;
+}
+
+
+
+label {
+    left: 5px;
+    top: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 30px;
+    margin-top: 4px;
+}
+
+/*设置选中的input的样式    參考網址:https://www.cnblogs.com/xinheng/p/9492284.html */
+/* + 是兄弟选择器,获取选中后的label元素*/
+input:checked + label {
+    border: 0px;
+    border-radius: 30px;
+    position: absolute;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    box-shadow: 1px 0 2px #c1c1c173 inset, 0 1px 2px #c1c1c173 inset,0 -1px 1px #fff inset, -1px 0 1px #fff inset;
+    cursor: pointer;
+}
+    /*添加的加号与label进行拼接(一个矩形边框去掉上和左的边框),再旋转45度*/
+    input:checked + label::after {
+        content: "";
+        border-radius: 15px;
+        width: 60%;
+        height: 60%;
+        margin: 4px 4px 4px 4px;
+        position: absolute;
+        content: "";
+        background-color: #3489B8;
+        box-shadow: 0 -1px 2px #fff, -1px 0 2px #fff, 1px 0 2px #777, 0 1px 2px #777;
+    }
+
+#center_btn {
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+    background: #BC3432;
+    color: #fff;
+    box-shadow: 0 -5px 5px #fff, -5px 0 5px #fff, 2px 0 5px #777, 0 2px 5px #777;
+    border: 0px;
+    width: 50% !important;
+    padding: 5px 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 14pt;
+    border: 0px;
+    border-radius: 30px;
+}
+
+
+
+@media (min-width:260px) {
+    #center_btn {
+        text-align: center;
+        margin: 0% 0% 0% -5%;
+    }
+    .center {
+        width: 40% !important;
+    }
+
+    .mall {
+        margin: 5% 0% 0% 0%;
+    }
+
+    .mall_bg {
+        width: 85% !important;
+        height: 27% !important;
+        border-radius: 50px;
+        margin: 5% 0% 2% 5%;
+    }
+
+    .mall_bg ul {
+        z-index: 1;
+        width: 90%;
+        height: 300%;
+        overflow-y: auto;
+        border-radius: 15px;
+        top: 90%;
+        padding: 10px 10px;
+    }
+
+    .mall_bg ul li {
+        font-size: 10pt;
+        padding: 5px 5px 10px 5px;
+    }
+}
+
+@media (min-width:250px) {
+    #center_btn {
+        text-align: center;
+        margin: 0% 0% 0% -5%;
+    }
+
+    .center {
+        width: 40% !important;
+    }
+
+    .mall {
+        margin: 5% 0% 0% 0%;
+    }
+
+    .mall_bg {
+        width: 85% !important;
+        height: 27% !important;
+        border-radius: 50px;
+        margin: 5% 0% 2% 5%;
+    }
+
+    .mall_bg ul {
+        z-index: 1;
+        width: 90%;
+        height: 300%;
+        overflow-y: auto;
+        border-radius: 15px;
+        top: 90%;
+        padding: 10px 10px;
+    }
+
+        .mall_bg ul li {
+            font-size: 10pt;
+            padding: 5px 5px 10px 5px;
+        }
+
+    #mall {
+        font-size: 13pt;
+        width: 70%;
+        margin: 9px 0px 0px 11px !important;
+    }
+
+    i {
+        font-size: 16pt !important;
+        margin: 13px 20px 0px 0px;
+    }
+}
+
+@media (max-width: 313px) {
+    html {
+        overflow-y: auto;
+    }
+
+    .filter_radio {
+        width: 100%;
+    }
+}
+
+@media (min-width: 314px) {
+    html {
+        overflow-y: auto;
+    }
+
+    .filter_radio {
+        width: 49%;
+    }
+}

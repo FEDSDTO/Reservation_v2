@@ -1,0 +1,73 @@
+﻿
+@{
+    ViewBag.Title = "order_meal";
+    Layout = null;
+}
+
+<link href="~/Content/Delivery/order_meal.css" rel="stylesheet" />
+<link href="~/Content/Reservation/Raservation.css" rel="stylesheet" />
+<link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+
+<div class="meal">
+    <div class="order_img">
+        <img src="~/IMG/meal.png" />
+    </div>
+    <div class="order_content">
+        <div class="neme">
+            楊枝甘露
+        </div>
+        <div class="explain">
+            芒果肉
+        </div>
+        <div class="annotation">
+            <p>餐點特殊需求</p>
+            <textarea id="order_annotation" name="annotation" rows="4" cols="50"></textarea>
+        </div>
+    </div>
+    <div class="order">
+        <div class="totalprice">
+
+            <div class="quantity">
+                
+                <span class="input-group-btn">
+                    <button class="btn" id="num-jian" type="button"><i class="fa fa-minus"></i></button>
+                </span>
+                <input type="text" id="input-num" class="form-control" style="width:35px;border:0px solid #fff;font-size:16px;color:#3366ff;text-align: center;" placeholder="设定" value="1">
+                
+                <span class="input-group-btn">
+                    <button class="btn " id="num-jia" type="button"><i class="fa fa-plus"></i></button>
+                </span>
+            </div>
+
+            <div class="price_block">
+                <button class="btn" id="price" type="button"><p>加入購物車</p><p class="price">NT $100</p></button>
+            </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    var num_jia = document.getElementById("num-jia");
+    var num_jian = document.getElementById("num-jian");
+    var input_num = document.getElementById("input-num");
+    //加號點擊事件
+    num_jia.onclick=function(){
+        if(input_num.value >= 30) {  //判断最高可加到30
+               input_num.value = 30;
+         }else {
+               input_num.value = parseInt(input_num.value) + 1;
+         }
+     }
+     //減號點擊事件
+    num_jian.onclick=function(){
+        if(input_num.value <= 1) { //判断最低可减到1
+                 input_num.value = 1;
+          }else {
+                 input_num.value = parseInt(input_num.value) - 1; //-1
+          }
+    }
+
+</script>

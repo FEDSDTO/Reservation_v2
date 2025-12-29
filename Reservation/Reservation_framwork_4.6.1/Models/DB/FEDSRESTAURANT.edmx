@@ -1,0 +1,679 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="FEDSRESTAURANTModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="MallGroup">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="MallId" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="IsUse" Type="bit" Nullable="false" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Editor" Type="int" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="EditFrom" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="MemberReserve">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="memberId" Type="int" Nullable="false" />
+          <Property Name="CompanyId" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="BranchId" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="GroupSize" Type="int" Nullable="false" />
+          <Property Name="NumberOfKid" Type="int" Nullable="false" />
+          <Property Name="ContactName" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="ContactPhone" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="ContactGender" Type="tinyint" Nullable="false" />
+          <Property Name="ContactEmail" Type="nvarchar" MaxLength="60" />
+          <Property Name="Datetime" Type="datetime" Nullable="false" />
+          <Property Name="Note" Type="nvarchar" MaxLength="500" />
+          <Property Name="Remark" Type="nvarchar" MaxLength="200" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Editor" Type="int" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="EditFrom" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="MemberReserveLog">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ReserveId" Type="bigint" Nullable="false" />
+          <Property Name="Status" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Json" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="MemberWaiting">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="memberId" Type="int" Nullable="false" />
+          <Property Name="CompanyId" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="BranchId" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="GroupSize" Type="int" Nullable="false" />
+          <Property Name="NumberOfKid" Type="int" Nullable="false" />
+          <Property Name="ContactName" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="ContactPhone" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="ContactGender" Type="tinyint" Nullable="false" />
+          <Property Name="ContactEmail" Type="nvarchar" MaxLength="60" />
+          <Property Name="Datetime" Type="datetime" Nullable="false" />
+          <Property Name="Note" Type="nvarchar" MaxLength="500" />
+          <Property Name="Purpose" Type="nvarchar" MaxLength="50" />
+          <Property Name="Remark" Type="nvarchar" MaxLength="200" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Editor" Type="int" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="EditFrom" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="MemberWaitingLog">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ReserveId" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="Status" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Json" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Restaurant">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Type" Type="int" />
+          <Property Name="Remark" Type="nvarchar" MaxLength="50" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Editor" Type="int" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="EditFrom" Type="nvarchar" MaxLength="20" />
+          <Property Name="IsUse" Type="bit" />
+        </EntityType>
+        <EntityType Name="RestaurantBranch">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="CompanyId" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="GroupId" Type="nvarchar" MaxLength="60" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="Address" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="PhoneNumber" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="WebBookingEnable" Type="bit" Nullable="false" />
+          <Property Name="WebWaitingEnable" Type="bit" Nullable="false" />
+          <Property Name="Remark" Type="nchar" MaxLength="10" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Editor" Type="int" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="EditFrom" Type="nvarchar" MaxLength="20" />
+          <Property Name="IsUse" Type="bit" />
+        </EntityType>
+        <EntityType Name="RestaurantImage">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="KeyId" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="Type" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="Src" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+          <Property Name="Sort" Type="int" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Editor" Type="int" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="EditFrom" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="RestaurantType">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Type" Type="nvarchar" MaxLength="30" Nullable="false" />
+          <Property Name="Status" Type="tinyint" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="200" />
+          <Property Name="Creator" Type="int" Nullable="false" />
+          <Property Name="CreateDate" Type="datetime" Nullable="false" />
+          <Property Name="CreateFrom" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Editor" Type="int" />
+          <Property Name="EditDate" Type="datetime" />
+          <Property Name="EditFrom" Type="nvarchar" MaxLength="20" />
+        </EntityType>
+        <Association Name="FK_Branch_Company">
+          <End Role="Restaurant" Type="Self.Restaurant" Multiplicity="1" />
+          <End Role="RestaurantBranch" Type="Self.RestaurantBranch" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Restaurant">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="RestaurantBranch">
+              <PropertyRef Name="CompanyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Branch_Group">
+          <End Role="MallGroup" Type="Self.MallGroup" Multiplicity="1" />
+          <End Role="RestaurantBranch" Type="Self.RestaurantBranch" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MallGroup">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="RestaurantBranch">
+              <PropertyRef Name="GroupId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MemberReserveLog">
+          <End Role="MemberReserve" Type="Self.MemberReserve" Multiplicity="1" />
+          <End Role="MemberReserveLog" Type="Self.MemberReserveLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MemberReserve">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="MemberReserveLog">
+              <PropertyRef Name="ReserveId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MemberWaitingLog">
+          <End Role="MemberWaiting" Type="Self.MemberWaiting" Multiplicity="1" />
+          <End Role="MemberWaitingLog" Type="Self.MemberWaitingLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MemberWaiting">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="MemberWaitingLog">
+              <PropertyRef Name="ReserveId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="FEDSRESTAURANTModelStoreContainer">
+          <EntitySet Name="MallGroup" EntityType="Self.MallGroup" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MemberReserve" EntityType="Self.MemberReserve" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MemberReserveLog" EntityType="Self.MemberReserveLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MemberWaiting" EntityType="Self.MemberWaiting" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="MemberWaitingLog" EntityType="Self.MemberWaitingLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Restaurant" EntityType="Self.Restaurant" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RestaurantBranch" EntityType="Self.RestaurantBranch" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RestaurantImage" EntityType="Self.RestaurantImage" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RestaurantType" EntityType="Self.RestaurantType" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Branch_Company" Association="Self.FK_Branch_Company">
+            <End Role="Restaurant" EntitySet="Restaurant" />
+            <End Role="RestaurantBranch" EntitySet="RestaurantBranch" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Branch_Group" Association="Self.FK_Branch_Group">
+            <End Role="MallGroup" EntitySet="MallGroup" />
+            <End Role="RestaurantBranch" EntitySet="RestaurantBranch" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MemberReserveLog" Association="Self.FK_MemberReserveLog">
+            <End Role="MemberReserve" EntitySet="MemberReserve" />
+            <End Role="MemberReserveLog" EntitySet="MemberReserveLog" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MemberWaitingLog" Association="Self.FK_MemberWaitingLog">
+            <End Role="MemberWaiting" EntitySet="MemberWaiting" />
+            <End Role="MemberWaitingLog" EntitySet="MemberWaitingLog" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="FEDSRESTAURANTModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="MallGroup">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MallId" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IsUse" Type="Boolean" Nullable="false" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Editor" Type="Int32" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="EditFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="RestaurantBranches" Relationship="Self.FK_Branch_Group" FromRole="MallGroup" ToRole="RestaurantBranch" />
+        </EntityType>
+        <EntityType Name="MemberReserve">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="memberId" Type="Int32" Nullable="false" />
+          <Property Name="CompanyId" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="BranchId" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="GroupSize" Type="Int32" Nullable="false" />
+          <Property Name="NumberOfKid" Type="Int32" Nullable="false" />
+          <Property Name="ContactName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ContactPhone" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContactGender" Type="Byte" Nullable="false" />
+          <Property Name="ContactEmail" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+          <Property Name="Datetime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Note" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Remark" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Editor" Type="Int32" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="EditFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="MemberReserveLogs" Relationship="Self.FK_MemberReserveLog" FromRole="MemberReserve" ToRole="MemberReserveLog" />
+        </EntityType>
+        <EntityType Name="MemberReserveLog">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ReserveId" Type="Int64" Nullable="false" />
+          <Property Name="Status" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Json" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="MemberReserve" Relationship="Self.FK_MemberReserveLog" FromRole="MemberReserveLog" ToRole="MemberReserve" />
+        </EntityType>
+        <EntityType Name="MemberWaiting">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="memberId" Type="Int32" Nullable="false" />
+          <Property Name="CompanyId" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="BranchId" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="GroupSize" Type="Int32" Nullable="false" />
+          <Property Name="NumberOfKid" Type="Int32" Nullable="false" />
+          <Property Name="ContactName" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ContactPhone" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContactGender" Type="Byte" Nullable="false" />
+          <Property Name="ContactEmail" Type="String" MaxLength="60" FixedLength="false" Unicode="true" />
+          <Property Name="Datetime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Note" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Purpose" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Remark" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Editor" Type="Int32" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="EditFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="MemberWaitingLogs" Relationship="Self.FK_MemberWaitingLog" FromRole="MemberWaiting" ToRole="MemberWaitingLog" />
+        </EntityType>
+        <EntityType Name="MemberWaitingLog">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="ReserveId" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Status" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Json" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="MemberWaiting" Relationship="Self.FK_MemberWaitingLog" FromRole="MemberWaitingLog" ToRole="MemberWaiting" />
+        </EntityType>
+        <EntityType Name="Restaurant">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Type" Type="Int32" />
+          <Property Name="Remark" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Editor" Type="Int32" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="EditFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="RestaurantBranches" Relationship="Self.FK_Branch_Company" FromRole="Restaurant" ToRole="RestaurantBranch" />
+          <Property Name="IsUse" Type="Boolean" />
+        </EntityType>
+        <EntityType Name="RestaurantBranch">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="CompanyId" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="GroupId" Type="String" MaxLength="60" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="WebBookingEnable" Type="Boolean" Nullable="false" />
+          <Property Name="WebWaitingEnable" Type="Boolean" Nullable="false" />
+          <Property Name="Remark" Type="String" MaxLength="10" FixedLength="true" Unicode="true" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Editor" Type="Int32" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="EditFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="MallGroup" Relationship="Self.FK_Branch_Group" FromRole="RestaurantBranch" ToRole="MallGroup" />
+          <NavigationProperty Name="Restaurant" Relationship="Self.FK_Branch_Company" FromRole="RestaurantBranch" ToRole="Restaurant" />
+          <Property Name="IsUse" Type="Boolean" />
+        </EntityType>
+        <EntityType Name="RestaurantImage">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="KeyId" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Type" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Src" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Sort" Type="Int32" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Editor" Type="Int32" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="EditFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="RestaurantType">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Type" Type="String" MaxLength="30" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Status" Type="Byte" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="Creator" Type="Int32" Nullable="false" />
+          <Property Name="CreateDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Editor" Type="Int32" />
+          <Property Name="EditDate" Type="DateTime" Precision="3" />
+          <Property Name="EditFrom" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <Association Name="FK_Branch_Group">
+          <End Role="MallGroup" Type="Self.MallGroup" Multiplicity="1" />
+          <End Role="RestaurantBranch" Type="Self.RestaurantBranch" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MallGroup">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="RestaurantBranch">
+              <PropertyRef Name="GroupId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MemberReserveLog">
+          <End Role="MemberReserve" Type="Self.MemberReserve" Multiplicity="1" />
+          <End Role="MemberReserveLog" Type="Self.MemberReserveLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MemberReserve">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="MemberReserveLog">
+              <PropertyRef Name="ReserveId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_MemberWaitingLog">
+          <End Role="MemberWaiting" Type="Self.MemberWaiting" Multiplicity="1" />
+          <End Role="MemberWaitingLog" Type="Self.MemberWaitingLog" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MemberWaiting">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="MemberWaitingLog">
+              <PropertyRef Name="ReserveId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Branch_Company">
+          <End Role="Restaurant" Type="Self.Restaurant" Multiplicity="1" />
+          <End Role="RestaurantBranch" Type="Self.RestaurantBranch" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Restaurant">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="RestaurantBranch">
+              <PropertyRef Name="CompanyId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="FEDSRESTAURANTEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="MallGroups" EntityType="Self.MallGroup" />
+          <EntitySet Name="MemberReserves" EntityType="Self.MemberReserve" />
+          <EntitySet Name="MemberReserveLogs" EntityType="Self.MemberReserveLog" />
+          <EntitySet Name="MemberWaitings" EntityType="Self.MemberWaiting" />
+          <EntitySet Name="MemberWaitingLogs" EntityType="Self.MemberWaitingLog" />
+          <EntitySet Name="Restaurants" EntityType="Self.Restaurant" />
+          <EntitySet Name="RestaurantBranches" EntityType="Self.RestaurantBranch" />
+          <EntitySet Name="RestaurantImages" EntityType="Self.RestaurantImage" />
+          <EntitySet Name="RestaurantTypes" EntityType="Self.RestaurantType" />
+          <AssociationSet Name="FK_Branch_Group" Association="Self.FK_Branch_Group">
+            <End Role="MallGroup" EntitySet="MallGroups" />
+            <End Role="RestaurantBranch" EntitySet="RestaurantBranches" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MemberReserveLog" Association="Self.FK_MemberReserveLog">
+            <End Role="MemberReserve" EntitySet="MemberReserves" />
+            <End Role="MemberReserveLog" EntitySet="MemberReserveLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_MemberWaitingLog" Association="Self.FK_MemberWaitingLog">
+            <End Role="MemberWaiting" EntitySet="MemberWaitings" />
+            <End Role="MemberWaitingLog" EntitySet="MemberWaitingLogs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Branch_Company" Association="Self.FK_Branch_Company">
+            <End Role="Restaurant" EntitySet="Restaurants" />
+            <End Role="RestaurantBranch" EntitySet="RestaurantBranches" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="FEDSRESTAURANTModelStoreContainer" CdmEntityContainer="FEDSRESTAURANTEntities">
+          <EntitySetMapping Name="MallGroups">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.MallGroup">
+              <MappingFragment StoreEntitySet="MallGroup">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="MallId" ColumnName="MallId" />
+                <ScalarProperty Name="IsUse" ColumnName="IsUse" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+                <ScalarProperty Name="Editor" ColumnName="Editor" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="EditFrom" ColumnName="EditFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MemberReserves">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.MemberReserve">
+              <MappingFragment StoreEntitySet="MemberReserve">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="memberId" ColumnName="memberId" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="BranchId" ColumnName="BranchId" />
+                <ScalarProperty Name="GroupSize" ColumnName="GroupSize" />
+                <ScalarProperty Name="NumberOfKid" ColumnName="NumberOfKid" />
+                <ScalarProperty Name="ContactName" ColumnName="ContactName" />
+                <ScalarProperty Name="ContactPhone" ColumnName="ContactPhone" />
+                <ScalarProperty Name="ContactGender" ColumnName="ContactGender" />
+                <ScalarProperty Name="ContactEmail" ColumnName="ContactEmail" />
+                <ScalarProperty Name="Datetime" ColumnName="Datetime" />
+                <ScalarProperty Name="Note" ColumnName="Note" />
+                <ScalarProperty Name="Remark" ColumnName="Remark" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+                <ScalarProperty Name="Editor" ColumnName="Editor" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="EditFrom" ColumnName="EditFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MemberReserveLogs">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.MemberReserveLog">
+              <MappingFragment StoreEntitySet="MemberReserveLog">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="ReserveId" ColumnName="ReserveId" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Json" ColumnName="Json" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MemberWaitings">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.MemberWaiting">
+              <MappingFragment StoreEntitySet="MemberWaiting">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="memberId" ColumnName="memberId" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="BranchId" ColumnName="BranchId" />
+                <ScalarProperty Name="GroupSize" ColumnName="GroupSize" />
+                <ScalarProperty Name="NumberOfKid" ColumnName="NumberOfKid" />
+                <ScalarProperty Name="ContactName" ColumnName="ContactName" />
+                <ScalarProperty Name="ContactPhone" ColumnName="ContactPhone" />
+                <ScalarProperty Name="ContactGender" ColumnName="ContactGender" />
+                <ScalarProperty Name="ContactEmail" ColumnName="ContactEmail" />
+                <ScalarProperty Name="Datetime" ColumnName="Datetime" />
+                <ScalarProperty Name="Note" ColumnName="Note" />
+                <ScalarProperty Name="Purpose" ColumnName="Purpose" />
+                <ScalarProperty Name="Remark" ColumnName="Remark" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+                <ScalarProperty Name="Editor" ColumnName="Editor" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="EditFrom" ColumnName="EditFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="MemberWaitingLogs">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.MemberWaitingLog">
+              <MappingFragment StoreEntitySet="MemberWaitingLog">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="ReserveId" ColumnName="ReserveId" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Json" ColumnName="Json" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Restaurants">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.Restaurant">
+              <MappingFragment StoreEntitySet="Restaurant">
+                <ScalarProperty Name="IsUse" ColumnName="IsUse" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="Remark" ColumnName="Remark" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+                <ScalarProperty Name="Editor" ColumnName="Editor" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="EditFrom" ColumnName="EditFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RestaurantBranches">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.RestaurantBranch">
+              <MappingFragment StoreEntitySet="RestaurantBranch">
+                <ScalarProperty Name="IsUse" ColumnName="IsUse" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="CompanyId" ColumnName="CompanyId" />
+                <ScalarProperty Name="GroupId" ColumnName="GroupId" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="WebBookingEnable" ColumnName="WebBookingEnable" />
+                <ScalarProperty Name="WebWaitingEnable" ColumnName="WebWaitingEnable" />
+                <ScalarProperty Name="Remark" ColumnName="Remark" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+                <ScalarProperty Name="Editor" ColumnName="Editor" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="EditFrom" ColumnName="EditFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RestaurantImages">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.RestaurantImage">
+              <MappingFragment StoreEntitySet="RestaurantImage">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="KeyId" ColumnName="KeyId" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="Src" ColumnName="Src" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Sort" ColumnName="Sort" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+                <ScalarProperty Name="Editor" ColumnName="Editor" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="EditFrom" ColumnName="EditFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RestaurantTypes">
+            <EntityTypeMapping TypeName="FEDSRESTAURANTModel.RestaurantType">
+              <MappingFragment StoreEntitySet="RestaurantType">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Creator" ColumnName="Creator" />
+                <ScalarProperty Name="CreateDate" ColumnName="CreateDate" />
+                <ScalarProperty Name="CreateFrom" ColumnName="CreateFrom" />
+                <ScalarProperty Name="Editor" ColumnName="Editor" />
+                <ScalarProperty Name="EditDate" ColumnName="EditDate" />
+                <ScalarProperty Name="EditFrom" ColumnName="EditFrom" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

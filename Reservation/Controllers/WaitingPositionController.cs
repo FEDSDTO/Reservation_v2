@@ -1,13 +1,16 @@
-﻿ using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Reservation.Models.DB;
+using Reservation.Models.EFRestaurantModels;
 using Reservation.Models.ViewModels;
+using Reservation.Service;
 
 namespace Reservation.Controllers
 {
     public class WaitingPositionController : Controller
     {
         private static Dictionary<int, Queue<QueueInfo>> _queueData = new();
+        private readonly RestaurantContext _restaurantContext;
+        private readonly RestaurantService _restaurantService;
         
         private class QueueInfo
         {
@@ -20,114 +23,60 @@ namespace Reservation.Controllers
             public DateTime JoinTime { get; set; }
         }
 
-        private List<Branch> GetBranches()
+        public WaitingPositionController(
+            RestaurantContext restaurantContext,
+            RestaurantService restaurantService)
         {
-            return new List<Branch>
-            {
-                new Branch { Id = 1, Name = "遠百信義A13" },
-                new Branch { Id = 2, Name = "遠百板橋" },
-                new Branch { Id = 3, Name = "遠百台中" }
-            };
+            _restaurantContext = restaurantContext;
+            _restaurantService = restaurantService;
         }
 
-        private List<Restaurant> GetRestaurants()
+        public async Task<IActionResult> Index(string branchId, string restaurantId)
         {
-            return new List<Restaurant>
-            {
-                new Restaurant 
-                { 
-                    Id = 1, 
-                    Name = "1010湘食堂", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "4F懷舊食光埕",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = true,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 2, 
-                    Name = "新馬辣經典麻辣鍋", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號4樓",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = true
-                },
-                new Restaurant 
-                { 
-                    Id = 3, 
-                    Name = "筷炒台式餐館", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號7樓",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 4, 
-                    Name = "四川吳抄手", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號14樓（遠東信義A13）",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 5, 
-                    Name = "寰隆餐飲企業", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號4樓",
-                    Phone = "02-2729-1234",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 2,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 6, 
-                    Name = "香米泰國料理", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號30樓",
-                    Phone = "02-2729-5678",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 3,
-                    IsPopular = false,
-                    IsNew = false
-                }
-            };
-        }
-
-        public IActionResult Index(int id)
-        {
-            var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == id);
-            if (restaurant == null)
+            if (string.IsNullOrEmpty(restaurantId) || string.IsNullOrEmpty(branchId))
             {
                 return NotFound();
             }
 
-            var branch = GetBranches().FirstOrDefault(b => b.Id == restaurant.BranchId);
-            if (branch == null)
+            var mallGroups = await _restaurantService.GetMallsAsync();
+            var branchDict = new Dictionary<string, int>();
+            var branches = new List<Branch>();
+            
+            for (int i = 0; i < mallGroups.Count; i++)
             {
-                branch = GetBranches().First();
+                var branch = new Branch 
+                { 
+                    Id = i + 1,
+                    Name = mallGroups[i].Name 
+                };
+                branches.Add(branch);
+                branchDict[mallGroups[i].GroupId] = branch.Id;
             }
+
+            var restaurantCards = await _restaurantService.GetRestaurantsAsync(branchId);
+            var restaurantCard = restaurantCards.FirstOrDefault(r => r.id == restaurantId);
+            
+            if (restaurantCard == null)
+            {
+                return NotFound();
+            }
+
+            var restaurant = new Reservation.Models.ViewModels.Restaurant
+            {
+                Id = branches.FirstOrDefault(b => branchDict.ContainsKey(branchId) && branchDict[branchId] == b.Id)?.Id ?? 1,
+                Name = restaurantCard.Name,
+                ImageUrl = restaurantCard.Images?.FirstOrDefault() ?? "~/Image/1.jpg",
+                Location = restaurantCard.Address,
+                Phone = restaurantCard.PhoneNumber,
+                OpeningHours = "10:00-22:00",
+                BranchId = branchDict.ContainsKey(branchId) ? branchDict[branchId] : 1,
+                CategoryId = 1,
+                IsPopular = false,
+                IsNew = false
+            };
+
+            var selectedBranch = branches.FirstOrDefault(b => branchDict.ContainsKey(branchId) && branchDict[branchId] == b.Id) 
+                ?? branches.FirstOrDefault();
 
             var currentQueueCount = 0;
             if (_queueData.ContainsKey(restaurant.Id))
@@ -138,7 +87,7 @@ namespace Reservation.Controllers
             var viewModel = new WaitingPositionViewModel
             {
                 Restaurant = restaurant,
-                Branch = branch,
+                Branch = selectedBranch ?? new Branch(),
                 AdultCount = 2,
                 ChildCount = 0,
                 CurrentQueueCount = currentQueueCount
@@ -155,17 +104,6 @@ namespace Reservation.Controllers
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
-                }
-                
-                var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == model.Restaurant.Id);
-                if (restaurant != null)
-                {
-                    model.Restaurant = restaurant;
-                    var branch = GetBranches().FirstOrDefault(b => b.Id == restaurant.BranchId);
-                    if (branch != null)
-                    {
-                        model.Branch = branch;
-                    }
                 }
                 
                 if (_queueData.ContainsKey(model.Restaurant.Id))

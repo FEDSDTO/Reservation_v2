@@ -1,0 +1,164 @@
+﻿@using Reservation.ViewModels.Restaurants;
+@using Reservation.ViewModels.WaitingPosition;
+@model WaitingPositionModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string[] w_people = { "0", "0", "0" };
+    if (Model.WaitingCount >= 1000)
+    { w_people = new string[] { "9", "9", "9" }; }
+    else
+    {
+        string strWaitingCount = Model.WaitingCount.ToString();
+        w_people[2] = strWaitingCount.Substring(strWaitingCount.Length - 1, 1);
+        if (Model.WaitingCount >= 10)
+        { w_people[1] = strWaitingCount.Substring(strWaitingCount.Length - 2, 1); }
+        if (Model.WaitingCount >= 100)
+        { w_people[0] = strWaitingCount.Substring(strWaitingCount.Length - 3, 1); }
+    }
+}
+
+@section styles{
+    <link href="~/Content/Reservation/Raservation.css" rel="stylesheet" />
+    <link href="~/Content/waiting_position/waiting_position.css" rel="stylesheet" />
+}
+
+<div class="content">
+    <h3 id="raservation_title">候位資訊</h3>
+    <div class="waiting_infomation">
+        <div class="w_datetitle">
+            <h3 id="w_todaydate"></h3><h3>-目前排隊組數</h3>
+        </div>
+        <div class="w_people">
+            <p>@w_people[0]</p>
+        </div>
+        <div class="w_people">
+            <p>@w_people[1]</p>
+        </div>
+        <div class="w_people">
+            <p>@w_people[2]</p>
+        </div>
+        <div class="w_notice">
+            <p class="w_noticetitle">請前往餐廳排隊取號</p>
+            <p>實際等候時間及排隊人數，一個餐廳現場為主</p>
+        </div>
+        <div id="center_btn">
+            <form method="get" action="@Url.Action("Waitingposition_info", "WaitingPosition")">
+                <input type="hidden" name="groupId" value="@Model.GroupId" />
+                <input type="hidden" name="companyId" value="@Model.CompanyId" />
+                <input type="hidden" name="branchId" value="@Model.id" />
+                <button type="submit" class="center"> 我要候位 </button>
+            </form>
+        </div>
+    </div>
+    @if (string.IsNullOrWhiteSpace(Model.MemberAccount) && false)
+    {
+        <a href="@Reservation.Models.Common.GetLoginUrl()">
+            <div class="login">
+                <img src="~/IMG/login_banner.png" />
+            </div>
+        </a>
+    }
+</div>
+<div id="demarcation01">
+    <img class="bg_wave" src="~/IMG/bg_1.png" />
+    <img class="bg_mb_wave" src="~/IMG/bg_mb_1.png" />
+</div>
+@if (Model.AlternateWaitingBranches != null && Model.AlternateWaitingBranches.Count > 0)
+{
+    <div id="recommend_res">
+        <div class="content">
+            <div id="AlternateWaitingBranches" class="w_notice">
+                <p class="w_noticetitle">您想快點用餐省去用餐時間嗎?</p>
+                <p>推薦以下餐廳，快去用餐吧!!!</p>
+            </div>
+            <div class="recommend_title">推薦餐廳</div>
+            <div id="slider" class="slider">
+                @foreach (Restaurant alternateBranch in Model.AlternateWaitingBranches)
+                {
+                    <a href="/WaitingPosition?groupId=@alternateBranch.GroupId&companyId=@alternateBranch.CompanyId&branchId=@alternateBranch.id">
+                        <div class="slide_son">
+                            <div class="rastaurant_pic">
+                                @if (alternateBranch.Images.Count > 0)
+                                {
+                                    <img src="@alternateBranch.Images[0]" />
+                                }
+                            </div>
+                            <div class="rastaurant_information">
+                                <div class="rastaurant_title">
+                                    <h3>@alternateBranch.Name</h3>
+                                </div>
+                                <div class="rastaurant_detail">
+                                    <p>@alternateBranch.Address</p>
+                                </div>
+                                <div class="rastaurant_status">
+                                    <img src="~/IMG/icon/Vacancy_icon.png" /><p class="rastaurant_p">目前有空位</p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+    <div id="demarcation02">
+        <img class="bg_wave" src="~/IMG/bg_2.png" />
+        <img class="bg_mb_wave" src="~/IMG/bg_mb_2.png" />
+    </div>
+}
+@if (Model.Menus.Count > 0)
+{
+    <div id="menu">
+        <div class="content">
+            <div id="menu_title" class="menu_title">菜單</div>
+            <div class="flexslider" style="width:350px; margin-left:100px;">
+                <ul class="slides">
+                    @foreach (string menuImg in Model.Menus)
+                    {
+                        <li><img class="d-block w-100" src="@menuImg" alt="菜單" /></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+<div id="demarcation03">
+    <img class="bg_mb_wave" src="~/IMG/bg_mb_1.png" />
+</div>
+<div id="res_mb_info">
+    <div class="content">
+        <div class="res_mb_title">餐廳資訊</div>
+        <h3>餐廳位置</h3>
+        <p>@Model.Address</p>
+        <hr>
+        <h3>料理類型</h3>
+        <p>@string.Join("、", Model.Company.Tags.Select(t => t.Name))</p>
+        <hr>
+        <h3>店家電話</h3>
+        <p><a href="tel:@Model.PhoneNumber">@Model.PhoneNumber</p>
+        <hr>
+        <h3>營業時間</h3>
+        @foreach (var OpeningTime in Model.OpeningTimes)
+        {
+            <p>@OpeningTime.From - @OpeningTime.To</p>
+        }
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        var outDiv = document.getElementById('slider');
+        outDiv.onwheel = function (event) {
+            //禁止事件默认行为（此处禁止鼠标滚轮行为关联到"屏幕滚动条上下移动"行为）
+            event.preventDefault();
+            //设置鼠标滚轮滚动时屏幕滚动条的移动步长
+            var step = 50;
+            if (event.deltaY < 0) {
+                //向上滚动鼠标滚轮，屏幕滚动条左移
+                this.scrollLeft -= step;
+            } else {
+                //向下滚动鼠标滚轮，屏幕滚动条右移
+                this.scrollLeft += step;
+            }
+        }
+    </script>
+}

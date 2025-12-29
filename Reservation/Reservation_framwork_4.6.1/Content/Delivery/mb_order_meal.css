@@ -1,0 +1,185 @@
+﻿body {
+    margin: 0px;
+    width: 100%;
+    background-color: #F1F1F1;
+}
+
+.meal {
+    width: 100%;
+    height: 100%;
+    margin: 0px !important;
+    padding: 0px;
+}
+
+.page_back {
+    position: absolute;
+    top: 20;
+    left: 20;
+    font-size: 80px !important;
+    font-weight: bolder;
+    width: 40px;
+    height: 80px;
+    padding: 5px 30px 10px 30px;
+    border-radius: 100px;
+    background-color: #000000b3;
+    box-shadow: 0px 0px 20px #ffffffa8;
+    color: #fff;
+}
+
+.order_img {
+    width: 100%;
+    padding: 0px;
+}
+
+    .order_img img {
+        width: 100%;
+        height: 20%;
+        border-radius: 0px 0px 100px 100px;
+        box-shadow: 0px 5px 10px #777;
+    }
+
+.order_content {
+    width: 100%;
+}
+
+.neme {
+    width: 90%;
+    padding: 40px 50px 10px 50px;
+    font-size: 40pt;
+    font-weight: bolder;
+    color: #4F4F4F;
+}
+
+.explain {
+    width: 90%;
+    padding: 10px 50px 30px 50px;
+    font-size: 35pt;
+    font-weight: bold;
+    color: #aaaaaa;
+}
+
+.annotation {
+    width: 90%;
+    margin: 30px 30px;
+}
+
+    .annotation p {
+        padding: 0px 20px;
+        font-size: 25pt;
+        font-weight: bolder;
+        color: #4F4F4F;
+    }
+
+    .annotation textarea {
+        width: 100%;
+        height: 300px;
+        margin: 0px 0px 0px 20px;
+        padding: 30px;
+        font-size: 25pt;
+        color: #4F4F4F;
+        background: #e8ecf0; /* Old browsers */
+        background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+        border: none;
+        border-radius: 40px;
+        box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+        resize: none;
+    }
+
+.totalprice {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    padding: 10px 0px;
+}
+
+.quantity {
+    width: 90%;
+    height: 100px;
+    position: relative;
+    margin: 0px 50px 10px 50px;
+    text-align: center;
+    background: #e8ecf0; /* Old browsers */
+    background: -moz-linear-gradient(top, #e8ecf0 0%, #eceff4 50%, #eceff4 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, #e8ecf0 0%,#eceff4 50%,#eceff4 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e8ecf0', endColorstr='#eceff4',GradientType=0 ); /* IE6-9 */
+    border-radius: 60px;
+    box-shadow: 5px 0 5px #c1c1c173 inset, 0 5px 5px #c1c1c173 inset,0 -5px 5px #fff inset, -5px 0 5px #fff inset;
+}
+
+    .quantity input {
+        background: none;
+        font-size: 30pt !important;
+        height: 100px;
+        color: #3489B8 !important;
+        font-weight: bolder;
+    }
+
+    .quantity button {
+        width: 25%;
+        height: 100px;
+        font-size: 25pt !important;
+        border: none;
+        background-color: #3489B8;
+    }
+
+        .quantity button:active {
+            width: 25%;
+            height: 100px;
+            border: none;
+            background-color: #266c92;
+        }
+
+
+
+#num-jian {
+    float: left;
+    border-radius: 60px 0px 0px 60px;
+    box-shadow: 5px 0 8px #777;
+}
+
+#num-jia {
+    float: right;
+    border-radius: 0px 60px 60px 0px;
+    box-shadow: -5px 0 8px #777;
+}
+
+    #num-jian:active, #num-jia:active {
+        box-shadow: none;
+    }
+
+.quantity button i {
+    color: #fff;
+    width: 100%;
+    padding-top: 3px;
+}
+
+.price_block {
+    width: 90%;
+}
+
+    .price_block button {
+        width: 100%;
+        margin: 30px 50px;
+        border: none;
+        border-radius: 50px;
+        background-color: #C6332C;
+        color: #fff;
+        font-size: 25pt !important;
+    }
+
+        .price_block button p {
+            width: 45%;
+            text-align: left;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .price_block button .price {
+            width: 45%;
+            text-align: right;
+            display: inline-block;
+        }

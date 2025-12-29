@@ -1,172 +1,81 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Reservation.Models.DB;
+using Reservation.Models.EFRestaurantModels;
 using Reservation.Models.ViewModels;
-using System.Globalization;
+using Reservation.Service;
 
 namespace Reservation.Controllers
 {
     public class ReservationController : Controller
     {
-        // 模擬數據服務（後續可替換為資料庫）
-        private List<Branch> GetBranches()
+        private readonly RestaurantContext _restaurantContext;
+        private readonly RestaurantService _restaurantService;
+
+        public ReservationController(
+            RestaurantContext restaurantContext,
+            RestaurantService restaurantService)
         {
-            return new List<Branch>
-            {
-                new Branch { Id = 1, Name = "遠百信義A13" },
-                new Branch { Id = 2, Name = "板橋大遠百" },
-                new Branch { Id = 3, Name = "台中大遠百" }
-            };
+            _restaurantContext = restaurantContext;
+            _restaurantService = restaurantService;
         }
 
-        private List<Restaurant> GetRestaurants()
+        public async Task<IActionResult> Index(string branchId, string restaurantId)
         {
-            return new List<Restaurant>
-            {
-                new Restaurant 
-                { 
-                    Id = 1, 
-                    Name = "1010湘食堂", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "4F懷舊食光埕",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = true,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 2, 
-                    Name = "新馬辣經典麻辣鍋", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號4樓",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = true
-                },
-                new Restaurant 
-                { 
-                    Id = 3, 
-                    Name = "筷炒台式餐館", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號7樓",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 4, 
-                    Name = "四川吳抄手", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號14樓（遠東信義A13）",
-                    Phone = "02-2729-0597",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 1,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 5, 
-                    Name = "寰隆餐飲企業", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號4樓",
-                    Phone = "02-2729-1234",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 2,
-                    IsPopular = false,
-                    IsNew = false
-                },
-                new Restaurant 
-                { 
-                    Id = 6, 
-                    Name = "香米泰國料理", 
-                    ImageUrl = "~/Image/1.jpg",
-                    Location = "台北市信義區松仁路58號30樓",
-                    Phone = "02-2729-5678",
-                    OpeningHours = "10:00-22:00",
-                    BranchId = 1,
-                    CategoryId = 3,
-                    IsPopular = false,
-                    IsNew = false
-                }
-            };
-        }
-
-        // 取得菜單資料（只有圖片）
-        private List<Menu> GetMenus(int restaurantId)
-        {
-            return new List<Menu>
-            {
-                new Menu
-                {
-                    Id = 1,
-                    RestaurantId = restaurantId,
-                    ImageUrl = "~/Image/menu1.jpg"
-                },
-                new Menu
-                {
-                    Id = 2,
-                    RestaurantId = restaurantId,
-                    ImageUrl = "~/Image/menu2.jpg"
-                },
-                new Menu
-                {
-                    Id = 3,
-                    RestaurantId = restaurantId,
-                    ImageUrl = "~/Image/menu3.jpg"
-                },
-                new Menu
-                {
-                    Id = 4,
-                    RestaurantId = restaurantId,
-                    ImageUrl = "~/Image/menu4.jpg"
-                },
-                new Menu
-                {
-                    Id = 5,
-                    RestaurantId = restaurantId,
-                    ImageUrl = "~/Image/menu5.jpg"
-                }
-            };
-        }
-
-        // 訂位功能 - GET
-        public IActionResult Index(int id)
-        {
-            var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == id);
-            if (restaurant == null)
+            if (string.IsNullOrEmpty(restaurantId) || string.IsNullOrEmpty(branchId))
             {
                 return NotFound();
             }
 
-            var branch = GetBranches().FirstOrDefault(b => b.Id == restaurant.BranchId);
-            if (branch == null)
+            var mallGroups = await _restaurantService.GetMallsAsync();
+            var branchDict = new Dictionary<string, int>();
+            var branches = new List<Branch>();
+            
+            for (int i = 0; i < mallGroups.Count; i++)
             {
-                branch = GetBranches().First();
+                var branch = new Branch 
+                { 
+                    Id = i + 1,
+                    Name = mallGroups[i].Name 
+                };
+                branches.Add(branch);
+                branchDict[mallGroups[i].GroupId] = branch.Id;
             }
+
+            var restaurantCards = await _restaurantService.GetRestaurantsAsync(branchId);
+            var restaurantCard = restaurantCards.FirstOrDefault(r => r.id == restaurantId);
+            
+            if (restaurantCard == null)
+            {
+                return NotFound();
+            }
+
+            var restaurant = new Reservation.Models.ViewModels.Restaurant
+            {
+                Id = branches.FirstOrDefault(b => branchDict.ContainsKey(branchId) && branchDict[branchId] == b.Id)?.Id ?? 1,
+                Name = restaurantCard.Name,
+                ImageUrl = restaurantCard.Images?.FirstOrDefault() ?? "~/Image/1.jpg",
+                Location = restaurantCard.Address,
+                Phone = restaurantCard.PhoneNumber,
+                OpeningHours = "10:00-22:00",
+                BranchId = branchDict.ContainsKey(branchId) ? branchDict[branchId] : 1,
+                CategoryId = 1,
+                IsPopular = false,
+                IsNew = false
+            };
+
+            var selectedBranch = branches.FirstOrDefault(b => branchDict.ContainsKey(branchId) && branchDict[branchId] == b.Id) 
+                ?? branches.FirstOrDefault();
 
             var viewModel = new ReservationViewModel
             {
                 Restaurant = restaurant,
-                Branch = branch,
+                Branch = selectedBranch ?? new Branch(),
                 SelectedDate = DateTime.Today,
                 AdultCount = 2,
                 ChildCount = 0,
                 SelectedMealPeriod = "中午",
                 AvailableTimeSlots = GetAvailableTimeSlots("中午", DateTime.Today),
-                Menus = GetMenus(restaurant.Id)
+                Menus = new List<Menu>()
             };
 
             return View(viewModel);
@@ -177,18 +86,8 @@ namespace Reservation.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == model.Restaurant.Id);
-                if (restaurant != null)
-                {
-                    model.Restaurant = restaurant;
-                    var branch = GetBranches().FirstOrDefault(b => b.Id == restaurant.BranchId);
-                    if (branch != null)
-                    {
-                        model.Branch = branch;
-                    }
-                }
                 model.AvailableTimeSlots = GetAvailableTimeSlots(model.SelectedMealPeriod, model.SelectedDate ?? DateTime.Today);
-                model.Menus = GetMenus(model.Restaurant.Id);
+                model.Menus = new List<Menu>();
                 return View(model);
             }
 
@@ -204,53 +103,40 @@ namespace Reservation.Controllers
             });
         }
 
-        [HttpGet]
-        public IActionResult Confirm(int restaurantId, int branchId, DateTime selectedDate, int adultCount, int childCount, string selectedMealPeriod, string selectedTimeSlot)
-        {
-            if (restaurantId == 0)
-            {
-                return RedirectToAction("Index", "Restaurant");
-            }
+        //[HttpGet]
+        //public IActionResult Confirm(int restaurantId, int branchId, DateTime selectedDate, int adultCount, int childCount, string selectedMealPeriod, string selectedTimeSlot)
+        //{
+        //    if (restaurantId == 0)
+        //    {
+        //        return RedirectToAction("Index", "Restaurant");
+        //    }
 
-            var restaurant = GetRestaurants().FirstOrDefault(r => r.Id == restaurantId);
-            if (restaurant == null)
-            {
-                return NotFound();
-            }
+        //    var model = new ReservationConfirmViewModel
+        //    {
+        //        Restaurant = new Reservation.Models.ViewModels.Restaurant { Id = restaurantId },
+        //        Branch = new Branch { Id = branchId },
+        //        SelectedDate = selectedDate,
+        //        AdultCount = adultCount,
+        //        ChildCount = childCount,
+        //        SelectedMealPeriod = selectedMealPeriod ?? "中午",
+        //        SelectedTimeSlot = selectedTimeSlot ?? string.Empty
+        //    };
 
-            var branch = GetBranches().FirstOrDefault(b => b.Id == branchId);
-            if (branch == null)
-            {
-                branch = GetBranches().FirstOrDefault(b => b.Id == restaurant.BranchId) ?? GetBranches().First();
-            }
+        //    return View(model);
+        //}
 
-            var model = new ReservationConfirmViewModel
-            {
-                Restaurant = restaurant,
-                Branch = branch,
-                SelectedDate = selectedDate,
-                AdultCount = adultCount,
-                ChildCount = childCount,
-                SelectedMealPeriod = selectedMealPeriod ?? "中午",
-                SelectedTimeSlot = selectedTimeSlot ?? string.Empty
-            };
+        //[HttpPost]
+        //public IActionResult Confirm(ReservationConfirmViewModel model)
+        //{
+        //    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        //    {
+        //        return Json(new { success = true, message = "訂位成功" });
+        //    }
 
-            return View(model);
-        }
+        //    TempData["ReservationSuccess"] = "訂位資料已提交";
+        //    return RedirectToAction("Index", "Restaurant");
+        //}
 
-        [HttpPost]
-        public IActionResult Confirm(ReservationConfirmViewModel model)
-        {
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return Json(new { success = true, message = "訂位成功" });
-            }
-
-            TempData["ReservationSuccess"] = "訂位資料已提交";
-            return RedirectToAction("Index", "Restaurant");
-        }
-
-        // 取得可用時段
         private List<string> GetAvailableTimeSlots(string mealPeriod, DateTime selectedDate)
         {
             var timeSlots = new List<string>();
@@ -259,7 +145,6 @@ namespace Reservation.Controllers
 
             if (mealPeriod == "中午")
             {
-                // 中午時段：11:00-16:00，每 30 分鐘一個
                 for (int hour = 11; hour <= 15; hour++)
                 {
                     timeSlots.Add($"{hour:00}:00");
@@ -267,7 +152,6 @@ namespace Reservation.Controllers
                 }
                 timeSlots.Add("16:00");
 
-                // 如果是今天，過濾已過時段
                 if (isToday)
                 {
                     timeSlots = timeSlots.Where(slot =>
@@ -282,7 +166,6 @@ namespace Reservation.Controllers
             }
             else if (mealPeriod == "晚上")
             {
-                // 晚上時段：17:00-22:00，每 30 分鐘一個
                 for (int hour = 17; hour <= 21; hour++)
                 {
                     timeSlots.Add($"{hour:00}:00");
@@ -290,7 +173,6 @@ namespace Reservation.Controllers
                 }
                 timeSlots.Add("22:00");
 
-                // 如果是今天，過濾已過時段
                 if (isToday)
                 {
                     timeSlots = timeSlots.Where(slot =>
@@ -307,7 +189,6 @@ namespace Reservation.Controllers
             return timeSlots;
         }
 
-        // API: 取得可用時段
         [HttpGet]
         public IActionResult GetTimeSlots(string mealPeriod, string date)
         {

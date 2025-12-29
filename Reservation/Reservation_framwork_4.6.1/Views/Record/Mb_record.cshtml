@@ -1,0 +1,83 @@
+﻿@using Reservation.Models.ViewModels;
+@model IEnumerable<Record>
+@{
+    ViewBag.Title = "Record";
+    Layout = null;
+}
+
+<link href="~/Content/Restaurants/mb_record.css?v0.2" rel="stylesheet" />
+<link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+
+
+<i class="fa fa-angle-left page_back" onclick="history.go(-1)"></i>
+<div class="title">
+    <span>訂位紀錄</span>
+</div>
+<form id="Record" action="@Url.Action("Mb_record", "Record")" method="post">
+    @if (ViewBag.Type == "Reserve")
+    {
+        <div class="btn_group">
+            <button id="Reserve" class="active" type="submit" onclick="mb_ReserveRecord(@ViewBag.Member, this.id)"><span>訂位紀錄</span></button>
+            <button id="Wait" type="submit" onclick="mb_ReserveRecord(@ViewBag.Member, this.id)"><span>候位紀錄</span></button>
+            @*<button><span>外帶紀錄</span></button>
+                <button><span>外送紀錄</span></button>*@
+        </div>
+    }
+    else if (ViewBag.Type == "Wait")
+    {
+        <div class="btn_group">
+            <button id="Reserve" type="submit" onclick="mb_ReserveRecord(@ViewBag.Member, this.id)"><span>訂位紀錄</span></button>
+            <button id="Wait" class="active" type="submit" onclick="mb_ReserveRecord(@ViewBag.Member, this.id)"><span>候位紀錄</span></button>
+            @*<button><span>外帶紀錄</span></button>
+                <button><span>外送紀錄</span></button>*@
+        </div>
+    }
+    <input type="hidden" id="memberId" name="memberId" value="" />
+    <input type="hidden" id="type" name="type" value="" />
+    @if (Model.Count() != 0)
+    {
+        foreach (var r in Model)
+        {
+            <div class="record">
+                <div class="record_block">
+                    <div class="record_title">
+                        <p>登記時間</p>
+                        <p>餐廳名稱</p>
+                        <p>訂 / 候位狀態</p>
+                        <p>入座時間</p>
+                        <p>用餐人數</p>
+                        <p>備註</p>
+                    </div>
+                    <div class="data">
+                        <p class="time">@r.creatOn</p>
+                        <p class="restaurants_name">@r.restaurantName</p>
+                        <p>@r.status</p>
+                        <p>@r.dateTime</p>
+                        <p>@r.adults 大人 @r.children 小孩</p>
+                        <p class="record_note">@r.note</p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="record">
+            <div class="record_block">
+                <p>尚無紀錄</p>
+            </div>
+        </div>
+    }
+</form>
+
+
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+<script src="~/Scripts/Raservation.js"></script>
+<script>
+
+    function mb_ReserveRecord(member, type) {
+        $('#memberId').val(member);
+        $('#type').val(type);
+    }
+
+</script>

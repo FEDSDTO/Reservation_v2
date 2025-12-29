@@ -1,5 +1,3 @@
-using Reservation.Models.DB;
-
 namespace Reservation.Models.ViewModels
 {
     public class WaitingPositionViewModel
@@ -8,12 +6,12 @@ namespace Reservation.Models.ViewModels
         public Branch Branch { get; set; } = new();
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerPhone { get; set; } = string.Empty;
-        public int AdultCount { get; set; } = 2;
-        public int ChildCount { get; set; } = 0;
-        public int CurrentQueueCount { get; set; } = 0;
-        public int? QueueNumber { get; set; }
-        public int? AheadCount { get; set; }
-        public int? EstimatedWaitMinutes { get; set; }
+        public int AdultCount { get; set; }
+        public int ChildCount { get; set; }
+        public int CurrentQueueCount { get; set; }
+        public int QueueNumber { get; set; }
+        public int AheadCount { get; set; }
+        public int EstimatedWaitMinutes { get; set; }
     }
 }
 
