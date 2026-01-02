@@ -32,6 +32,7 @@ namespace Reservation
             builder.Services.AddHttpClient();
             
             // 註冊服務
+            builder.Services.AddSingleton<Reservation.Service.Func_Log>();
             builder.Services.AddScoped<Reservation.Service.InlineAppsService>();
             builder.Services.AddScoped<Reservation.Service.RestaurantService>();
 

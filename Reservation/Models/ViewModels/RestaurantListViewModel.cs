@@ -1,18 +1,18 @@
 namespace Reservation.Models.ViewModels
 {
-    public class Branch
+    public class BranchModel
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    public class Category
+    public class CategoryModel
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    public class Restaurant
+    public class RestaurantInfoModel
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -26,14 +26,24 @@ namespace Reservation.Models.ViewModels
         public bool IsNew { get; set; }
     }
 
-    public class RestaurantListViewModel
+    public class RestaurantListModel
     {
-        public List<Branch> Branches { get; set; } = new();
-        public List<Category> Categories { get; set; } = new();
+        public List<BranchModel> Branches { get; set; } = new();
+        public List<CategoryModel> Categories { get; set; } = new();
         public List<RestaurantCardModel> RestaurantCards { get; set; } = new();
         public string? SelectedGroupId { get; set; }
         public int? SelectedBranchId { get; set; }
         public int? SelectedCategoryId { get; set; }
         public Dictionary<string, int> GroupIdToBranchId { get; set; } = new();
+    }
+
+    public class RestaurantListViewModel
+    {
+        public List<BranchModel> Branches { get; set; } = new();
+        public List<CategoryModel> Categories { get; set; } = new();
+        public List<RestaurantCardModel> RestaurantCards { get; set; } = new();
+        public string? SelectedBranchId { get; set; }
+        public int? SelectedCategoryId { get; set; }
+        public Dictionary<string, string> GroupIdToBranchId { get; set; } = new();
     }
 }

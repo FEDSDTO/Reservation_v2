@@ -1,4 +1,4 @@
- @model Reservation.Models.ViewModels.RestaurantListViewModel
+ @model Reservation.Models.ViewModels.RestaurantListModel
 @{
     ViewData["Title"] = "餐廳列表";
 }
@@ -80,11 +80,12 @@
             {
                 <div class="restaurant-card">
                     <div class="row g-0">
-                        <!-- 左側圖片 - 使用固定路徑格式 -->
+                        <!-- 左側圖片 - 直接使用本地目錄圖片 -->
                         <div class="col-md-3 col-4">
                             <div class="restaurant-image-wrapper">
                                 <img src="@Url.Content($"~/IMG/HomePage/{card.GroupId}/{card.id}.jpg")" 
                                      class="restaurant-image" 
+                                     alt="@card.Name"
                                      onerror="this.src='@Url.Content("~/IMG/HomePage/10.jpg")'" />
                             </div>
                         </div>

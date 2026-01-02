@@ -1,4 +1,4 @@
-@model Reservation.Models.ViewModels.ReservationConfirmViewModel
+@model Reservation.Models.ViewModels.ReservationConfirmModel
 @{
     ViewData["Title"] = "訂位確認";
     var culture = new System.Globalization.CultureInfo("zh-TW");

@@ -24,31 +24,30 @@ namespace Reservation.Controllers
             _restaurantService = restaurantService;
         }
 
-        private List<Category> GetCategories()
+        private List<CategoryModel> GetCategories()
         {
-            return new List<Category>
+            return new List<CategoryModel>
             {
-                new Category { Id = 0, Name = "所有餐廳" },
-                new Category { Id = 1, Name = "主題餐廳" },
-                new Category { Id = 2, Name = "輕食甜點" },
-                new Category { Id = 3, Name = "吃到飽" }
+                new CategoryModel { Id = 0, Name = "所有餐廳" },
+                new CategoryModel { Id = 1, Name = "主題餐廳" },
+                new CategoryModel { Id = 2, Name = "輕食甜點" },
+                new CategoryModel { Id = 3, Name = "吃到飽" }
             };
         }
 
         public async Task<IActionResult> Index(string? groupId, int? categoryId)
         {
             var mallGroups = await _restaurantService.GetMallsAsync();
-            
             var branchDict = new Dictionary<string, int>();
             var groupIdToBranchId = new Dictionary<string, int>();
-            var branches = new List<Branch>();
-            
-            for (int i = 0; i < mallGroups.Count; i++)
+            var branches = new List<BranchModel>();
+
+            for(int i = 0; i < mallGroups.Count; i++)
             {
-                var branch = new Branch 
-                { 
+                var branch = new BranchModel
+                {
                     Id = i + 1,
-                    Name = mallGroups[i].Name 
+                    Name = mallGroups[i].Name
                 };
                 branches.Add(branch);
                 branchDict[mallGroups[i].GroupId] = branch.Id;
@@ -58,38 +57,48 @@ namespace Reservation.Controllers
             var allCategories = GetCategories();
             var restaurantCards = new List<RestaurantCardModel>();
             
-            // 直接使用 groupId，不需要轉換
-            if (!string.IsNullOrWhiteSpace(groupId))
+            // ========== 主頁載入時，從 API 同步資料到資料庫 ==========
+            if(string.IsNullOrWhiteSpace(groupId))
             {
+                // 顯示所有分館：同步所有分館的資料
+                foreach(var mallGroup in mallGroups)
+                {
+                    await _restaurantService.RestaurantApiAsync(mallGroup.GroupId);
+                    var groupRestaurants = await _restaurantService.GetRestaurantsAsync(mallGroup.GroupId);
+                    restaurantCards.AddRange(groupRestaurants);
+                }
+            }
+            else
+            {
+                // 顯示特定分館：只同步該分館的資料
+                await _restaurantService.RestaurantApiAsync(groupId);
                 restaurantCards = await _restaurantService.GetRestaurantsAsync(groupId);
             }
-
-            var viewModel = new RestaurantListViewModel
+            
+            var viewModel = new RestaurantListModel
             {
                 Branches = branches,
                 Categories = allCategories,
                 RestaurantCards = restaurantCards,
                 SelectedGroupId = groupId,
-                SelectedBranchId = !string.IsNullOrWhiteSpace(groupId) && groupIdToBranchId.ContainsKey(groupId) 
-                    ? groupIdToBranchId[groupId] 
+                SelectedBranchId = !string.IsNullOrWhiteSpace(groupId) && groupIdToBranchId.ContainsKey(groupId)
+                    ? groupIdToBranchId[groupId]
                     : null,
                 SelectedCategoryId = categoryId,
                 GroupIdToBranchId = groupIdToBranchId
             };
-
             return View(viewModel);
         }
-        
         public async Task<IActionResult> QueryRecord(int? branchId)
         {
             var mallGroups = await _restaurantService.GetMallsAsync();
             
             var branchDict = new Dictionary<string, int>();
-            var branches = new List<Branch>();
+            var branches = new List<BranchModel>();
             
             for (int i = 0; i < mallGroups.Count; i++)
             {
-                var branch = new Branch 
+                var branch = new BranchModel 
                 { 
                     Id = i + 1,
                     Name = mallGroups[i].Name 
@@ -98,8 +107,8 @@ namespace Reservation.Controllers
                 branchDict[mallGroups[i].GroupId] = branch.Id;
             }
 
-            var reservationRecords = new List<ReservationRecord>();
-            var waitingRecords = new List<WaitingRecord>();
+            var reservationRecords = new List<ReservationRecordModel>();
+            var waitingRecords = new List<WaitingRecordModel>();
 
             if (branchId.HasValue)
             {
@@ -110,7 +119,7 @@ namespace Reservation.Controllers
                 }
             }
 
-            var viewModel = new RecordQueryViewModel
+            var viewModel = new RecordQueryModel
             {
                 Branches = branches,
                 SelectedBranchId = branchId,

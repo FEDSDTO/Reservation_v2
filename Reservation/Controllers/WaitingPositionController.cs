@@ -40,11 +40,11 @@ namespace Reservation.Controllers
 
             var mallGroups = await _restaurantService.GetMallsAsync();
             var branchDict = new Dictionary<string, int>();
-            var branches = new List<Branch>();
+            var branches = new List<BranchModel>();
             
             for (int i = 0; i < mallGroups.Count; i++)
             {
-                var branch = new Branch 
+                var branch = new BranchModel 
                 { 
                     Id = i + 1,
                     Name = mallGroups[i].Name 
@@ -61,7 +61,7 @@ namespace Reservation.Controllers
                 return NotFound();
             }
 
-            var restaurant = new Reservation.Models.ViewModels.Restaurant
+            var restaurant = new Reservation.Models.ViewModels.RestaurantInfoModel
             {
                 Id = branches.FirstOrDefault(b => branchDict.ContainsKey(branchId) && branchDict[branchId] == b.Id)?.Id ?? 1,
                 Name = restaurantCard.Name,
@@ -84,10 +84,10 @@ namespace Reservation.Controllers
                 currentQueueCount = _queueData[restaurant.Id].Count;
             }
 
-            var viewModel = new WaitingPositionViewModel
+            var viewModel = new WaitingPositionModel
             {
                 Restaurant = restaurant,
-                Branch = selectedBranch ?? new Branch(),
+                Branch = selectedBranch ?? new BranchModel(),
                 AdultCount = 2,
                 ChildCount = 0,
                 CurrentQueueCount = currentQueueCount
@@ -97,7 +97,7 @@ namespace Reservation.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(WaitingPositionViewModel model)
+        public IActionResult Index(WaitingPositionModel model)
         {
             if (!ModelState.IsValid)
             {

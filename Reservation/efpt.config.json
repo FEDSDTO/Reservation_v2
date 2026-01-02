@@ -49,10 +49,6 @@
       {
          "Name": "[dbo].[RestaurantImage]",
          "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[RestaurantType]",
-         "ObjectType": 0
       }
    ],
    "UiHint": null,

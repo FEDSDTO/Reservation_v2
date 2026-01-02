@@ -29,8 +29,6 @@ public partial class RestaurantContext : DbContext
 
     public virtual DbSet<RestaurantImage> RestaurantImages { get; set; }
 
-    public virtual DbSet<RestaurantType> RestaurantTypes { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MallGroup>(entity =>
@@ -346,78 +344,20 @@ public partial class RestaurantContext : DbContext
 
         modelBuilder.Entity<RestaurantImage>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_RestaurantIMG");
+
             entity.ToTable("RestaurantImage");
 
-            entity.HasIndex(e => new { e.Type, e.KeyId }, "IX_ForeignKey");
-
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
-            entity.Property(e => e.CreateDate)
-                .HasComment("資料創建時間")
-                .HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
             entity.Property(e => e.CreateFrom)
-                .IsRequired()
-                .HasMaxLength(20)
-                .HasComment("資料創建來源");
-            entity.Property(e => e.Creator).HasComment("資料創建者ID");
-            entity.Property(e => e.Description)
-                .HasMaxLength(200)
-                .HasComment("圖片描述\r\n可用於alt");
-            entity.Property(e => e.EditDate)
-                .HasComment("最後編輯時間")
-                .HasColumnType("datetime");
-            entity.Property(e => e.EditFrom)
-                .HasMaxLength(20)
-                .HasComment("最後編輯資料來源");
-            entity.Property(e => e.Editor).HasComment("最後編輯者ID");
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.KeyId)
                 .IsRequired()
-                .HasMaxLength(150)
-                .HasComment("外部關聯\r\n依據Type不同，可能對應不同Table的ID");
-            entity.Property(e => e.Sort).HasComment("圖片排序");
+                .HasMaxLength(60);
             entity.Property(e => e.Src)
                 .IsRequired()
-                .HasMaxLength(200)
-                .HasComment("圖片位址");
-            entity.Property(e => e.Type)
-                .IsRequired()
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasComment("圖片類型");
-        });
-
-        modelBuilder.Entity<RestaurantType>(entity =>
-        {
-            entity.ToTable("RestaurantType");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CreateDate)
-                .HasComment("資料創建時間")
-                .HasColumnType("datetime");
-            entity.Property(e => e.CreateFrom)
-                .IsRequired()
-                .HasMaxLength(20)
-                .HasComment("資料創建來源");
-            entity.Property(e => e.Creator).HasComment("資料創建者ID");
-            entity.Property(e => e.Description)
-                .HasMaxLength(200)
-                .HasComment("類型描述");
-            entity.Property(e => e.EditDate)
-                .HasComment("最後編輯時間")
-                .HasColumnType("datetime");
-            entity.Property(e => e.EditFrom)
-                .HasMaxLength(20)
-                .HasComment("最後編輯資料來源");
-            entity.Property(e => e.Editor).HasComment("最後編輯者ID");
-            entity.Property(e => e.Status)
-                .HasDefaultValue((byte)1)
-                .HasComment("啟用狀態")
-                .HasAnnotation("Relational:DefaultConstraintName", "DF_RestaurantType_Status");
-            entity.Property(e => e.Type)
-                .IsRequired()
-                .HasMaxLength(30)
-                .HasComment("類型名稱");
+                .HasMaxLength(200);
         });
 
         OnModelCreatingPartial(modelBuilder);

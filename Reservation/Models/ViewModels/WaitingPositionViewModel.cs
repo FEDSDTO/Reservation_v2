@@ -1,9 +1,9 @@
 namespace Reservation.Models.ViewModels
 {
-    public class WaitingPositionViewModel
+    public class WaitingPositionModel
     {
-        public Restaurant Restaurant { get; set; } = new();
-        public Branch Branch { get; set; } = new();
+        public RestaurantInfoModel Restaurant { get; set; } = new();
+        public BranchModel Branch { get; set; } = new();
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerPhone { get; set; } = string.Empty;
         public int AdultCount { get; set; }

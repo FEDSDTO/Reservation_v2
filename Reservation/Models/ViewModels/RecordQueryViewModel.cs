@@ -1,6 +1,6 @@
 namespace Reservation.Models.ViewModels
 {
-    public class ReservationRecord
+    public class ReservationRecordModel
     {
         public int ReservationId { get; set; }
         public int RestaurantId { get; set; }
@@ -15,7 +15,7 @@ namespace Reservation.Models.ViewModels
         public string Status { get; set; } = "完成";
     }
 
-    public class WaitingRecord
+    public class WaitingRecordModel
     {
         public int WaitingId { get; set; }
         public int RestaurantId { get; set; }
@@ -30,12 +30,12 @@ namespace Reservation.Models.ViewModels
         public string Status { get; set; } = "等待中";
     }
 
-    public class RecordQueryViewModel
+    public class RecordQueryModel
     {
-        public List<Branch> Branches { get; set; } = new();
+        public List<BranchModel> Branches { get; set; } = new();
         public int? SelectedBranchId { get; set; }
-        public List<ReservationRecord> ReservationRecords { get; set; } = new();
-        public List<WaitingRecord> WaitingRecords { get; set; } = new();
+        public List<ReservationRecordModel> ReservationRecords { get; set; } = new();
+        public List<WaitingRecordModel> WaitingRecords { get; set; } = new();
         public string MemberName { get; set; } = "黃O明";
     }
 }

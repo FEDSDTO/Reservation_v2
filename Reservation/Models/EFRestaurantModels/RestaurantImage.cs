@@ -9,60 +9,11 @@ public partial class RestaurantImage
 {
     public int Id { get; set; }
 
-    /// <summary>
-    /// 外部關聯
-    /// 依據Type不同，可能對應不同Table的ID
-    /// </summary>
     public string KeyId { get; set; }
 
-    /// <summary>
-    /// 圖片類型
-    /// </summary>
-    public string Type { get; set; }
-
-    /// <summary>
-    /// 圖片位址
-    /// </summary>
     public string Src { get; set; }
 
-    /// <summary>
-    /// 圖片描述
-    /// 可用於alt
-    /// </summary>
-    public string Description { get; set; }
+    public DateTime? CreateDate { get; set; }
 
-    /// <summary>
-    /// 圖片排序
-    /// </summary>
-    public int? Sort { get; set; }
-
-    /// <summary>
-    /// 資料創建者ID
-    /// </summary>
-    public int Creator { get; set; }
-
-    /// <summary>
-    /// 資料創建時間
-    /// </summary>
-    public DateTime CreateDate { get; set; }
-
-    /// <summary>
-    /// 資料創建來源
-    /// </summary>
     public string CreateFrom { get; set; }
-
-    /// <summary>
-    /// 最後編輯者ID
-    /// </summary>
-    public int? Editor { get; set; }
-
-    /// <summary>
-    /// 最後編輯時間
-    /// </summary>
-    public DateTime? EditDate { get; set; }
-
-    /// <summary>
-    /// 最後編輯資料來源
-    /// </summary>
-    public string EditFrom { get; set; }
 }
