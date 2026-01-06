@@ -46,6 +46,14 @@ namespace Reservation.Middleware
             return _configuration["DefaultDevToken"] ?? DefaultDevTokenFallback;
         }
 
+        /// <summary>
+        /// 取得正式環境預設 Token（從配置檔案讀取）
+        /// </summary>
+        private string? GetDefaultProdToken()
+        {
+            return _configuration["DefaultProdToken"];
+        }
+
         public async Task InvokeAsync(HttpContext context, MemberContext memberContext)
         {
             // 检查是否在排除列表中
@@ -96,7 +104,25 @@ namespace Reservation.Middleware
                 });
             }
 
-            // 如果沒有 Token（既沒有 Cookie 也沒有 URL 參數，且不是開發環境）
+            // 正式環境：如果沒有 Token 且配置了預設 Token，使用預設 Token
+            if (string.IsNullOrEmpty(tokenFromCookie) && !_environment.IsDevelopment())
+            {
+                var defaultProdToken = GetDefaultProdToken();
+                if (!string.IsNullOrEmpty(defaultProdToken))
+                {
+                    _logger.LogInformation($"正式環境：使用預設 Token: {defaultProdToken}");
+                    tokenFromCookie = defaultProdToken;
+                    // 將預設 Token 設置到 Cookie 中
+                    context.Response.Cookies.Append(TokenCookieName, defaultProdToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = context.Request.IsHttps,
+                        SameSite = SameSiteMode.Lax
+                    });
+                }
+            }
+
+            // 如果沒有 Token（既沒有 Cookie 也沒有 URL 參數，且沒有預設 Token）
             if (string.IsNullOrEmpty(tokenFromCookie))
             {
                 await RedirectToLoginAsync(context);

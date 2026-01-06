@@ -20,13 +20,6 @@
   <ItemGroup>
     <Content Include="Views\Reservation\Confirm.cshtml.bak" />
     <None Include="efpt.config.json.user" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\EFMemeberModels\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="wwwroot\IMG\banner.png" />
     <None Include="wwwroot\IMG\Banner\mb_am.png" />
     <None Include="wwwroot\IMG\Banner\mb_as.png" />
@@ -206,6 +199,10 @@
     <None Include="wwwroot\IMG\Pic\pic_1.png" />
     <None Include="wwwroot\IMG\Pic\pic_2.png" />
     <None Include="wwwroot\IMG\Pic\rastaurant_pic.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\EFMemeberModels\" />
   </ItemGroup>
 
   <ItemGroup>
