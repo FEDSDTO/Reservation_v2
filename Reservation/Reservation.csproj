@@ -4,6 +4,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 使用框架依賴部署，只發布應用程序DLL，不包含運行時框架 -->
+    <!-- 服務器需要安裝 .NET 8.0 Runtime 或 ASP.NET Core Runtime -->
+    <SelfContained>false</SelfContained>
+    <SatelliteResourceLanguages>zh-Hant</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <!-- 排除舊專案資料夾，避免編譯衝突 -->
@@ -15,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Reservation\Confirm.cshtml.bak" />
+    <None Include="efpt.config.json.user" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="efpt.config.json.user" />
     <None Include="wwwroot\IMG\banner.png" />
     <None Include="wwwroot\IMG\Banner\mb_am.png" />
     <None Include="wwwroot\IMG\Banner\mb_as.png" />
@@ -205,12 +209,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.22">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <!-- <ItemGroup>
