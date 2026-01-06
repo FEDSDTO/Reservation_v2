@@ -69,13 +69,6 @@ namespace Reservation.Service
                apiResult.Msg=response.ReasonPhrase ?? string.Empty;
                apiResult.Data=await response.Content.ReadAsStringAsync();
 
-               // 記錄 API 回應
-               _fileLogService.ApiResponseLog_Txt($"=== API 回應 ===");
-               _fileLogService.ApiResponseLog_Txt($"狀態碼: {apiResult.Code}");
-               _fileLogService.ApiResponseLog_Txt($"回應時間: {elapsedTime} ms");
-               _fileLogService.ApiResponseLog_Txt($"回應內容: {apiResult.Data}");
-               _fileLogService.ApiResponseLog_Txt($"================\r\n");
-
             }
             catch(Exception ex)
             {
