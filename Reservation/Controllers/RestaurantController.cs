@@ -41,13 +41,13 @@ namespace Reservation.Controllers
             var branchDict = new Dictionary<string, int>();
             var groupIdToBranchId = new Dictionary<string, int>();
             var branches = new List<BranchModel>();
-
+            
             for(int i = 0; i < mallGroups.Count; i++)
             {
                 var branch = new BranchModel
-                {
+                { 
                     Id = i + 1,
-                    Name = mallGroups[i].Name
+                    Name = mallGroups[i].Name 
                 };
                 branches.Add(branch);
                 branchDict[mallGroups[i].GroupId] = branch.Id;
@@ -74,7 +74,7 @@ namespace Reservation.Controllers
                 await _restaurantService.RestaurantApiAsync(groupId);
                 restaurantCards = await _restaurantService.GetRestaurantsAsync(groupId);
             }
-            
+
             var viewModel = new RestaurantListModel
             {
                 Branches = branches,
@@ -133,6 +133,72 @@ namespace Reservation.Controllers
         public IActionResult Queue(int id)
         {
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMallByGPS(double? lat, double? lng)
+        {
+            if(!lat.HasValue || !lng.HasValue)
+            {
+                return Json(new { success = false, message = "座標參數缺失" });
+            }
+
+            var mallGroups = await _restaurantService.GetMallsAsync();
+
+            // 定義各分館的座標範圍（根據實際分館位置）
+            var branchLocations = new Dictionary<string, (double lat, double lng, double radius)>
+            {
+                { "feds-32", (25.041859000, 121.509014000, 0.05) }, // 遠百寶慶
+                { "feds-37", (23.473118000, 120.441096000, 0.05) }, // 遠百嘉義
+                { "feds-40", (24.989982000, 121.313795000, 0.05) }, // 遠百桃園
+                { "feds-42", (24.802178000, 120.964880000, 0.05) }, // 新竹大遠百
+                { "feds-48", (22.996651000, 120.214358000, 0.05) }, // 台南大遠百
+                { "feds-50", (25.011361000, 121.464402000, 0.05) }, // 遠百板橋
+                { "feds-51", (22.613360000, 120.303994000, 0.05) }, // 高雄大遠百
+                { "feds-52", (23.978682000, 121.599776000, 0.05) }, // 遠百花蓮
+                { "feds-53", (24.164204000, 120.644555000, 0.05) }, // 台中大遠百
+                { "feds-54", (25.013950000, 121.466880000, 0.05) }, // 板橋大遠百
+                { "feds-55", (25.036882000, 121.566125100, 0.05) }, // 遠百信義A13
+                { "feds-72", (24.822541000, 121.022852800, 0.05) }  // 遠百竹北
+            };
+
+            string? nearestGroupId = null;
+            double minDistance = double.MaxValue;
+
+            foreach(var group in mallGroups)
+            {
+                if(branchLocations.ContainsKey(group.GroupId))
+                {
+                    var branch = branchLocations[group.GroupId];
+                    var distance = CalculateDistance(lat.Value, lng.Value, branch.lat, branch.lng);
+                    
+                    if(distance <= branch.radius && distance < minDistance)
+                    {
+                        minDistance = distance;
+                        nearestGroupId = group.GroupId;
+                    }
+                }
+            }
+
+            if(!string.IsNullOrEmpty(nearestGroupId))
+            {
+                return Json(new { success = true, groupId = nearestGroupId, distance = minDistance });
+            }
+
+            return Json(new { success = false, message = "找不到最近的分館" });
+        }
+
+        // 計算兩點間距離（公里）- Haversine 公式
+        private double CalculateDistance(double lat1, double lng1, double lat2, double lng2)
+        {
+            const double R = 6371; // 地球半徑（公里）
+            var dLat = (lat2 - lat1) * Math.PI / 180;
+            var dLng = (lng2 - lng1) * Math.PI / 180;
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180) *
+                    Math.Sin(dLng / 2) * Math.Sin(dLng / 2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return R * c;
         }
     }
 }
