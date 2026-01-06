@@ -149,6 +149,73 @@
                 img.src = img.src;
             }
         });
+
+        // GPS 地理位置偵測（只在 HTTPS 環境下啟用）
+        $(document).ready(function(){
+            @if(string.IsNullOrWhiteSpace(Model.SelectedGroupId))
+            {
+                <text>
+                    // 只在 HTTPS 環境下啟用 GPS 定位
+                    var isHttps = window.location.protocol === 'https:';
+                    
+                    if(navigator.geolocation && isHttps){
+                        setTimeout(function(){
+                            if(confirm('是否要根據您的位置自動選擇分館？'))
+                            {
+                                detectLocationByGPS();
+                            }
+                        }, 500);
+                    }
+                </text>
+            }
+            
+            function detectLocationByGPS(){
+                // 檢查是否為 HTTPS
+                var isHttps = window.location.protocol === 'https:';
+                if(!isHttps){
+                    // 不顯示錯誤訊息，靜默處理
+                    return;
+                }
+                
+                if(!navigator.geolocation){
+                    alert('您的瀏覽器不支援 GPS 定位功能');
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position){
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+                        $.ajax({
+                            url:'@Url.Action("GetMallByGPS", "Restaurant")',
+                            type:'GET',
+                            data:{lat:lat,lng:lng},
+                            success:function(response){
+                                if(response.success && response.groupId){
+                                    // 跳轉到對應的分館頁面，頁面會自動重新載入並更新標題和下拉選單
+                                    var url = '@Url.Action("Index","Restaurant")' + '?groupId=' + response.groupId;
+                                    window.location.href = url;
+                                }else{
+                                    console.log('無法判斷最近的分館');
+                                }
+                            },
+                            error:function(){
+                                console.log('無法連線到伺服器');
+                            }
+                        });
+                    },
+                    function(error){
+                        // 靜默處理錯誤，不顯示錯誤訊息
+                        console.log('GPS 定位失敗：', error.message);
+                    },
+                    {
+                        timeout: 10000,
+                        enableHighAccuracy: false,
+                        maximumAge: 300000
+                    }
+                );
+            }
+        });
     </script>
 }
 
