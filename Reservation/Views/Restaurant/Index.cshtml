@@ -28,8 +28,13 @@
                         </span>
                     </button>
                     <ul class="dropdown-menu w-100" aria-labelledby="branchDropdown">
-                        <li><a class="dropdown-item" href="@Url.Action("Index",new{categoryId=Model.SelectedCategoryId})"
-                        onclick="sessionStorage.removeItem('gpsLocationAsked')">所有分店</a></li>
+                        <li>
+                            <a class="dropdown-item" 
+                               href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId })"
+                               onclick="sessionStorage.setItem('gpsLocationAsked', 'no'); sessionStorage.setItem('userSelectedAllBranches', 'true');">
+                                所有分店
+                            </a>
+                        </li>
                         @foreach (var branch in Model.Branches)
                         {
                             var branchGroupId = Model.GroupIdToBranchId.FirstOrDefault(x => x.Value == branch.Id).Key ?? "";
@@ -156,30 +161,39 @@
             @if(string.IsNullOrWhiteSpace(Model.SelectedGroupId))
             {
                 <text>
-                    // 移除 HTTPS 限制，支援 HTTP 和 HTTPS
-                    if(navigator.geolocation){
-                        // 檢查是否已經詢問過用戶（在同一個瀏覽器會話中）
-                        var gpsAsked = sessionStorage.getItem('gpsLocationAsked');
-                        
-                        if(!gpsAsked){
-                            // 第一次訪問，詢問用戶
-                            setTimeout(function(){
-                                if(confirm('是否要根據您的位置自動選擇分館？')){
-                                    // 用戶同意，記錄並執行 GPS 定位
-                                    sessionStorage.setItem('gpsLocationAsked', 'yes');
+                    // 檢查用戶是否主動選擇了「所有分店」
+                    var userSelectedAllBranches = sessionStorage.getItem('userSelectedAllBranches');
+                    
+                    // 如果用戶主動選擇了「所有分店」，不執行 GPS 定位
+                    if(userSelectedAllBranches === 'true'){
+                        // 清除標記，但保留 gpsLocationAsked 為 'no'，避免下次再詢問
+                        sessionStorage.removeItem('userSelectedAllBranches');
+                        // 不執行任何 GPS 定位相關操作
+                    } else {
+                        // 移除 HTTPS 限制，支援 HTTP 和 HTTPS
+                        if(navigator.geolocation){
+                            // 檢查是否已經詢問過用戶（在同一個瀏覽器會話中）
+                            var gpsAsked = sessionStorage.getItem('gpsLocationAsked');
+                            
+                            if(!gpsAsked){
+                                // 第一次訪問，詢問用戶
+                                setTimeout(function(){
+                                    if(confirm('是否要根據您的位置自動選擇分館？')){
+                                        // 用戶同意，記錄並執行 GPS 定位
+                                        sessionStorage.setItem('gpsLocationAsked', 'yes');
+                                        detectLocationByGPS();
+                                    } else {
+                                        // 用戶拒絕，記錄但不執行
+                                        sessionStorage.setItem('gpsLocationAsked', 'no');
+                                    }
+                                }, 500);
+                            } else if(gpsAsked === 'yes'){
+                                // 用戶之前同意過，直接執行 GPS 定位（不再次詢問）
+                                setTimeout(function(){
                                     detectLocationByGPS();
-                                } else {
-                                    // 用戶拒絕，記錄但不執行
-                                    sessionStorage.setItem('gpsLocationAsked', 'no');
-                                }
-                            }, 500);
-                        } else if(gpsAsked === 'yes'){
-                            // 用戶之前同意過，直接執行 GPS 定位（不再次詢問）
-                            setTimeout(function(){
-                                detectLocationByGPS();
-                            }, 500);
+                                }, 500);
+                            }                      
                         }
-                        // 如果 gpsAsked === 'no'，則不執行任何操作
                     }
                 </text>
             }
