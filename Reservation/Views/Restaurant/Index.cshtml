@@ -150,34 +150,44 @@
             }
         });
 
-        // GPS 地理位置偵測（只在 HTTPS 環境下啟用）
+        // GPS 地理位置偵測
         $(document).ready(function(){
             @if(string.IsNullOrWhiteSpace(Model.SelectedGroupId))
             {
                 <text>
-                    // 只在 HTTPS 環境下啟用 GPS 定位
-                    var isHttps = window.location.protocol === 'https:';
-                    
-                    if(navigator.geolocation && isHttps){
-                        setTimeout(function(){
-                            if(confirm('是否要根據您的位置自動選擇分館？'))
-                            {
+                    // 移除 HTTPS 限制，支援 HTTP 和 HTTPS
+                    if(navigator.geolocation){
+                        // 檢查是否已經詢問過用戶（在同一個瀏覽器會話中）
+                        var gpsAsked = sessionStorage.getItem('gpsLocationAsked');
+                        
+                        if(!gpsAsked){
+                            // 第一次訪問，詢問用戶
+                            setTimeout(function(){
+                                if(confirm('是否要根據您的位置自動選擇分館？')){
+                                    // 用戶同意，記錄並執行 GPS 定位
+                                    sessionStorage.setItem('gpsLocationAsked', 'yes');
+                                    detectLocationByGPS();
+                                } else {
+                                    // 用戶拒絕，記錄但不執行
+                                    sessionStorage.setItem('gpsLocationAsked', 'no');
+                                }
+                            }, 500);
+                        } else if(gpsAsked === 'yes'){
+                            // 用戶之前同意過，直接執行 GPS 定位（不再次詢問）
+                            setTimeout(function(){
                                 detectLocationByGPS();
-                            }
-                        }, 500);
+                            }, 500);
+                        }
+                        // 如果 gpsAsked === 'no'，則不執行任何操作
                     }
                 </text>
             }
             
             function detectLocationByGPS(){
-                // 檢查是否為 HTTPS
-                var isHttps = window.location.protocol === 'https:';
-                if(!isHttps){
-                    // 不顯示錯誤訊息，靜默處理
-                    return;
-                }
+                console.log('開始 GPS 定位...');
                 
                 if(!navigator.geolocation){
+                    console.error('瀏覽器不支援 GPS 定位功能');
                     alert('您的瀏覽器不支援 GPS 定位功能');
                     return;
                 }
@@ -186,14 +196,20 @@
                     function(position){
                         var lat = position.coords.latitude;
                         var lng = position.coords.longitude;
-                        console.log('GPS 座標取得成功：', lat, lng);
+                        var accuracy = position.coords.accuracy;
+                        console.log('GPS 座標取得成功：', {
+                            lat: lat,
+                            lng: lng,
+                            accuracy: accuracy + ' 公尺'
+                        });
 
+                        console.log('發送 AJAX 請求到：', '@Url.Action("GetMallByGPS", "Restaurant")');
                         $.ajax({
                             url:'@Url.Action("GetMallByGPS", "Restaurant")',
                             type:'GET',
                             data:{lat:lat,lng:lng},
                             success:function(response){
-                                console.log('GPS API 回應：', response);
+                                console.log('GPS API 回應成功：', response);
                                 
                                 if(response.success && response.groupId){
                                     // 跳轉到對應的分館頁面
@@ -203,7 +219,7 @@
                                 }else{
                                     // 顯示具體錯誤訊息
                                     var errorMsg = response.message || '無法判斷最近的分館';
-                                    console.log('無法判斷最近的分館，回應訊息：', errorMsg);
+                                    console.warn('無法判斷最近的分館，回應訊息：', errorMsg);
                                     console.log('完整回應：', response);
                                 }
                             },
@@ -219,23 +235,38 @@
                         });
                     },
                     function(error){
-                        // 改進錯誤處理，顯示具體錯誤原因
+                        // 改進錯誤處理，顯示具體錯誤原因和錯誤代碼
                         var errorMessage = 'GPS 定位失敗';
-                        switch(error.code){
-                            case error.PERMISSION_DENIED:
+                        var errorCode = error && error.code !== undefined ? error.code : -1;
+                        
+                        // 根據錯誤代碼設定錯誤訊息
+                        switch(errorCode){
+                            case 1: // PERMISSION_DENIED
                                 errorMessage = 'GPS 定位權限被拒絕';
                                 break;
-                            case error.POSITION_UNAVAILABLE:
+                            case 2: // POSITION_UNAVAILABLE
                                 errorMessage = 'GPS 位置資訊不可用';
                                 break;
-                            case error.TIMEOUT:
+                            case 3: // TIMEOUT
                                 errorMessage = 'GPS 定位請求超時';
                                 break;
                             default:
-                                errorMessage = 'GPS 定位失敗：' + error.message;
+                                // 嘗試從 error 物件取得更多資訊
+                                if(error && error.message){
+                                    errorMessage = 'GPS 定位失敗：' + error.message;
+                                } else {
+                                    errorMessage = 'GPS 定位失敗：未知錯誤';
+                                }
                                 break;
                         }
-                        console.error('GPS 定位錯誤：', errorMessage, error);
+                        
+                        // 改進 console 輸出格式，使其更易讀
+                        console.error('GPS 定位錯誤');
+                        console.error('錯誤代碼：', errorCode);
+                        console.error('錯誤訊息：', errorMessage);
+                        if(error){
+                            console.error('錯誤物件：', error);
+                        }
                     },
                     {
                         timeout: 10000,
@@ -243,7 +274,8 @@
                         maximumAge: 300000
                     }
                 );
-        });
+            }  // 結束 detectLocationByGPS 函數
+        });    // 結束 $(document).ready
     </script>
 }
 
