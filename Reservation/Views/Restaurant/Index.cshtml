@@ -28,7 +28,8 @@
                         </span>
                     </button>
                     <ul class="dropdown-menu w-100" aria-labelledby="branchDropdown">
-                        <li><a class="dropdown-item" href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId })">所有分店</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index",new{categoryId=Model.SelectedCategoryId})"
+                        onclick="sessionStorage.removeItem('gpsLocationAsked')">所有分店</a></li>
                         @foreach (var branch in Model.Branches)
                         {
                             var branchGroupId = Model.GroupIdToBranchId.FirstOrDefault(x => x.Value == branch.Id).Key ?? "";
