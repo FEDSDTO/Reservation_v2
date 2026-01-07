@@ -172,7 +172,7 @@ namespace Reservation.Controllers
                     var branch = branchLocations[group.GroupId];
                     var distance = CalculateDistance(lat.Value, lng.Value, branch.lat, branch.lng);
                     
-                    if(distance <= branch.radius && distance < minDistance)
+                    if( distance < minDistance)
                     {
                         minDistance = distance;
                         nearestGroupId = group.GroupId;
@@ -183,6 +183,16 @@ namespace Reservation.Controllers
             if(!string.IsNullOrEmpty(nearestGroupId))
             {
                 return Json(new { success = true, groupId = nearestGroupId, distance = minDistance });
+            }
+
+            if(mallGroups.Any())
+            {
+                return Json(new{
+                    success = true,
+                    groupId = mallGroups.First().GroupId,
+                    distance = 0,
+                    message="使用預設分館"
+                });
             }
 
             return Json(new { success = false, message = "找不到最近的分館" });

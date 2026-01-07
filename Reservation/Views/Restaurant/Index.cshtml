@@ -186,27 +186,56 @@
                     function(position){
                         var lat = position.coords.latitude;
                         var lng = position.coords.longitude;
+                        console.log('GPS 座標取得成功：', lat, lng);
+
                         $.ajax({
                             url:'@Url.Action("GetMallByGPS", "Restaurant")',
                             type:'GET',
                             data:{lat:lat,lng:lng},
                             success:function(response){
+                                console.log('GPS API 回應：', response);
+                                
                                 if(response.success && response.groupId){
-                                    // 跳轉到對應的分館頁面，頁面會自動重新載入並更新標題和下拉選單
+                                    // 跳轉到對應的分館頁面
                                     var url = '@Url.Action("Index","Restaurant")' + '?groupId=' + response.groupId;
+                                    console.log('準備跳轉到：', url);
                                     window.location.href = url;
                                 }else{
-                                    console.log('無法判斷最近的分館');
+                                    // 顯示具體錯誤訊息
+                                    var errorMsg = response.message || '無法判斷最近的分館';
+                                    console.log('無法判斷最近的分館，回應訊息：', errorMsg);
+                                    console.log('完整回應：', response);
                                 }
                             },
-                            error:function(){
-                                console.log('無法連線到伺服器');
+                            error:function(xhr, status, error){
+                                console.error('GPS API 請求失敗：', {
+                                    status: xhr.status,
+                                    statusText: xhr.statusText,
+                                    responseText: xhr.responseText,
+                                    error: error,
+                                    statusCode: status
+                                });
                             }
                         });
                     },
                     function(error){
-                        // 靜默處理錯誤，不顯示錯誤訊息
-                        console.log('GPS 定位失敗：', error.message);
+                        // 改進錯誤處理，顯示具體錯誤原因
+                        var errorMessage = 'GPS 定位失敗';
+                        switch(error.code){
+                            case error.PERMISSION_DENIED:
+                                errorMessage = 'GPS 定位權限被拒絕';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = 'GPS 位置資訊不可用';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = 'GPS 定位請求超時';
+                                break;
+                            default:
+                                errorMessage = 'GPS 定位失敗：' + error.message;
+                                break;
+                        }
+                        console.error('GPS 定位錯誤：', errorMessage, error);
                     },
                     {
                         timeout: 10000,
@@ -214,7 +243,6 @@
                         maximumAge: 300000
                     }
                 );
-            }
         });
     </script>
 }
