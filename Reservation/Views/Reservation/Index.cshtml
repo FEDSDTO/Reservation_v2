@@ -65,6 +65,9 @@
         <form method="post" action="@Url.Action("Index", "Reservation")" id="reservationForm">
             <input type="hidden" name="Restaurant.Id" value="@Model.Restaurant.Id" />
             <input type="hidden" name="Branch.Id" value="@Model.Branch.Id" />
+            <input type="hidden" name="GroupId" value="@ViewBag.GroupId" />
+            <input type="hidden" name="CompanyId" value="@ViewBag.CompanyId" />
+            <input type="hidden" name="BranchId" value="@ViewBag.BranchId" />
             
             <!-- 訂位日期 -->
             <div class="form-group mb-3">
@@ -692,18 +695,23 @@
             // 載入時段
             function loadTimeSlots() {
                 var date = $('#reservationDate').val();
-                var period = $('#selectedMealPeriod').val();
                 
                 if (!date) {
                     date = '@DateTime.Today.ToString("yyyy-MM-dd")';
                     $('#reservationDate').val(date);
                 }
 
+                var groupId = '@ViewBag.GroupId';
+                var companyId = '@ViewBag.CompanyId';
+                var branchId = '@ViewBag.BranchId';
+
                 $.ajax({
                     url: '@Url.Action("GetTimeSlots", "Reservation")',
                     type: 'GET',
                     data: {
-                        mealPeriod: period,
+                        id: groupId,
+                        companyId: companyId,
+                        branchId: branchId,
                         date: date
                     },
                     success: function(slots) {

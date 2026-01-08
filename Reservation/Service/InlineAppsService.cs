@@ -29,6 +29,35 @@ namespace Reservation.Service
             //等待餐廳
             waiting,
         }
+
+        /// <summary>
+        /// 封裝 Framework 的 GetInlineappsBranch - 取得單一餐廳分店的詳細資訊
+        /// </summary>
+        public async Task<ApiResult> GetBranchAsync(
+            string groupId, 
+            string companyId, 
+            string branchId, 
+            string type,  // "all", "booking", "waiting"
+            int size = 1, 
+            DateTime? date = null)
+        {
+            date ??= DateTime.UtcNow.Date;
+            var queryStr = $"type={type}&size={size}&date={date:yyyy-MM-dd}";
+            return await GetInlineApps(
+                $"/v2/groups/{groupId}/companies/{companyId}/branches/{branchId}", 
+                queryStr);
+        }
+
+       public async Task<ApiResult> PostReservationAsync(
+            string companyId, 
+            string branchId, 
+            object requestBody)
+        {
+            return await PostInlineApps(
+                $"/reservations/{companyId}/{branchId}", 
+                requestBody);
+        }
+
         /// <summary>
         /// 執行 GET 請求到 Inline Apps API
         /// </summary>
@@ -88,16 +117,16 @@ namespace Reservation.Service
         /// <param name="location"></param>
         /// <param name="requestBody"></param>
         /// <returns></returns>
-        public async Task<ApiResult> PostInlineApps(string location,string requestBody)
+        public async Task<ApiResult> PostInlineApps(string location, object requestBody)
         {
             var apiResult = new ApiResult();
             try
             {
-                location=location.TrimStart('/');
-                location=location.TrimEnd('?');
+                location = location.TrimStart('/');
+                location = location.TrimEnd('?');
 
-                string domain = _configuration["InlineDomain"]??string.Empty;
-                string apiKey = _configuration["InlineApiKey"]??string.Empty;
+                string domain = _configuration["InlineDomain"] ?? string.Empty;
+                string apiKey = _configuration["InlineApiKey"] ?? string.Empty;
                 
                 // 移除 domain 結尾的斜線，避免雙斜線問題
                 domain = domain.TrimEnd('/');
@@ -105,22 +134,48 @@ namespace Reservation.Service
                 string url = $"{domain}/{location}";
 
                 var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Add("X-API-KEY",apiKey);
+                client.DefaultRequestHeaders.Add("X-API-KEY", apiKey);
 
-                var json = JsonSerializer.Serialize(requestBody);
-                var content = new StringContent(json,Encoding.UTF8,"application/json");
+                // 處理 requestBody：如果是 string 就直接使用，否則序列化
+                string json;
+                if (requestBody is string str)
+                {
+                    json = str;
+                }
+                else
+                {
+                    json = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+                }
 
-                var response = await client.PostAsync(url,content);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                apiResult.Code=(int)response.StatusCode;
-                apiResult.Msg=response.ReasonPhrase??string.Empty;
-                apiResult.Data=await response.Content.ReadAsStringAsync();
-                
-            }catch(Exception ex)
+                _fileLogService?.ApiResponseLog_Txt($"=== API POST 請求 ===");
+                _fileLogService?.ApiResponseLog_Txt($"URL: {url}");
+                _fileLogService?.ApiResponseLog_Txt($"Request Body: {json}");
+
+                var startTime = DateTime.Now;
+                var response = await client.PostAsync(url, content);
+                var elapsedTime = (DateTime.Now - startTime).TotalMilliseconds;
+
+                apiResult.Code = (int)response.StatusCode;
+                apiResult.Msg = response.ReasonPhrase ?? string.Empty;
+                apiResult.Data = await response.Content.ReadAsStringAsync();
+
+                _fileLogService?.ApiResponseLog_Txt($"回應狀態碼: {apiResult.Code}");
+                _fileLogService?.ApiResponseLog_Txt($"回應時間: {elapsedTime}ms");
+                _fileLogService?.ApiResponseLog_Txt($"回應內容: {apiResult.Data}");
+            }
+            catch(Exception ex)
             {
-                apiResult.Code=-1;
-                apiResult.Msg=ex.Message;
-                apiResult.Data=string.Empty;
+                apiResult.Code = -1;
+                apiResult.Msg = ex.Message;
+                apiResult.Data = string.Empty;
+                
+                _fileLogService?.SystemErrorLog_Txt($"Inline API POST 請求失敗 - Location: {location}, Error: {ex.Message}");
+                _fileLogService?.SystemErrorLog_Txt($"StackTrace: {ex.StackTrace}");
             }
             return apiResult;
         }
