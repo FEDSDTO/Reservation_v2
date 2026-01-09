@@ -377,6 +377,7 @@ namespace Reservation.Controllers
                 }
 
                 // ========== 步驟 3：將 CustomerTitle (先生/小姐) 轉換為 Gender (0/1/2) ==========
+                int memberId = 0;
                 int gender = 2; // 預設：未指定
                 if(model.CustomerTitle == "先生")
                 {
@@ -449,6 +450,41 @@ namespace Reservation.Controllers
                 {
                     _fileLogService?.SystemLog_Txt($"訂位成功 - API 回應: {apiResult.Data}");
                     
+                    try
+                    {
+                       var memberReserveLog=new MemberReserveLog{
+                        Status="N",
+                        Json=apiResult.Data,
+                        Creator=0,
+                        CreateDate=DateTime.Now,
+                        CreateFrom="FEDS-SYS"
+                       };
+
+                       var memberReserve = new MemberReserve{
+                            MemberId = memberId, // 會員ID，非會員為 0
+                            CompanyId = companyId,
+                            BranchId = branchId,
+                            GroupSize = model.AdultCount,
+                            NumberOfKid = model.ChildCount,
+                            ContactName = model.CustomerName,
+                            ContactPhone = formattedPhone,
+                            ContactGender = (byte)gender,
+                            Datetime = bookingDateTime, // 台灣時間（非 UTC）
+                            Note = customerNote,
+                            Creator = 0,
+                            CreateDate = DateTime.Now,
+                            CreateFrom = "FEDS-SYS",
+                            MemberReserveLogs = new List<MemberReserveLog> { memberReserveLog }
+                       };
+
+                       _restaurantContext.MemberReserves.Add(memberReserve);
+                       await _restaurantContext.SaveChangesAsync();
+                       _fileLogService?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}");
+                    }catch(Exception ex)
+                    {
+                      _fileLogService?.SystemErrorLog_Txt($"儲存訂位資料到資料庫失敗: {ex.Message}");
+                    }
+
                     return Json(new { success = true, message = "訂位成功" });
                 }
                 else

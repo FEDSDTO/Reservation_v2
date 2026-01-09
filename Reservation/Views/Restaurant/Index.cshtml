@@ -6,9 +6,9 @@
 <!-- 頂部漸層導航欄 -->
 <header class="restaurant-header">
     <div class="header-content">
-        <h1 class="header-title">@(Model.SelectedBranchId.HasValue ? 
-            Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百信義A13" 
-            : "遠百信義A13")</h1>
+       <h1 class="header-title">@(Model.SelectedBranchId.HasValue ? 
+    Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百餐廳訂位" 
+    : "遠百餐廳訂位")</h1>
     </div>
 </header>
 <!-- 搜尋與篩選區域 -->

@@ -66,9 +66,8 @@ namespace Reservation.Controllers
                 // 顯示所有分館：同步所有分館的資料
                 foreach(var mallGroup in mallGroups)
                 {
-                    await _restaurantService.RestaurantApiAsync(mallGroup.GroupId);
-                    var groupRestaurants = await _restaurantService.GetRestaurantsAsync(mallGroup.GroupId);
-                    restaurantCards.AddRange(groupRestaurants);
+                   var groupRestaurants = await _restaurantService.GetRestaurantsAsync(mallGroup.GroupId);
+                   restaurantCards.AddRange(groupRestaurants);
                 }
             }
             else
