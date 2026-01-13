@@ -17,7 +17,7 @@ namespace Reservation.Models.ViewModels
 
     public class WaitingRecordModel
     {
-        public int WaitingId { get; set; }
+        public string WaitingId { get; set; } = string.Empty;
         public int RestaurantId { get; set; }
         public string RestaurantName { get; set; } = string.Empty;
         public string RestaurantImageUrl { get; set; } = string.Empty;

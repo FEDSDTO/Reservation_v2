@@ -1,5 +1,6 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Reservation.Models.EFMemeberModels;
 using Reservation.Models.EFRestaurantModels;
 using Reservation.Models.ViewModels;
@@ -93,43 +94,97 @@ namespace Reservation.Controllers
         }
         public async Task<IActionResult> QueryRecord(int? branchId)
         {
-            var mallGroups = await _restaurantService.GetMallsAsync();
-            
-            var branchDict = new Dictionary<string, int>();
-            var branches = new List<BranchModel>();
-            
-            for (int i = 0; i < mallGroups.Count; i++)
-            {
-                var branch = new BranchModel 
-                { 
-                    Id = i + 1,
-                    Name = mallGroups[i].Name 
-                };
-                branches.Add(branch);
-                branchDict[mallGroups[i].GroupId] = branch.Id;
-            }
+           var mallGroups = await _restaurantService.GetMallsAsync();
+           var branchDict =  new Dictionary<string, int>();
+           var branches = new List<BranchModel>();
 
-            var reservationRecords = new List<ReservationRecordModel>();
-            var waitingRecords = new List<WaitingRecordModel>();
+           for(int i = 0;i<mallGroups.Count;i++)
+           {
+              var branch = new BranchModel
+              {
+                Id = i +1,
+                Name = mallGroups[i].Name
+              };
+              branches.Add(branch);
+              branchDict[mallGroups[i].GroupId] = branch.Id;
+           }
 
-            if (branchId.HasValue)
+           var reservationRecords = new List<ReservationRecordModel>();
+           var waitingRecords = new List<WaitingRecordModel>();
+
+           int memberId = 0;
+           if(branchId.HasValue)
+           {
+            var selectedGroupId = branchDict.FirstOrDefault(x=>x.Value == branchId.Value).Key;
+            if(!string.IsNullOrEmpty(selectedGroupId))
             {
-                var selectedGroupId = branchDict.FirstOrDefault(x => x.Value == branchId.Value).Key;
-                if (!string.IsNullOrEmpty(selectedGroupId))
+                // 查詢訂位記錄
+                 var reserves = await _restaurantContext.MemberReserves
+                .Where(r => r.MemberId == memberId && r.BranchId != null && 
+                           r.BranchId.StartsWith(selectedGroupId))
+                .OrderByDescending(r => r.CreateDate)
+                .ToListAsync();
+
+                foreach(var reserve in reserves)
                 {
-                    var restaurantCards = await _restaurantService.GetRestaurantsAsync(selectedGroupId);
+                    var restaurant = await _restaurantService.GetRestaurantDetailAsync
+                    (selectedGroupId,reserve.BranchId);
+                    
+                    if(restaurant!=null)
+                    {
+                       reservationRecords.Add(new ReservationRecordModel{
+                           ReservationId = (int)reserve.Id,
+                           RestaurantId = restaurant.id.GetHashCode(),
+                           RestaurantName = restaurant.Name,
+                           RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{reserve.BranchId}.jpg",
+                           RestaurantLocation = restaurant.Address,
+                           RestaurantPhone = restaurant.PhoneNumber,
+                           ReservationDate = reserve.Datetime,
+                           DayOfWeek = reserve.Datetime.ToString("dddd",new System.Globalization.CultureInfo("zh-TW")),
+                           AdultCount = reserve.GroupSize,
+                           ChildCount = reserve.NumberOfKid,
+                           Status = "完成"
+                       });
+                    }
+                }
+                // 查詢候位記錄
+                var waitings = await _restaurantContext.MemberWaitings
+                .Where(w=>w.MemberId == memberId && w.BranchId !=null &&
+                w.BranchId.StartsWith(selectedGroupId))
+                .OrderByDescending(w=>w.CreateDate)
+                .ToListAsync();
+
+                foreach(var waiting in waitings)
+                {
+                    var restaurant = await _restaurantService.GetRestaurantDetailAsync(
+                        selectedGroupId,waiting.BranchId);
+                    if(restaurant!=null)
+                    {
+                        waitingRecords.Add(new WaitingRecordModel{
+                            WaitingId = waiting.Id,
+                            RestaurantId = restaurant.id.GetHashCode(),
+                            RestaurantName = restaurant.Name,
+                            RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{waiting.BranchId}.jpg",
+                            RestaurantLocation = restaurant.Address,
+                            RestaurantPhone = restaurant.PhoneNumber,
+                            JoinDate = waiting.CreateDate,
+                            AdultCount = waiting.GroupSize,
+                            ChildCount = waiting.NumberOfKid,
+                            QueueNumber = 0,
+                            Status = "等待中"                            
+                        });
+                    }
                 }
             }
-
-            var viewModel = new RecordQueryModel
-            {
-                Branches = branches,
-                SelectedBranchId = branchId,
-                ReservationRecords = reservationRecords,
-                WaitingRecords = waitingRecords
-            };
-
-            return View(viewModel);
+           }
+           var viewModel = new RecordQueryModel
+           {
+            Branches = branches,
+            SelectedBranchId = branchId,
+            ReservationRecords = reservationRecords,
+            WaitingRecords = waitingRecords,
+           };
+           return View();
         }
 
         public IActionResult Queue(int id)

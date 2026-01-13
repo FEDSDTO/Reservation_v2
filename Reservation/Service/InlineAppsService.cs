@@ -180,5 +180,10 @@ namespace Reservation.Service
             return apiResult;
         }
         
+        public async Task<ApiResult> PostWaitingAsync(string companyId,string branchId,object requestBody)
+        {
+            return await PostInlineApps( $"/waitings/{companyId}/{branchId}", requestBody);
+        }
+       
     }
 }
