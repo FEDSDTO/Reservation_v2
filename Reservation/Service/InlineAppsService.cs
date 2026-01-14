@@ -8,7 +8,7 @@ namespace Reservation.Service
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
-        private readonly Func_Log _fileLogService;
+        private readonly Func_Log _Log;
        
         public InlineAppsService(
             IHttpClientFactory httpClientFactory,
@@ -17,7 +17,7 @@ namespace Reservation.Service
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
-            _fileLogService = fileLogService;
+            _Log = fileLogService;
         }
 
         public enum GroupType
@@ -82,10 +82,10 @@ namespace Reservation.Service
                string url = $"{domain}/{location}?{queryStr}";
                
                // 記錄請求資訊
-               _fileLogService.ApiResponseLog_Txt($"=== API 請求 ===");
-               _fileLogService.ApiResponseLog_Txt($"URL: {url}");
-               _fileLogService.ApiResponseLog_Txt($"Location: {location}");
-               _fileLogService.ApiResponseLog_Txt($"Query: {queryStr}");
+               _Log.ApiResponseLog_Txt($"=== API 請求 ===");
+               _Log.ApiResponseLog_Txt($"URL: {url}");
+               _Log.ApiResponseLog_Txt($"Location: {location}");
+               _Log.ApiResponseLog_Txt($"Query: {queryStr}");
                
                var client = _httpClientFactory.CreateClient();
                client.DefaultRequestHeaders.Add("X-API-KEY",apiKey);
@@ -106,8 +106,8 @@ namespace Reservation.Service
                apiResult.Data=string.Empty;
                
                // 記錄錯誤
-               _fileLogService.SystemErrorLog_Txt($"Inline API 請求失敗 - Location: {location}, Error: {ex.Message}");
-               _fileLogService.SystemErrorLog_Txt($"StackTrace: {ex.StackTrace}");
+               _Log.SystemErrorLog_Txt($"Inline API 請求失敗 - Location: {location}, Error: {ex.Message}");
+               _Log.SystemErrorLog_Txt($"StackTrace: {ex.StackTrace}");
             }
             return apiResult;
         }
@@ -152,9 +152,9 @@ namespace Reservation.Service
 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                _fileLogService?.ApiResponseLog_Txt($"=== API POST 請求 ===");
-                _fileLogService?.ApiResponseLog_Txt($"URL: {url}");
-                _fileLogService?.ApiResponseLog_Txt($"Request Body: {json}");
+                _Log?.ApiResponseLog_Txt($"=== API POST 請求 ===");
+                _Log?.ApiResponseLog_Txt($"URL: {url}");
+                _Log?.ApiResponseLog_Txt($"Request Body: {json}");
 
                 var startTime = DateTime.Now;
                 var response = await client.PostAsync(url, content);
@@ -164,9 +164,9 @@ namespace Reservation.Service
                 apiResult.Msg = response.ReasonPhrase ?? string.Empty;
                 apiResult.Data = await response.Content.ReadAsStringAsync();
 
-                _fileLogService?.ApiResponseLog_Txt($"回應狀態碼: {apiResult.Code}");
-                _fileLogService?.ApiResponseLog_Txt($"回應時間: {elapsedTime}ms");
-                _fileLogService?.ApiResponseLog_Txt($"回應內容: {apiResult.Data}");
+                _Log?.ApiResponseLog_Txt($"回應狀態碼: {apiResult.Code}");
+                _Log?.ApiResponseLog_Txt($"回應時間: {elapsedTime}ms");
+                _Log?.ApiResponseLog_Txt($"回應內容: {apiResult.Data}");
             }
             catch(Exception ex)
             {
@@ -174,8 +174,8 @@ namespace Reservation.Service
                 apiResult.Msg = ex.Message;
                 apiResult.Data = string.Empty;
                 
-                _fileLogService?.SystemErrorLog_Txt($"Inline API POST 請求失敗 - Location: {location}, Error: {ex.Message}");
-                _fileLogService?.SystemErrorLog_Txt($"StackTrace: {ex.StackTrace}");
+                _Log?.SystemErrorLog_Txt($"Inline API POST 請求失敗 - Location: {location}, Error: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"StackTrace: {ex.StackTrace}");
             }
             return apiResult;
         }

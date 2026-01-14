@@ -12,6 +12,7 @@ namespace Reservation.Models.ViewModels
         public int QueueNumber { get; set; }
         public int AheadCount { get; set; }
         public int EstimatedWaitMinutes { get; set; }
+         public int MaxWaitingGroupSize { get; set; } = 8;
     }
     public class WaitingPositionOrder
     {

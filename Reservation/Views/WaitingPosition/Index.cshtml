@@ -114,7 +114,7 @@
                 <div class="col-6">
                     <label class="form-label">大人</label>
                     <select class="form-select" name="AdultCount" id="adultCount" required>
-                        @for (int i = 1; i <= 8; i++)
+                        @for (int i = 1; i <= Model.MaxWaitingGroupSize; i++)
                         {
                             <option value="@i" selected="@(Model.AdultCount == i)">@i 位</option>
                         }
@@ -123,7 +123,7 @@
                 <div class="col-6">
                     <label class="form-label">小孩</label>
                     <select class="form-select" name="ChildCount" id="childCount">
-                        @for (int i = 0; i <= 8; i++)
+                        @for (int i = 0; i <= Model.MaxWaitingGroupSize - Model.AdultCount; i++)
                         {
                             <option value="@i" selected="@(Model.ChildCount == i)">@i 位</option>
                         }
@@ -255,14 +255,17 @@
             });
 
             setInterval(function() {
-                $.ajax({
-                    url: '@Url.Action("GetQueueStatus", "WaitingPosition")',
-                    type: 'GET',
-                    data: { restaurantId: @Model.Restaurant.Id },
-                    success: function(response) {
-                        $('#waitingCountDisplay').text(response.currentQueueCount);
-                    }
-                });
+               $.ajax({
+                url:'@Url.Action("GetQueueStatus","WaitingPosition")',
+                type:'GET',
+                data:{
+                    groupId: '@ViewBag.GroupId',
+                    companyId: '@ViewBag.CompanyId',
+                    branchId: '@ViewBag.BranchId'
+                },success:function(response){
+                    $('#waitingCountDisplay').text(response.currentQueueCount);
+                }
+               })
             }, 30000);
         });
     </script>

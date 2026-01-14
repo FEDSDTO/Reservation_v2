@@ -11,22 +11,10 @@ namespace Reservation.Controllers
 {
     public class WaitingPositionController : Controller
     {
-        private static Dictionary<int, Queue<QueueInfo>> _queueData = new();
         private readonly RestaurantContext _restaurantContext;
         private readonly RestaurantService _restaurantService;
         private readonly InlineAppsService _inlineAppsService;
-        private readonly Func_Log _fileLogService;
-        
-        private class QueueInfo
-        {
-            public int QueueNumber { get; set; }
-            public int RestaurantId { get; set; }
-            public string CustomerName { get; set; } = string.Empty;
-            public string CustomerPhone { get; set; } = string.Empty;
-            public int AdultCount { get; set; }
-            public int ChildCount { get; set; }
-            public DateTime JoinTime { get; set; }
-        }
+        private readonly Func_Log _Log;
 
         public WaitingPositionController(
             RestaurantContext restaurantContext,
@@ -37,16 +25,15 @@ namespace Reservation.Controllers
             _restaurantContext = restaurantContext;
             _restaurantService = restaurantService;
             _inlineAppsService = inlineAppsService;
-            _fileLogService = fileLogService;
+            _Log = fileLogService;
         }
 
         public async Task<IActionResult> Index(string branchId, string restaurantId)
         {
-            if (string.IsNullOrEmpty(restaurantId) || string.IsNullOrEmpty(branchId))
-            {
-                return NotFound();
-            }
-
+           if(string.IsNullOrEmpty(restaurantId) || string.IsNullOrEmpty(branchId))
+           {
+              return NotFound();
+           }
             var mallGroups = await _restaurantService.GetMallsAsync();
             var branchDict = new Dictionary<string, int>();
             var branches = new List<BranchModel>();
@@ -63,13 +50,64 @@ namespace Reservation.Controllers
             }
 
             var restaurantCards = await _restaurantService.GetRestaurantsAsync(branchId);
-            var restaurantCard = restaurantCards.FirstOrDefault(r => r.id == restaurantId);
-            
-            if (restaurantCard == null)
+            var restaurantCard = restaurantCards.FirstOrDefault(r=>r.id == restaurantId);
+
+            if(restaurantCard == null)
             {
                 return NotFound();
             }
+            var currentQueueCount = 0;
+            int estimatedWaitMinutes = 0;
+            string waitingStatus = "open";
+            int maxWaitingGroupSize= 8;
+            try
+            {
+                var apiResult = await _inlineAppsService.GetBranchAsync(
+                    branchId,
+                    restaurantCard.CompanyId,
+                    restaurantId,
+                    "waiting",
+                    size: 1,
+                    date: DateTime.UtcNow.Date);
 
+                if(apiResult.Code == 200)
+                {
+                    try
+                    {
+                        var data = JObject.Parse(apiResult.Data);
+                        var waitingInfo = data.GetValue("waitingInfo");
+                        if(waitingInfo != null)
+                        {
+                            currentQueueCount = waitingInfo.Value<int?>("waitingCount") ?? 0;
+                            estimatedWaitMinutes = waitingInfo.Value<int?>("estimatedWaitingMinutes") ?? 0;
+                            waitingStatus = waitingInfo.Value<string>("status")?.ToLower() ?? "open";
+                        }
+                        var maxGroupSize = data.GetValue("maxWaitingGroupSize");
+                        if(maxGroupSize != null)
+                        {
+                            maxWaitingGroupSize = maxGroupSize.Value<int>();
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        _Log?.SystemErrorLog_Txt($"解析候位資訊失敗: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    _Log?.SystemErrorLog_Txt($"取得候位資訊失敗 - Code: {apiResult.Code}, Msg: {apiResult.Msg}");
+                }
+            }
+            catch(Exception ex)
+            {
+                _Log?.SystemErrorLog_Txt($"取得候位資訊異常: {ex.Message}");
+            }
+
+            if(waitingStatus != "open")
+            {
+                TempData["ErrorMsg"] = "餐廳目前無提供候位服務";
+               return RedirectToAction("Index", "Restaurant", new { groupId = branchId });
+            }
             var restaurant = new Reservation.Models.ViewModels.RestaurantInfoModel
             {
                 Id = branches.FirstOrDefault(b => branchDict.ContainsKey(branchId) && branchDict[branchId] == b.Id)?.Id ?? 1,
@@ -86,24 +124,21 @@ namespace Reservation.Controllers
 
             var selectedBranch = branches.FirstOrDefault(b => branchDict.ContainsKey(branchId) && branchDict[branchId] == b.Id) 
                 ?? branches.FirstOrDefault();
-
-            var currentQueueCount = 0;
-            if (_queueData.ContainsKey(restaurant.Id))
-            {
-                currentQueueCount = _queueData[restaurant.Id].Count;
-            }
-
+            
             var viewModel = new WaitingPositionModel
             {
                 Restaurant = restaurant,
                 Branch = selectedBranch ?? new BranchModel(),
                 AdultCount = 2,
                 ChildCount = 0,
-                CurrentQueueCount = currentQueueCount
+                CurrentQueueCount = currentQueueCount,
+                QueueNumber = 0,
+                AheadCount = 0,
+                EstimatedWaitMinutes = estimatedWaitMinutes,
+                MaxWaitingGroupSize = maxWaitingGroupSize
             };
-            
             ViewBag.GroupId = branchId;
-            ViewBag.CompanyId =restaurantCard.CompanyId;
+            ViewBag.CompanyId = restaurantCard.CompanyId;
             ViewBag.BranchId = restaurantId;
             return View(viewModel);
         }
@@ -180,15 +215,15 @@ namespace Reservation.Controllers
               Datetime = DateTime.UtcNow,
               CreatedFrom = "FEDSWEB"
             };
-            _fileLogService?.SystemLog_Txt($"=== 提交候位 ===");
-            _fileLogService?.SystemLog_Txt($"GroupId: {groupId}, CompanyId: {companyId}, BranchId: {branchId}");
-            _fileLogService?.SystemLog_Txt($"候位資料: {System.Text.Json.JsonSerializer.Serialize(waitingPositionOrder)}");
+            _Log?.SystemLog_Txt($"=== 提交候位 ===");
+            _Log?.SystemLog_Txt($"GroupId: {groupId}, CompanyId: {companyId}, BranchId: {branchId}");
+            _Log?.SystemLog_Txt($"候位資料: {System.Text.Json.JsonSerializer.Serialize(waitingPositionOrder)}");
             
 
             var apiResult = await _inlineAppsService.PostWaitingAsync(companyId,branchId,waitingPositionOrder);
             if(apiResult.Code !=200)
             {
-                _fileLogService?.SystemErrorLog_Txt($"候位失敗 - code:{apiResult.Code}, message:{apiResult.Msg},Data:{apiResult.Data}");
+                _Log?.SystemErrorLog_Txt($"候位失敗 - code:{apiResult.Code}, message:{apiResult.Msg},Data:{apiResult.Data}");
                 string errorMessage = "候位失敗，請稍後再試";
                 string errorType ="general";
                 try
@@ -209,7 +244,7 @@ namespace Reservation.Controllers
                 }
                 catch(Exception ex)
                 {
-                    _fileLogService?.SystemErrorLog_Txt($"候位失敗 - 解析錯誤: {ex.Message}");
+                    _Log?.SystemErrorLog_Txt($"候位失敗 - 解析錯誤: {ex.Message}");
                 }
                 return Json(new {
                     success = false,
@@ -226,51 +261,58 @@ namespace Reservation.Controllers
             }
             catch(Exception ex)
             {
-               _fileLogService?.SystemErrorLog_Txt($"候位失敗 - 解析ReservationId失敗: {ex.Message}");
+               _Log?.SystemErrorLog_Txt($"候位失敗 - 解析ReservationId失敗: {ex.Message}");
             }
 
             try
             {
+               string waitingId = reservationId;
+               if(string.IsNullOrEmpty(waitingId))
+               {
+                  waitingId = $"WAIT_{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+                   _Log?.SystemLog_Txt($"API 未返回 reservationId，產生臨時 ID: {waitingId}");
+               }
+
                var memberWaiting = new MemberWaiting
                {
-                MemberId = memberId,
-                CompanyId = companyId,
-                BranchId = branchId,
-                GroupSize = model.AdultCount,
-                NumberOfKid = model.ChildCount,
-                ContactName = model.CustomerName,
-                ContactPhone = formattedPhone,
-                ContactGender = (byte)gender,
-                Datetime = DateTime.Now,
-                Note = !string.IsNullOrEmpty(waitingPositionOrder.CustomerNote) 
-                    ? waitingPositionOrder.CustomerNote 
-                    : (string.IsNullOrEmpty(reservationId) ? string.Empty : $"API ReservationId: {reservationId}"),
-                Creator = 0,
-                CreateDate = DateTime.Now,
-                CreateFrom = "FEDS-SYS"
+                 Id = waitingId,
+                 MemberId = memberId,
+                 CompanyId = companyId,
+                 BranchId = branchId,
+                 GroupSize = model.AdultCount,
+                 NumberOfKid=model.ChildCount,
+                 ContactName = model.CustomerName,
+                 ContactPhone = formattedPhone,
+                 ContactGender = (byte)gender,
+                 Datetime = DateTime.Now,
+                 Note = waitingPositionOrder.CustomerNote ?? string.Empty,
+                 Remark = !string.IsNullOrEmpty(reservationId)
+                 ? $"API 返回 reservationId: {reservationId}"
+                 : string.Empty,
+                 Creator = 0,
+                 CreateDate = DateTime.Now,
+                 CreateFrom = "FEDS-SYS"
                };
 
                _restaurantContext.MemberWaitings.Add(memberWaiting);
                await _restaurantContext.SaveChangesAsync();
-
-               var memberWaitingLog = new MemberWaitingLog
-               {
-                ReserveId = memberWaiting.Id.ToString(),
-                Status = "N",
-                Json = System.Text.Json.JsonSerializer.Serialize(waitingPositionOrder),
-                Creator = 0,
-                CreateDate = DateTime.Now,
-                CreateFrom = "FEDS-SYS"
-               };
-
-               memberWaiting.MemberWaitingLogs.Add(memberWaitingLog);
-               await _restaurantContext.SaveChangesAsync();
                
-               _fileLogService?.SystemLog_Txt($"候位資料已儲存到資料庫 - WaitingId: {memberWaiting.Id}, API ReservationId: {reservationId}");
+                var memberWaitingLog = new MemberWaitingLog
+                {
+                    ReserveId = memberWaiting.Id,
+                    Status = "N",
+                    Json = System.Text.Json.JsonSerializer.Serialize(waitingPositionOrder),
+                    Creator = 0,
+                    CreateDate = DateTime.Now,
+                    CreateFrom = "FEDS-SYS"
+                };
+                memberWaiting.MemberWaitingLogs.Add(memberWaitingLog);
+                await _restaurantContext.SaveChangesAsync();
+                _Log?.SystemLog_Txt($"候位資料已儲存到資料庫 - WaitingId: {memberWaiting.Id}, API ReservationId: {reservationId}");
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"儲存候位資料到資料庫失敗: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
+                _Log?.SystemErrorLog_Txt($"儲存候位資料到資料庫失敗: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
             }
 
             if(Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -292,18 +334,45 @@ namespace Reservation.Controllers
 
            }catch(Exception ex)
            {
-            _fileLogService?.SystemErrorLog_Txt($"候位失敗: {ex.Message}");
+            _Log?.SystemErrorLog_Txt($"候位失敗: {ex.Message}");
             return Json(new { success = false, message = "候位失敗，請稍後再試" });
            }
         }
 
         [HttpGet]
-        public IActionResult GetQueueStatus(int restaurantId)
+        public async Task<IActionResult> GetQueueStatus(string groupId, string companyId, string branchId)
         {
             var currentQueueCount = 0;
-            if (_queueData.ContainsKey(restaurantId))
+            try
             {
-                currentQueueCount = _queueData[restaurantId].Count;
+                var apiResult = await _inlineAppsService.GetBranchAsync(
+                    groupId, 
+                    companyId, 
+                    branchId, 
+                    "waiting",
+                    size: 1,
+                    date: DateTime.UtcNow.Date);
+
+                if(apiResult.Code == 200)
+                {
+                    try
+                    {
+                        var data = JObject.Parse(apiResult.Data);
+                        var waitingInfo = data.GetValue("waitingInfo");
+                        if(waitingInfo != null)
+                        {
+                            currentQueueCount = waitingInfo.Value<int?>("waitingCount") ?? 0;
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        _Log?.SystemErrorLog_Txt($"解析候位資訊失敗: {ex.Message}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                _Log?.SystemErrorLog_Txt($"取得候位資訊失敗: {ex.Message}");
             }
             return Json(new { currentQueueCount = currentQueueCount });
         }

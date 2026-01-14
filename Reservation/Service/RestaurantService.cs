@@ -14,7 +14,7 @@ namespace Reservation.Service
     {
         private readonly RestaurantContext _restaurantContext;
         private readonly InlineAppsService _inlineAppsService;
-        private readonly Func_Log _fileLogService;
+        private readonly Func_Log _Log;
 
         public RestaurantService(
             RestaurantContext restaurantContext,
@@ -23,7 +23,7 @@ namespace Reservation.Service
         {
             _restaurantContext = restaurantContext;
             _inlineAppsService = inlineAppsService;
-            _fileLogService = fileLogService;
+            _Log = fileLogService;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Reservation.Service
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"資料庫讀取錯誤 - GroupId: {groupId}, Error: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"資料庫讀取錯誤 - GroupId: {groupId}, Error: {ex.Message}");
             }
             return cards;
         }
@@ -208,7 +208,7 @@ namespace Reservation.Service
                                 }
                                 catch(Exception ex)
                                 {
-                                    _fileLogService?.SystemErrorLog_Txt($"儲存資料失敗 - BranchId: {card.id}, Error: {ex.Message}");
+                                    _Log?.SystemErrorLog_Txt($"儲存資料失敗 - BranchId: {card.id}, Error: {ex.Message}");
                                 }
                             }
                         }
@@ -218,7 +218,7 @@ namespace Reservation.Service
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"API 同步錯誤 - GroupId: {groupId}, Error: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"API 同步錯誤 - GroupId: {groupId}, Error: {ex.Message}");
                 return false;
             }
             return false;
@@ -259,7 +259,7 @@ namespace Reservation.Service
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"取得餐廳詳細資料錯誤 - GroupId: {groupId}, BranchId: {branchId}, Error: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"取得餐廳詳細資料錯誤 - GroupId: {groupId}, BranchId: {branchId}, Error: {ex.Message}");
                 return null;
             }
         }

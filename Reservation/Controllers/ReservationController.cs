@@ -13,7 +13,7 @@ namespace Reservation.Controllers
         private readonly RestaurantContext _restaurantContext;
         private readonly RestaurantService _restaurantService;
         private readonly InlineAppsService _inlineAppsService;
-        private readonly Func_Log _fileLogService;
+        private readonly Func_Log _Log;
 
         public ReservationController(
             RestaurantContext restaurantContext,
@@ -24,7 +24,7 @@ namespace Reservation.Controllers
             _restaurantContext = restaurantContext;
             _restaurantService = restaurantService;
             _inlineAppsService = inlineAppsService;
-            _fileLogService = fileLogService;
+            _Log = fileLogService;
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Reservation.Controllers
             // id = groupId, companyId, branchId 來自 URL
             if(string.IsNullOrEmpty(id) || string.IsNullOrEmpty(companyId) || string.IsNullOrEmpty(branchId))
             {
-                _fileLogService?.SystemErrorLog_Txt($"訂位頁面參數缺失 - id: {id}, companyId: {companyId}, branchId: {branchId}");
+                _Log?.SystemErrorLog_Txt($"訂位頁面參數缺失 - id: {id}, companyId: {companyId}, branchId: {branchId}");
                 return RedirectToAction("Index", "Restaurant");
             }
 
@@ -61,7 +61,7 @@ namespace Reservation.Controllers
                 var restaurant = await _restaurantService.GetRestaurantDetailAsync(id, branchId);
                 if(restaurant == null)
                 {
-                    _fileLogService?.SystemErrorLog_Txt($"找不到餐廳資料 - GroupId: {id}, BranchId: {branchId}");
+                    _Log?.SystemErrorLog_Txt($"找不到餐廳資料 - GroupId: {id}, BranchId: {branchId}");
                     return RedirectToAction("Index", "Restaurant");
                 }
 
@@ -150,12 +150,12 @@ namespace Reservation.Controllers
                     }
                     catch(Exception ex)
                     {
-                        _fileLogService?.SystemErrorLog_Txt($"解析 API 回應失敗: {ex.Message}");
+                        _Log?.SystemErrorLog_Txt($"解析 API 回應失敗: {ex.Message}");
                     }
                 }
                 else
                 {
-                    _fileLogService?.SystemErrorLog_Txt($"API 請求失敗 - Code: {apiResult.Code}, Msg: {apiResult.Msg}");
+                    _Log?.SystemErrorLog_Txt($"API 請求失敗 - Code: {apiResult.Code}, Msg: {apiResult.Msg}");
                 }
 
                 // ========== 步驟 4：建立 ViewModel ==========
@@ -199,7 +199,7 @@ namespace Reservation.Controllers
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"訂位頁面發生錯誤: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
+                _Log?.SystemErrorLog_Txt($"訂位頁面發生錯誤: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
                 TempData["ErrorMsg"] = "載入餐廳資料時發生錯誤";
                 return RedirectToAction("Index", "Restaurant", new { groupId = id });
             }
@@ -322,7 +322,7 @@ namespace Reservation.Controllers
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"確認頁面發生錯誤: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"確認頁面發生錯誤: {ex.Message}");
                 TempData["ErrorMsg"] = "載入確認頁面時發生錯誤";
                 return RedirectToAction("Index", "Restaurant");
             }
@@ -436,9 +436,9 @@ namespace Reservation.Controllers
                     createdFrom = "FEDSWEB"
                 };
 
-                _fileLogService?.SystemLog_Txt($"=== 提交訂位 ===");
-                _fileLogService?.SystemLog_Txt($"GroupId: {groupId}, CompanyId: {companyId}, BranchId: {branchId}");
-                _fileLogService?.SystemLog_Txt($"訂位資料: {System.Text.Json.JsonSerializer.Serialize(reservationData)}");
+                _Log?.SystemLog_Txt($"=== 提交訂位 ===");
+                _Log?.SystemLog_Txt($"GroupId: {groupId}, CompanyId: {companyId}, BranchId: {branchId}");
+                _Log?.SystemLog_Txt($"訂位資料: {System.Text.Json.JsonSerializer.Serialize(reservationData)}");
 
                 // ========== 步驟 8：POST API ==========
                 var apiResult = await _inlineAppsService.PostReservationAsync(
@@ -448,7 +448,7 @@ namespace Reservation.Controllers
 
                 if(apiResult.Code == 200)
                 {
-                    _fileLogService?.SystemLog_Txt($"訂位成功 - API 回應: {apiResult.Data}");
+                    _Log?.SystemLog_Txt($"訂位成功 - API 回應: {apiResult.Data}");
                     
                     try
                     {
@@ -479,23 +479,23 @@ namespace Reservation.Controllers
 
                        _restaurantContext.MemberReserves.Add(memberReserve);
                        await _restaurantContext.SaveChangesAsync();
-                       _fileLogService?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}");
+                       _Log?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}");
                     }catch(Exception ex)
                     {
-                      _fileLogService?.SystemErrorLog_Txt($"儲存訂位資料到資料庫失敗: {ex.Message}");
+                      _Log?.SystemErrorLog_Txt($"儲存訂位資料到資料庫失敗: {ex.Message}");
                     }
 
                     return Json(new { success = true, message = "訂位成功" });
                 }
                 else
                 {
-                    _fileLogService?.SystemErrorLog_Txt($"訂位失敗 - Code: {apiResult.Code}, Msg: {apiResult.Msg}, Data: {apiResult.Data}");
+                    _Log?.SystemErrorLog_Txt($"訂位失敗 - Code: {apiResult.Code}, Msg: {apiResult.Msg}, Data: {apiResult.Data}");
                     return Json(new { success = false, errors = new[] { "訂位失敗，請聯絡客服單位" } });
                 }
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"提交訂位發生錯誤: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
+                _Log?.SystemErrorLog_Txt($"提交訂位發生錯誤: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
                 return Json(new { success = false, errors = new[] { "系統發生錯誤，請稍後再試" } });
             }
         }
@@ -606,7 +606,7 @@ namespace Reservation.Controllers
             }
             catch(Exception ex)
             {
-                _fileLogService?.SystemErrorLog_Txt($"取得時段失敗: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"取得時段失敗: {ex.Message}");
             }
 
             return Json(new List<string>());
