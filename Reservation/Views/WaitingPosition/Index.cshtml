@@ -177,14 +177,14 @@
                 <div class="error-icon-wrapper">
                     <div class="error-icon">
                         <svg viewBox="0 0 52 52" class="error-svg">
-                            <circle class="error-circle" cx="26" cy="26" r="25" fill="none" stroke="white" stroke-width="2"/>
-                            <path class="error-x" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M16 16 36 36 M36 16 16 36"/>
+                            <circle class="error-circle" cx="26" cy="26" r="25" fill="none" stroke="white" stroke-width="2.5"/>
+                            <path class="error-x" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" d="M16 16 36 36 M36 16 16 36"/>
                         </svg>
                     </div>
                 </div>
                 <h2 class="reservation-error-title" id="errorModalTitle">候位失敗</h2>
                 <p class="reservation-error-message" id="errorModalMessage">候位失敗，請稍後再試</p>
-                <button type="button" class="btn reservation-ok-btn" data-bs-dismiss="modal">
+                <button type="button" class="btn reservation-ok-btn" id="errorModalOkBtn" data-bs-dismiss="modal">
                     OK
                 </button>
             </div>
@@ -193,12 +193,26 @@
 </div>
 
 @section Scripts {
+    @if(TempData["ErrorMsg"] != null)
+    {
+        var errorMsg = TempData["ErrorMsg"]?.ToString() ?? string.Empty;
+        <script>
+            $(document).ready(function() {
+                $('#errorModalMessage').text('@Html.Raw(errorMsg.Replace("'", "\\'").Replace("\r", "").Replace("\n", " "))');
+                $('#errorModalTitle').text('無法候位');
+                var errorModalElement = document.getElementById('waitingPositionErrorModal');
+                var errorModal = new bootstrap.Modal(errorModalElement);
+                
+                errorModal.show();
+            });
+        </script>
+    }
     <script>
-        $(document).ready(function() {
-            $('#waitingPositionForm').on('submit', function(e) {
+        $(document).ready(function(){
+            $('#waitingPositionForm').on('submit', function(e){
                 e.preventDefault();
                 
-                if (!this.checkValidity()) {
+                if(!this.checkValidity()){
                     $(this).addClass('was-validated');
                     return false;
                 }
@@ -207,7 +221,7 @@
                 var submitBtn = $(this).find('button[type="submit"]');
                 var originalText = submitBtn.html();
                 submitBtn.prop('disabled', true).html('處理中...');
-                
+
                 $.ajax({
                     url: '@Url.Action("Index", "WaitingPosition")',
                     type: 'POST',
@@ -215,25 +229,21 @@
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    success: function(response) {
-                        if (response.success) {
+                    success: function(response){
+                        if(response.success){
                             $('#waitingCountDisplay').text(response.currentQueueCount);
-                            
+
                             var modalElement = document.getElementById('waitingPositionSuccessModal');
                             var modal = new bootstrap.Modal(modalElement);
                             modal.show();
-                        } else {
-                            var errorMessage = response.errors && response.errors.length > 0 
-                                ? response.errors[0] 
+                        }
+                        else{
+                            var errorMessage = response.errors && response.errors.length > 0
+                                ? response.errors[0]
                                 : '請檢查輸入資料';
-                            
+
+                            $('#errorModalTitle').text('候位失敗');
                             $('#errorModalMessage').text(errorMessage);
-                            
-                            if (response.errorType === 'waiting_disabled') {
-                                $('#errorModalTitle').text('無法候位');
-                            } else {
-                                $('#errorModalTitle').text('候位失敗');
-                            }
                             
                             var errorModalElement = document.getElementById('waitingPositionErrorModal');
                             var errorModal = new bootstrap.Modal(errorModalElement);
@@ -241,31 +251,32 @@
                         }
                         submitBtn.prop('disabled', false).html(originalText);
                     },
-                    error: function(xhr, status, error) {
+                    error: function(xhr, status, error)
+                    {
                         $('#errorModalTitle').text('候位失敗');
                         $('#errorModalMessage').text('系統發生錯誤，請稍後再試');
-                        
+
                         var errorModalElement = document.getElementById('waitingPositionErrorModal');
                         var errorModal = new bootstrap.Modal(errorModalElement);
                         errorModal.show();
-                        
                         submitBtn.prop('disabled', false).html(originalText);
                     }
                 });
             });
 
-            setInterval(function() {
-               $.ajax({
-                url:'@Url.Action("GetQueueStatus","WaitingPosition")',
-                type:'GET',
-                data:{
-                    groupId: '@ViewBag.GroupId',
-                    companyId: '@ViewBag.CompanyId',
-                    branchId: '@ViewBag.BranchId'
-                },success:function(response){
-                    $('#waitingCountDisplay').text(response.currentQueueCount);
-                }
-               })
+            setInterval(function(){
+                $.ajax({
+                    url: '@Url.Action("GetQueueStatus", "WaitingPosition")',
+                    type: 'GET',
+                    data: {
+                        groupId: '@ViewBag.GroupId',
+                        companyId: '@ViewBag.CompanyId',
+                        branchId: '@ViewBag.BranchId'
+                    },
+                    success: function(response){
+                        $('#waitingCountDisplay').text(response.currentQueueCount);
+                    }
+                });
             }, 30000);
         });
     </script>
