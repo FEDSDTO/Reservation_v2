@@ -309,23 +309,75 @@ namespace Reservation.Controllers
             {
                 _Log?.SystemErrorLog_Txt($"候位失敗 - code:{apiResult.Code}, message:{apiResult.Msg},Data:{apiResult.Data}");
                 string errorMessage = "候位失敗，請稍後再試";
+                bool isDuplicate = false;
+                
                 try
                 {
                     var errorData = Newtonsoft.Json.Linq.JObject.Parse(apiResult.Data);
                     var message = errorData.GetValue("message")?.ToString();
-                    if(!string.IsNullOrEmpty(message))
+                    var reason = errorData.GetValue("reason")?.ToString();
+                    var errorCode = errorData.GetValue("code")?.ToString();
+
+                    // 檢查錯誤碼（如果 API 有提供）
+                    if(!string.IsNullOrEmpty(errorCode))
                     {
-                        errorMessage = message;
+                        var errorCodeUpper = errorCode.ToUpper();
+                        if(errorCodeUpper.Contains("DUPLICATE") || errorCodeUpper.Contains("ALREADY"))
+                        {
+                            isDuplicate = true;
+                        }
+                    }
+                    
+                    // 檢查錯誤訊息
+                   if(!string.IsNullOrEmpty(message) && !isDuplicate)
+                   {
+                    var messageLower = message.ToLower();
+                     if(messageLower.Contains("duplicate") || 
+                           messageLower.Contains("already") || 
+                           messageLower.Contains("exists") ||
+                           messageLower.Contains("重複") ||
+                           messageLower.Contains("已存在") ||
+                           messageLower.Contains("limit") ||
+                           messageLower.Contains("hit customer"))
+                        {
+                            isDuplicate = true;
+                        }
+                        else if(!isDuplicate)
+                        {
+                            errorMessage = message;
+                        }
+                   }
+                   
+                    if(!string.IsNullOrEmpty(reason) && !isDuplicate)
+                    {
+                        var reasonLower = reason.ToLower();
+                        if(reasonLower.Contains("duplicate") || 
+                           reasonLower.Contains("already") || 
+                           reasonLower.Contains("exists") ||
+                           reasonLower.Contains("重複") ||
+                           reasonLower.Contains("已存在") ||
+                           reasonLower.Contains("limit") ||
+                           reasonLower.Contains("hit customer"))
+                        {
+                            isDuplicate = true;
+                        }
                     }
                 }
                 catch(Exception ex)
                 {
                     _Log?.SystemErrorLog_Txt($"候位失敗 - 解析錯誤: {ex.Message}");
                 }
+                
+                if(isDuplicate)
+                {
+                    errorMessage = "請聯絡客服單位";
+                }
+                
                 return Json(new {
                     success = false,
                     errors = new[] { errorMessage }
                 });
+
             };
             string reservationId = string.Empty;
             try
