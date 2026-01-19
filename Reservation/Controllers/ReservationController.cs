@@ -211,6 +211,11 @@ namespace Reservation.Controllers
         [HttpPost]
         public IActionResult Index(ReservationModel model)
         {
+
+            if(string.IsNullOrWhiteSpace(model.SelectedTimeSlot))
+            {
+                ModelState.AddModelError("SelectedTimeSlot","請選擇訂位時間");
+            }
             if (!ModelState.IsValid)
             {
                 model.AvailableTimeSlots = GetAvailableTimeSlots(model.SelectedMealPeriod, model.SelectedDate ?? DateTime.Today);

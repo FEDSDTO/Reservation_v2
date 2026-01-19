@@ -332,13 +332,7 @@ namespace Reservation.Controllers
                    if(!string.IsNullOrEmpty(message) && !isDuplicate)
                    {
                     var messageLower = message.ToLower();
-                     if(messageLower.Contains("duplicate") || 
-                           messageLower.Contains("already") || 
-                           messageLower.Contains("exists") ||
-                           messageLower.Contains("重複") ||
-                           messageLower.Contains("已存在") ||
-                           messageLower.Contains("limit") ||
-                           messageLower.Contains("hit customer"))
+                     if(messageLower.Contains("hit customer"))
                         {
                             isDuplicate = true;
                         }
@@ -347,17 +341,11 @@ namespace Reservation.Controllers
                             errorMessage = message;
                         }
                    }
-                   
+
                     if(!string.IsNullOrEmpty(reason) && !isDuplicate)
                     {
                         var reasonLower = reason.ToLower();
-                        if(reasonLower.Contains("duplicate") || 
-                           reasonLower.Contains("already") || 
-                           reasonLower.Contains("exists") ||
-                           reasonLower.Contains("重複") ||
-                           reasonLower.Contains("已存在") ||
-                           reasonLower.Contains("limit") ||
-                           reasonLower.Contains("hit customer"))
+                        if(reasonLower.Contains("hit customer"))
                         {
                             isDuplicate = true;
                         }
