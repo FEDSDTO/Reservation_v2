@@ -6,9 +6,9 @@
 <!-- 頂部漸層導航欄 -->
 <header class="restaurant-header">
     <div class="header-content">
-        <h1 class="header-title">@(Model.SelectedBranchId.HasValue ? 
-            Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百信義A13" 
-            : "遠百信義A13")</h1>
+       <h1 class="header-title">@(Model.SelectedBranchId.HasValue ? 
+    Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百餐廳訂位" 
+    : "遠百餐廳訂位")</h1>
     </div>
 </header>
 <!-- 搜尋與篩選區域 -->
@@ -116,7 +116,11 @@
                                 <div class="restaurant-actions">
                                     @if (card.WebBookingEnabled)
                                     {
-                                        <a href="@Url.Action("Index", "Reservation", new { branchId = card.GroupId, restaurantId = card.id })" 
+                                        <a href="@Url.Action("Index", "Reservation", new { 
+                                            id = card.GroupId, 
+                                            companyId = card.CompanyId, 
+                                            branchId = card.id 
+                                        })" 
                                            class="btn btn-outline-primary btn-reservation">訂位</a>
                                     }
                                     @if (card.WebWaitingEnabled)
@@ -140,7 +144,45 @@
     </div>
 </div>
 
+<!-- 無法候位錯誤彈窗 -->
+<div class="modal fade" id="restaurantErrorModal" tabindex="-1" aria-labelledby="restaurantErrorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content reservation-error-modal">
+            <button type="button" class="btn-close btn-close-white reservation-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            <div class="reservation-error-content">
+                <div class="error-icon-wrapper">
+                    <div class="error-icon">
+                        <svg viewBox="0 0 52 52" class="error-svg">
+                            <circle class="error-circle" cx="26" cy="26" r="25" fill="none" stroke="white" stroke-width="2.5"/>
+                            <path class="error-x" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" d="M16 16 36 36 M36 16 16 36"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="reservation-error-title" id="restaurantErrorModalTitle">無法候位</h2>
+                <p class="reservation-error-message" id="restaurantErrorModalMessage">餐廳目前無提供候位服務</p>
+                <button type="button" class="btn reservation-ok-btn" data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    @if(TempData["ErrorMsg"] != null)
+    {
+        var errorMsg = TempData["ErrorMsg"]?.ToString() ?? string.Empty;
+        <script>
+            $(document).ready(function() {
+                $('#restaurantErrorModalMessage').text('@Html.Raw(errorMsg.Replace("'", "\\'").Replace("\r", "").Replace("\n", " "))');
+                $('#restaurantErrorModalTitle').text('無法候位');
+                var errorModalElement = document.getElementById('restaurantErrorModal');
+                var errorModal = new bootstrap.Modal(errorModalElement);
+                errorModal.show();
+            });
+        </script>
+    }
     <script>
         // 圖片錯誤處理（舊版邏輯）
         function imgError(e) {
@@ -202,7 +244,6 @@
                 console.log('開始 GPS 定位...');
                 
                 if(!navigator.geolocation){
-                    console.error('瀏覽器不支援 GPS 定位功能');
                     alert('您的瀏覽器不支援 GPS 定位功能');
                     return;
                 }
@@ -232,56 +273,16 @@
                                     console.log('準備跳轉到：', url);
                                     window.location.href = url;
                                 }else{
-                                    // 顯示具體錯誤訊息
-                                    var errorMsg = response.message || '無法判斷最近的分館';
-                                    console.warn('無法判斷最近的分館，回應訊息：', errorMsg);
-                                    console.log('完整回應：', response);
+                                    // 無法判斷最近的分館，靜默處理
                                 }
                             },
                             error:function(xhr, status, error){
-                                console.error('GPS API 請求失敗：', {
-                                    status: xhr.status,
-                                    statusText: xhr.statusText,
-                                    responseText: xhr.responseText,
-                                    error: error,
-                                    statusCode: status
-                                });
+                                // GPS API 請求失敗，靜默處理
                             }
                         });
                     },
                     function(error){
-                        // 改進錯誤處理，顯示具體錯誤原因和錯誤代碼
-                        var errorMessage = 'GPS 定位失敗';
-                        var errorCode = error && error.code !== undefined ? error.code : -1;
-                        
-                        // 根據錯誤代碼設定錯誤訊息
-                        switch(errorCode){
-                            case 1: // PERMISSION_DENIED
-                                errorMessage = 'GPS 定位權限被拒絕';
-                                break;
-                            case 2: // POSITION_UNAVAILABLE
-                                errorMessage = 'GPS 位置資訊不可用';
-                                break;
-                            case 3: // TIMEOUT
-                                errorMessage = 'GPS 定位請求超時';
-                                break;
-                            default:
-                                // 嘗試從 error 物件取得更多資訊
-                                if(error && error.message){
-                                    errorMessage = 'GPS 定位失敗：' + error.message;
-                                } else {
-                                    errorMessage = 'GPS 定位失敗：未知錯誤';
-                                }
-                                break;
-                        }
-                        
-                        // 改進 console 輸出格式，使其更易讀
-                        console.error('GPS 定位錯誤');
-                        console.error('錯誤代碼：', errorCode);
-                        console.error('錯誤訊息：', errorMessage);
-                        if(error){
-                            console.error('錯誤物件：', error);
-                        }
+                        // GPS 定位錯誤，靜默處理
                     },
                     {
                         timeout: 10000,

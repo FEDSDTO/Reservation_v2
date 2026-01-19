@@ -12,7 +12,11 @@
     <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-auto">
-                <a href="@Url.Action("Index", "Reservation", new { id = Model.Restaurant.Id })" class="back-button">
+                <a href="@Url.Action("Index", "Reservation", new { 
+                    id = ViewBag.GroupId, 
+                    companyId = ViewBag.CompanyId, 
+                    branchId = ViewBag.BranchId 
+                })" class="back-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg>
@@ -52,6 +56,9 @@
         <form method="post" action="@Url.Action("Confirm", "Reservation")" id="reservationConfirmForm">
             <input type="hidden" name="Restaurant.Id" value="@Model.Restaurant.Id" />
             <input type="hidden" name="Branch.Id" value="@Model.Branch.Id" />
+            <input type="hidden" name="GroupId" value="@ViewBag.GroupId" />
+            <input type="hidden" name="CompanyId" value="@ViewBag.CompanyId" />
+            <input type="hidden" name="BranchId" value="@ViewBag.BranchId" />
             <input type="hidden" name="SelectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
             <input type="hidden" name="AdultCount" value="@Model.AdultCount" />
             <input type="hidden" name="ChildCount" value="@Model.ChildCount" />
@@ -72,7 +79,9 @@
                            placeholder="請輸入姓名" />
                     <select class="form-select reservation-title-select" name="CustomerTitle" id="customerTitle" style="max-width: 100px; flex-shrink: 0;">
                         <option value="先生" selected="@(Model.CustomerTitle == "先生")">先生</option>
-                        <option value="小姐" selected="@(Model.CustomerTitle == "小姐")">小姐</option>               
+                        <option value="小姐" selected="@(Model.CustomerTitle == "小姐")">小姐</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-group mb-3">

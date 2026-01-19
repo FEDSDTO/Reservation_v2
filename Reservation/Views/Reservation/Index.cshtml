@@ -65,6 +65,9 @@
         <form method="post" action="@Url.Action("Index", "Reservation")" id="reservationForm">
             <input type="hidden" name="Restaurant.Id" value="@Model.Restaurant.Id" />
             <input type="hidden" name="Branch.Id" value="@Model.Branch.Id" />
+            <input type="hidden" name="GroupId" value="@ViewBag.GroupId" />
+            <input type="hidden" name="CompanyId" value="@ViewBag.CompanyId" />
+            <input type="hidden" name="BranchId" value="@ViewBag.BranchId" />
             
             <!-- 訂位日期 -->
             <div class="form-group mb-3">
@@ -674,36 +677,35 @@
                 loadTimeSlots();
             });
 
-            // 時段按鈕選擇
+            // 時段按鈕選擇 - 時間必須必選，不允許取消
             $(document).on('click', '.time-slot-btn', function() {
                 var slot = $(this).data('slot');
-                if ($(this).hasClass('active')) {
-                    // 取消選擇
-                    $(this).removeClass('active');
-                    $('#selectedTimeSlot').val('');
-                } else {
-                    // 選擇時段
-                    $('.time-slot-btn').removeClass('active');
-                    $(this).addClass('active');
-                    $('#selectedTimeSlot').val(slot);
-                }
-            });
+                // 選擇時段（不允許取消）
+                $('.time-slot-btn').removeClass('active');
+                $(this).addClass('active');
+                $('#selectedTimeSlot').val(slot);
+            });          
 
             // 載入時段
             function loadTimeSlots() {
                 var date = $('#reservationDate').val();
-                var period = $('#selectedMealPeriod').val();
                 
                 if (!date) {
                     date = '@DateTime.Today.ToString("yyyy-MM-dd")';
                     $('#reservationDate').val(date);
                 }
 
+                var groupId = '@ViewBag.GroupId';
+                var companyId = '@ViewBag.CompanyId';
+                var branchId = '@ViewBag.BranchId';
+
                 $.ajax({
                     url: '@Url.Action("GetTimeSlots", "Reservation")',
                     type: 'GET',
                     data: {
-                        mealPeriod: period,
+                        id: groupId,
+                        companyId: companyId,
+                        branchId: branchId,
                         date: date
                     },
                     success: function(slots) {
@@ -722,7 +724,18 @@
                                 grid.append(btn);
                             });
                         } else {
-                            grid.html('<p class="text-muted">暫無可用時段</p>');
+                           var selectedDate = $('#reservationDate').val();
+                           var today = new Date();
+                           var todayStr = today.getFullYear() + '-' + 
+                            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(today.getDate()).padStart(2, '0');
+                            if(selectedDate === todayStr)
+                            {
+                                  grid.html('<p class="text-danger" style="font-weight: bold; white-space: nowrap;">本日已無可預約時段 已滿</p>');
+                            }else
+                            {
+                                    grid.html('<p class="text-muted">暫無可用時段</p>');
+                            }
                         }
                     },
                     error: function() {
@@ -734,6 +747,17 @@
             if ($('#timeSlotsGrid').children().length === 0) {
                 loadTimeSlots();
             }
+
+            // 表單提交驗證 - 時間必須必選
+            $('#reservationForm').on('submit', function(e) {
+                var selectedTimeSlot = $('#selectedTimeSlot').val();
+                
+                if(!selectedTimeSlot || selectedTimeSlot.trim() === '') {
+                    e.preventDefault();
+                    alert('請選擇訂位時間');
+                    return false;
+                }
+            });
 
         });
     </script>

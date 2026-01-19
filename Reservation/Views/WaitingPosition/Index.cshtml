@@ -72,10 +72,13 @@
 
     <!-- 候位表單 -->
     <div class="waiting-form-section">
-        <form method="post" action="@Url.Action("Index", "WaitingPosition")" id="waitingPositionForm">
-            <input type="hidden" name="Restaurant.Id" value="@Model.Restaurant.Id" />
-            <input type="hidden" name="Branch.Id" value="@Model.Branch.Id" />
-            
+        <form method="post" action="@Url.Action("Index","WaitingPosition")" id="waitingPositionForm">
+            <input type="hidden" name="Restaurant.Id" value="@Model.Restaurant.Id"/>
+            <input type="hidden" name="Branch.Id" value="@Model.Branch.Id"/>
+            <input type="hidden" name="GroupId" value="@ViewBag.GroupId"/>
+            <input type="hidden" name="CompanyId" value="@ViewBag.CompanyId"/>
+            <input type="hidden" name="BranchId" value="@ViewBag.BranchId"/>
+
             <div class="form-group mb-3">
                 <label class="form-label waiting-form-label">候位者姓名</label>
                 <div class="input-group">
@@ -111,7 +114,7 @@
                 <div class="col-6">
                     <label class="form-label">大人</label>
                     <select class="form-select" name="AdultCount" id="adultCount" required>
-                        @for (int i = 1; i <= 8; i++)
+                        @for (int i = 1; i <= Model.MaxWaitingGroupSize; i++)
                         {
                             <option value="@i" selected="@(Model.AdultCount == i)">@i 位</option>
                         }
@@ -120,7 +123,7 @@
                 <div class="col-6">
                     <label class="form-label">小孩</label>
                     <select class="form-select" name="ChildCount" id="childCount">
-                        @for (int i = 0; i <= 8; i++)
+                        @for (int i = 0; i <= Model.MaxWaitingGroupSize - Model.AdultCount; i++)
                         {
                             <option value="@i" selected="@(Model.ChildCount == i)">@i 位</option>
                         }
@@ -164,13 +167,52 @@
         </div>
     </div>
 </div>
+<!-- 候位失敗彈窗 -->
+<div class="modal fade" id="waitingPositionErrorModal" tabindex="-1" aria-labelledby="waitingPositionErrorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content reservation-error-modal">
+            <button type="button" class="btn-close btn-close-white reservation-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            <div class="reservation-error-content">
+                <div class="error-icon-wrapper">
+                    <div class="error-icon">
+                        <svg viewBox="0 0 52 52" class="error-svg">
+                            <circle class="error-circle" cx="26" cy="26" r="25" fill="none" stroke="white" stroke-width="2.5"/>
+                            <path class="error-x" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" d="M16 16 36 36 M36 16 16 36"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="reservation-error-title" id="errorModalTitle">候位失敗</h2>
+                <p class="reservation-error-message" id="errorModalMessage">候位失敗，請稍後再試</p>
+                <button type="button" class="btn reservation-ok-btn" id="errorModalOkBtn" data-bs-dismiss="modal">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    @if(TempData["ErrorMsg"] != null)
+    {
+        var errorMsg = TempData["ErrorMsg"]?.ToString() ?? string.Empty;
+        <script>
+            $(document).ready(function() {
+                $('#errorModalMessage').text('@Html.Raw(errorMsg.Replace("'", "\\'").Replace("\r", "").Replace("\n", " "))');
+                $('#errorModalTitle').text('無法候位');
+                var errorModalElement = document.getElementById('waitingPositionErrorModal');
+                var errorModal = new bootstrap.Modal(errorModalElement);
+                
+                errorModal.show();
+            });
+        </script>
+    }
     <script>
-        $(document).ready(function() {
-            $('#waitingPositionForm').on('submit', function(e) {
+        $(document).ready(function(){
+            $('#waitingPositionForm').on('submit', function(e){
                 e.preventDefault();
                 
-                if (!this.checkValidity()) {
+                if(!this.checkValidity()){
                     $(this).addClass('was-validated');
                     return false;
                 }
@@ -179,7 +221,7 @@
                 var submitBtn = $(this).find('button[type="submit"]');
                 var originalText = submitBtn.html();
                 submitBtn.prop('disabled', true).html('處理中...');
-                
+
                 $.ajax({
                     url: '@Url.Action("Index", "WaitingPosition")',
                     type: 'POST',
@@ -187,31 +229,51 @@
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    success: function(response) {
-                        if (response.success) {
+                    success: function(response){
+                        if(response.success){
                             $('#waitingCountDisplay').text(response.currentQueueCount);
-                            
+
                             var modalElement = document.getElementById('waitingPositionSuccessModal');
                             var modal = new bootstrap.Modal(modalElement);
                             modal.show();
-                        } else {
-                            alert('候位失敗：' + (response.errors ? response.errors.join(', ') : '請檢查輸入資料'));
+                        }
+                        else{
+                            var errorMessage = response.errors && response.errors.length > 0
+                                ? response.errors[0]
+                                : '請檢查輸入資料';
+
+                            $('#errorModalTitle').text('候位失敗');
+                            $('#errorModalMessage').text(errorMessage);
+                            
+                            var errorModalElement = document.getElementById('waitingPositionErrorModal');
+                            var errorModal = new bootstrap.Modal(errorModalElement);
+                            errorModal.show();
                         }
                         submitBtn.prop('disabled', false).html(originalText);
                     },
-                    error: function(xhr, status, error) {
-                        alert('候位失敗，請稍後再試');
+                    error: function(xhr, status, error)
+                    {
+                        $('#errorModalTitle').text('候位失敗');
+                        $('#errorModalMessage').text('系統發生錯誤，請稍後再試');
+
+                        var errorModalElement = document.getElementById('waitingPositionErrorModal');
+                        var errorModal = new bootstrap.Modal(errorModalElement);
+                        errorModal.show();
                         submitBtn.prop('disabled', false).html(originalText);
                     }
                 });
             });
 
-            setInterval(function() {
+            setInterval(function(){
                 $.ajax({
                     url: '@Url.Action("GetQueueStatus", "WaitingPosition")',
                     type: 'GET',
-                    data: { restaurantId: @Model.Restaurant.Id },
-                    success: function(response) {
+                    data: {
+                        groupId: '@ViewBag.GroupId',
+                        companyId: '@ViewBag.CompanyId',
+                        branchId: '@ViewBag.BranchId'
+                    },
+                    success: function(response){
                         $('#waitingCountDisplay').text(response.currentQueueCount);
                     }
                 });
