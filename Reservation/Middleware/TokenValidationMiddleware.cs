@@ -1,9 +1,14 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Reservation.Models.EFMemeberModels;
+using Reservation.Service;
 
 namespace Reservation.Middleware
 {
@@ -13,6 +18,7 @@ namespace Reservation.Middleware
         private readonly ILogger<TokenValidationMiddleware> _logger;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
+        private readonly Func_Log _log;
         private const string TokenCookieName = "MemberToken";
         // 開發環境預設 Token（後備值，如果配置文件中沒有設定）
         private const string DefaultDevTokenFallback = "EA4A52C4-1489-441A-BA39-8E5C07D2E041";
@@ -26,207 +32,146 @@ namespace Reservation.Middleware
             "/Home/Error"
         };
 
-        public TokenValidationMiddleware(
-            RequestDelegate next,
-            ILogger<TokenValidationMiddleware> logger,
-            IWebHostEnvironment environment,
-            IConfiguration configuration)
+        public TokenValidationMiddleware(RequestDelegate next,ILogger<TokenValidationMiddleware> logger,IWebHostEnvironment environment,IConfiguration configuration,Func_Log log)
         {
             _next = next;
             _logger = logger;
             _environment = environment;
             _configuration = configuration;
+            _log = log;
         }
         
-        /// <summary>
-        /// 取得開發環境預設 Token（從配置檔案讀取，如果沒有則使用後備值）
-        /// </summary>
-        private string GetDefaultDevToken()
+        public async Task InvokeAsync(HttpContext context,MemberContext memberContext)
         {
-            return _configuration["DefaultDevToken"] ?? DefaultDevTokenFallback;
-        }
-
-        /// <summary>
-        /// 取得正式環境預設 Token（從配置檔案讀取）
-        /// </summary>
-        private string? GetDefaultProdToken()
-        {
-            return _configuration["DefaultProdToken"];
-        }
-
-        public async Task InvokeAsync(HttpContext context, MemberContext memberContext)
-        {
-            // 检查是否在排除列表中
             var path = context.Request.Path.Value ?? "";
-            if (ExcludedPaths.Any(excluded => path.StartsWith(excluded, StringComparison.OrdinalIgnoreCase)))
+            _log.SystemLog_Txt($"[Token驗證] 開始處理路徑={path}");
+
+            if(ExcludedPaths.Any(excluded => path.StartsWith(excluded,StringComparison.OrdinalIgnoreCase)))
             {
+                _log.SystemLog_Txt($"[Token驗證] 跳過排除路徑={path}");
                 await _next(context);
                 return;
             }
-
-            // 特殊处理：Restaurant/Index 允许从 URL 参数获取 Token（首次访问）
-            var isRestaurantIndex = path.Equals("/Restaurant/Index", StringComparison.OrdinalIgnoreCase) ||
-                                   path.Equals("/Restaurant", StringComparison.OrdinalIgnoreCase) ||
-                                   path.Equals("/", StringComparison.OrdinalIgnoreCase);
-
-            // 尝试从 Cookie 读取 Token
+            var tokenFromQuery = context.Request.Query["Token"].FirstOrDefault();
             var tokenFromCookie = context.Request.Cookies[TokenCookieName];
-            
-            // 如果是 Restaurant/Index 且 Cookie 中没有 Token，尝试从 URL 参数获取
-            if (isRestaurantIndex && string.IsNullOrEmpty(tokenFromCookie))
-            {
-                var tokenFromQuery = context.Request.Query["Token"].FirstOrDefault();
-                if (!string.IsNullOrEmpty(tokenFromQuery))
-                {
-                    // 將 URL 參數中的 Token 設置到 Cookie 中
-                    context.Response.Cookies.Append(TokenCookieName, tokenFromQuery, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = context.Request.IsHttps,
-                        SameSite = SameSiteMode.Lax
-                    });
-                    tokenFromCookie = tokenFromQuery;
-                }
-            }
+            _log.SystemLog_Txt($"[Token驗證] URL參數有Token={!string.IsNullOrEmpty(tokenFromQuery)}, Cookie有Token={!string.IsNullOrEmpty(tokenFromCookie)}");
 
-            // 開發環境：如果沒有 Token，使用預設 Token
-            if (string.IsNullOrEmpty(tokenFromCookie) && _environment.IsDevelopment())
+            string? tokenToUse = null;
+
+            if(!string.IsNullOrEmpty(tokenFromQuery))
             {
-                var defaultToken = GetDefaultDevToken();
-                _logger.LogInformation($"開發環境：使用預設 Token: {defaultToken}");
-                tokenFromCookie = defaultToken;
-                // 將預設 Token 設置到 Cookie 中
-                context.Response.Cookies.Append(TokenCookieName, defaultToken, new CookieOptions
-                {
+                tokenToUse = tokenFromQuery;
+                context.Response.Cookies.Append(TokenCookieName,tokenFromQuery,new CookieOptions{
                     HttpOnly = true,
                     Secure = context.Request.IsHttps,
-                    SameSite = SameSiteMode.Lax
+                    SameSite = SameSiteMode.Lax,
                 });
+                _log.SystemLog_Txt($"[Token驗證] 使用URL參數Token並寫入Cookie token={Mask(tokenFromQuery)}");
+            }
+            else if(!string.IsNullOrEmpty(tokenFromCookie))
+            {
+                tokenToUse = tokenFromCookie;
+                 _log.SystemLog_Txt($"[Token驗證] 使用Cookie中的Token token={Mask(tokenFromCookie)}");
             }
 
-            // 正式環境：如果沒有 Token 且配置了預設 Token，使用預設 Token
-            if (string.IsNullOrEmpty(tokenFromCookie) && !_environment.IsDevelopment())
+            if(string.IsNullOrEmpty(tokenToUse))
             {
-                var defaultProdToken = GetDefaultProdToken();
-                if (!string.IsNullOrEmpty(defaultProdToken))
-                {
-                    _logger.LogInformation($"正式環境：使用預設 Token: {defaultProdToken}");
-                    tokenFromCookie = defaultProdToken;
-                    // 將預設 Token 設置到 Cookie 中
-                    context.Response.Cookies.Append(TokenCookieName, defaultProdToken, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = context.Request.IsHttps,
-                        SameSite = SameSiteMode.Lax
-                    });
-                }
-            }
-
-            // 如果沒有 Token（既沒有 Cookie 也沒有 URL 參數，且沒有預設 Token）
-            if (string.IsNullOrEmpty(tokenFromCookie))
-            {
+                _log.SystemErrorLog_Txt($"[Token驗證] 缺少Token -> 跳轉登入頁面 路徑={path}");
                 await RedirectToLoginAsync(context);
                 return;
             }
-
-            // 验证 Cookie 中的 Token
-            if (!Guid.TryParse(tokenFromCookie, out Guid tokenGuid))
+            if(!Guid.TryParse(tokenToUse,out Guid tokenGuid))
             {
-                _logger.LogWarning($"Cookie 中的 Token 格式無效: {tokenFromCookie}");
+                _log.SystemErrorLog_Txt($"[Token驗證] Token格式無效 token={Mask(tokenToUse)} -> 跳轉登入頁面 路徑={path}");
                 await RedirectToLoginAsync(context);
                 return;
             }
-
             try
             {
-                // 验证 Token：必须同时满足 Token 存在 且 EntityStatus == 1
-                var memberToken = await memberContext.MemberTokens
-                    .FirstOrDefaultAsync(mt => mt.Token == tokenGuid && mt.EntityStatus == 1);
+                 _log.SystemLog_Txt($"[Token驗證] 開始驗證Token tokenGuid={Mask(tokenGuid.ToString())}");
+                 var memberToken = await memberContext.MemberTokens.FirstOrDefaultAsync
+                 (mt => mt.Token == tokenGuid && mt.EntityStatus ==1);
 
-                // 開發環境：如果 Token 驗證失敗，跳過驗證使用模擬資料
-                if (_environment.IsDevelopment())
-                {
-                    if (memberToken == null)
-                    {
-                        _logger.LogWarning($"開發環境：Token 不存在於資料庫或 EntityStatus 不等於 1，跳過驗證. Token: {tokenGuid}");
-                        // 設置模擬的會員資訊
-                        context.Items["MemberId"] = 0;
-                        context.Items["Token"] = tokenGuid;
-                        await _next(context);
-                        return;
-                    }
+                 if(memberToken == null)
+                 {
+                     _log.SystemErrorLog_Txt($"[Token驗證] 資料庫查無Token或EntityStatus!=1 tokenGuid={Mask(tokenGuid.ToString())} -> 跳轉登入頁面");
+                     await RedirectToLoginAsync(context);
+                     return;
+                 }
 
-                    // 開發環境：即使 Token 過期也允許通過
-                    if (memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
-                    {
-                        _logger.LogWarning($"開發環境：Token 已過期，但允許通過. Token: {tokenGuid}, 過期時間: {memberToken.ExpireDate}");
-                        context.Items["MemberId"] = memberToken.MemberId;
-                        context.Items["Token"] = tokenGuid;
-                        context.Items["MemberToken"] = memberToken;
-                        await _next(context);
-                        return;
-                    }
-                }
-                else
-                {
-                    // 正式環境：嚴格驗證
-                    // 验证条件：Token 不存在或 EntityStatus != 1
-                    if (memberToken == null)
-                    {
-                        _logger.LogWarning($"Token 驗證失敗: Token 不存在或 EntityStatus 不等於 1. Token: {tokenGuid}");
-                        await RedirectToLoginAsync(context);
-                        return;
-                    }
-
-                    // 验证过期时间
-                    if (memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
-                    {
-                        _logger.LogWarning($"Token 已過期: {tokenGuid}, 過期時間: {memberToken.ExpireDate}");
-                        await RedirectToLoginAsync(context);
-                        return;
-                    }
-                }
-
-                // 验证通过，将信息存储到 HttpContext.Items
-                context.Items["MemberId"] = memberToken.MemberId;
-                context.Items["Token"] = tokenGuid;
-                context.Items["MemberToken"] = memberToken;
-
-                await _next(context);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"驗證 Token 時發生錯誤: {tokenGuid}");
-                
-                // 開發環境：發生錯誤時不重定向，允許繼續
-                if (_environment.IsDevelopment())
-                {
-                    _logger.LogWarning($"開發環境：Token 驗證發生錯誤，但允許繼續執行");
-                    context.Items["MemberId"] = 0;
-                    context.Items["Token"] = tokenGuid;
-                    await _next(context);
-                }
-                else
-                {
+                 if (memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
+                 {
+                    _log.SystemErrorLog_Txt($"[Token驗證] Token已過期 tokenGuid={Mask(tokenGuid.ToString())}, 過期時間={memberToken.ExpireDate:yyyy-MM-dd HH:mm:ss} -> 跳轉登入頁面");
                     await RedirectToLoginAsync(context);
-                }
+                    return;
+                 }
+
+                 context.Items["MemberId"] =memberToken.MemberId;
+                 context.Items["Token"]=tokenGuid;
+                 context.Items["MemberToken"]=memberToken;
+                  _log.SystemLog_Txt($"[Token驗證] 驗證成功 會員ID={memberToken.MemberId}, tokenGuid={Mask(tokenGuid.ToString())} -> 繼續處理");
+                await _next(context);
+            }catch(Exception ex)
+            {
+                _log.SystemErrorLog_Txt($"[Token驗證] 驗證過程中發生錯誤 tokenGuid={Mask(tokenGuid.ToString())}, 錯誤訊息={ex.Message} -> 跳轉登入頁面");
+                await RedirectToLoginAsync(context);
+                return;
             }
         }
 
-         private async Task RedirectToLoginAsync(HttpContext context)
+        private async Task RedirectToLoginAsync(HttpContext context)
         {
-            // 获取当前完整 URL
-            var request = context.Request;
-            var currentUrl = $"{request.Scheme}://{request.Host}{request.Path}{request.QueryString}";
-            
-            // URL 编码
-            var encodedReturnUrl = Uri.EscapeDataString(currentUrl);
-            
-            // 重定向到登录页面
-            var loginUrl = $"https://member.feds.com.tw/login/?returnUrl={encodedReturnUrl}";
-            
+            var returnUrl = GetReturnUrl();
+            var encodedReturnUrl = Uri.EscapeDataString(returnUrl);
+
+            var  loginBaseUrl = GetLoginUrl().TrimEnd('/');
+            var loginUrl = $"{loginBaseUrl}/?returnUrl={encodedReturnUrl}";
+            _log.SystemLog_Txt($"[Token驗證] 跳轉登入頁面 登入網址={loginBaseUrl}, 回跳網址={returnUrl}, 完整網址={loginUrl}");
             context.Response.Redirect(loginUrl);
-            await Task.CompletedTask;
+            await Task.CompletedTask;           
+        }
+         private string GetLoginUrl()
+        {
+            var loginUrl = _configuration["MemberLoginUrl"];
+            if(!string.IsNullOrEmpty(loginUrl))
+            {
+                return loginUrl.TrimEnd('/');
+            }
+
+            if(_environment.IsDevelopment())
+            {
+                return "https://v3member.testfeds.com/login/";
+            }else
+            {
+                return "https://member.feds.com.tw/login/";
+            }
+        }
+
+       private string GetReturnUrl()
+        {
+            var returnUrl = _configuration["MemberReturnUrl"];
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return returnUrl.TrimEnd('/');
+            }
+
+            // fallback：沒有設定檔時才使用
+            if (_environment.IsDevelopment())
+            {
+                return "https://v3www.testfeds.com/Reservation_v2";
+            }
+            else
+            {
+                return "https://member.feds.com.tw/Reservation_v2";
+            }
+        }
+         // 避免 log 寫入完整 token（敏感資訊）
+        private static string Mask(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return "(empty)";
+            value = value.Trim();
+            if (value.Length <= 8) return value;
+            return value.Substring(0, 8) + "****";
         }
     }
 
