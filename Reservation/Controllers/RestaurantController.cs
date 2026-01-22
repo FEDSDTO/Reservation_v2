@@ -198,15 +198,12 @@ namespace Reservation.Controllers
             try
             {
                 _Log?.SystemLog_Txt($"=== GPS 定位請求開始 ===");
-                _Log?.SystemLog_Txt($"GPS 座標參數 - 緯度: {lat}, 經度: {lng}");
                 
                 if(!lat.HasValue || !lng.HasValue)
                 {
-                    _Log?.SystemErrorLog_Txt("GPS 定位失敗：座標參數缺失");
                     return Json(new { success = false, message = "座標參數缺失" });
                 }
 
-                _Log?.SystemLog_Txt("開始取得分館列表...");
                 var mallGroups = await _restaurantService.GetMallsAsync();
                 _Log?.SystemLog_Txt($"取得分館列表成功，共 {mallGroups.Count} 個分館");
 
@@ -232,28 +229,20 @@ namespace Reservation.Controllers
                 int checkedCount = 0;
                 int matchedCount = 0;
 
-                _Log?.SystemLog_Txt("開始計算最近的分館...");
                 foreach(var group in mallGroups)
                 {
                     if(branchLocations.ContainsKey(group.GroupId))
                     {
                         var branch = branchLocations[group.GroupId];
                         var distance = CalculateDistance(lat.Value, lng.Value, branch.lat, branch.lng);
-                        checkedCount++;
-                        
-                        _Log?.SystemLog_Txt($"分館 {group.GroupId} ({group.Name}) - 距離: {distance:F4} 公里");
+                        checkedCount++;   
                         
                         if(distance < minDistance)
                         {
                             minDistance = distance;
                             nearestGroupId = group.GroupId;
                             matchedCount++;
-                            _Log?.SystemLog_Txt($"  → 更新最近分館: {nearestGroupId}, 距離: {minDistance:F4} 公里");
                         }
-                    }
-                    else
-                    {
-                        _Log?.SystemLog_Txt($"分館 {group.GroupId} ({group.Name}) - 不在座標字典中，跳過");
                     }
                 }
 
@@ -261,7 +250,6 @@ namespace Reservation.Controllers
 
                 if(!string.IsNullOrEmpty(nearestGroupId))
                 {
-                    _Log?.SystemLog_Txt($"GPS 定位成功 - 最近分館: {nearestGroupId}, 距離: {minDistance:F4} 公里");
                     return Json(new { success = true, groupId = nearestGroupId, distance = minDistance });
                 }
 
@@ -276,8 +264,6 @@ namespace Reservation.Controllers
                         message="使用預設分館"
                     });
                 }
-
-                _Log?.SystemErrorLog_Txt("GPS 定位失敗：找不到最近的分館，且沒有可用分館");
                 return Json(new { success = false, message = "找不到最近的分館" });
             }
             catch(Exception ex)

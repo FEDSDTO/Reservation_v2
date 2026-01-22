@@ -27,7 +27,8 @@ namespace Reservation.Middleware
             "/css/",
             "/js/",
             "/lib/",
-            "/Image/",
+            "/image/",
+            "/img/",
             "/favicon.ico",
             "/Home/Error"
         };
@@ -44,17 +45,17 @@ namespace Reservation.Middleware
         public async Task InvokeAsync(HttpContext context,MemberContext memberContext)
         {
             var path = context.Request.Path.Value ?? "";
-            _log.SystemLog_Txt($"[Token驗證] 開始處理路徑={path}");
-
+            
             if(ExcludedPaths.Any(excluded => path.StartsWith(excluded,StringComparison.OrdinalIgnoreCase)))
             {
-                _log.SystemLog_Txt($"[Token驗證] 跳過排除路徑={path}");
                 await _next(context);
                 return;
             }
+
+            _log.SystemLog_Txt($"[Token驗證] 開始處理路徑={path}");
+
             var tokenFromQuery = context.Request.Query["Token"].FirstOrDefault();
             var tokenFromCookie = context.Request.Cookies[TokenCookieName];
-            _log.SystemLog_Txt($"[Token驗證] URL參數有Token={!string.IsNullOrEmpty(tokenFromQuery)}, Cookie有Token={!string.IsNullOrEmpty(tokenFromCookie)}");
 
             string? tokenToUse = null;
 
@@ -66,42 +67,35 @@ namespace Reservation.Middleware
                     Secure = context.Request.IsHttps,
                     SameSite = SameSiteMode.Lax,
                 });
-                _log.SystemLog_Txt($"[Token驗證] 使用URL參數Token並寫入Cookie token={Mask(tokenFromQuery)}");
             }
             else if(!string.IsNullOrEmpty(tokenFromCookie))
             {
                 tokenToUse = tokenFromCookie;
-                 _log.SystemLog_Txt($"[Token驗證] 使用Cookie中的Token token={Mask(tokenFromCookie)}");
             }
 
             if(string.IsNullOrEmpty(tokenToUse))
             {
-                _log.SystemErrorLog_Txt($"[Token驗證] 缺少Token -> 跳轉登入頁面 路徑={path}");
                 await RedirectToLoginAsync(context);
                 return;
             }
             if(!Guid.TryParse(tokenToUse,out Guid tokenGuid))
             {
-                _log.SystemErrorLog_Txt($"[Token驗證] Token格式無效 token={Mask(tokenToUse)} -> 跳轉登入頁面 路徑={path}");
                 await RedirectToLoginAsync(context);
                 return;
             }
             try
             {
-                 _log.SystemLog_Txt($"[Token驗證] 開始驗證Token tokenGuid={Mask(tokenGuid.ToString())}");
                  var memberToken = await memberContext.MemberTokens.FirstOrDefaultAsync
                  (mt => mt.Token == tokenGuid && mt.EntityStatus ==1);
 
                  if(memberToken == null)
                  {
-                     _log.SystemErrorLog_Txt($"[Token驗證] 資料庫查無Token或EntityStatus!=1 tokenGuid={Mask(tokenGuid.ToString())} -> 跳轉登入頁面");
                      await RedirectToLoginAsync(context);
                      return;
                  }
 
                  if (memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
                  {
-                    _log.SystemErrorLog_Txt($"[Token驗證] Token已過期 tokenGuid={Mask(tokenGuid.ToString())}, 過期時間={memberToken.ExpireDate:yyyy-MM-dd HH:mm:ss} -> 跳轉登入頁面");
                     await RedirectToLoginAsync(context);
                     return;
                  }
@@ -109,8 +103,8 @@ namespace Reservation.Middleware
                  context.Items["MemberId"] =memberToken.MemberId;
                  context.Items["Token"]=tokenGuid;
                  context.Items["MemberToken"]=memberToken;
-                  _log.SystemLog_Txt($"[Token驗證] 驗證成功 會員ID={memberToken.MemberId}, tokenGuid={Mask(tokenGuid.ToString())} -> 繼續處理");
-                await _next(context);
+                 _log.SystemLog_Txt($"[Token驗證] 驗證成功 會員ID={memberToken.MemberId} -> 繼續處理");
+                 await _next(context);
             }catch(Exception ex)
             {
                 _log.SystemErrorLog_Txt($"[Token驗證] 驗證過程中發生錯誤 tokenGuid={Mask(tokenGuid.ToString())}, 錯誤訊息={ex.Message} -> 跳轉登入頁面");
@@ -126,7 +120,7 @@ namespace Reservation.Middleware
 
             var  loginBaseUrl = GetLoginUrl().TrimEnd('/');
             var loginUrl = $"{loginBaseUrl}/?returnUrl={encodedReturnUrl}";
-            _log.SystemLog_Txt($"[Token驗證] 跳轉登入頁面 登入網址={loginBaseUrl}, 回跳網址={returnUrl}, 完整網址={loginUrl}");
+            
             context.Response.Redirect(loginUrl);
             await Task.CompletedTask;           
         }

@@ -457,15 +457,53 @@ namespace Reservation.Controllers
                     
                     try
                     {
-                       var memberReserveLog=new MemberReserveLog{
-                        Status="N",
-                        Json=apiResult.Data,
-                        Creator=0,
-                        CreateDate=DateTime.Now,
-                        CreateFrom="FEDS-SYS"
-                       };
+                        // ========== 解析 API 回應的所有資料 ==========
+                        string parsedApiData = string.Empty;
+                        string externalReservationId = string.Empty;
+                        string customerId = string.Empty;
+                        string reservationLink = string.Empty;
+                        
+                        try
+                        {
+                            var result = Newtonsoft.Json.Linq.JObject.Parse(apiResult.Data);
+                            
+                            // 解析所有欄位
+                            externalReservationId = result["reservationId"]?.ToString() ?? string.Empty;
+                            customerId = result["customerId"]?.ToString() ?? string.Empty;
+                            reservationLink = result["reservationLink"]?.ToString() ?? string.Empty;
+                            
+                            // 組合解析後的資料（用於記錄到 Remark）
+                            var parsedFields = new System.Text.StringBuilder();
+                            parsedFields.AppendLine("=== API 回應解析 ===");
+                            
+                            foreach(var prop in result.Properties())
+                            {
+                                parsedFields.AppendLine($"{prop.Name}: {prop.Value?.ToString() ?? "null"}");
+                                
+                                // 記錄到日誌
+                                _Log?.SystemLog_Txt($"API 回應欄位 - {prop.Name}: {prop.Value?.ToString() ?? "null"}");
+                            }
+                            
+                            parsedApiData = parsedFields.ToString();
+                            
+                            // 記錄解析結果
+                            _Log?.SystemLog_Txt($"訂位 API 解析完成 - ReservationId: {externalReservationId}, CustomerId: {customerId}, Link: {reservationLink}");
+                        }
+                        catch(Exception parseEx)
+                        {
+                            _Log?.SystemErrorLog_Txt($"解析訂位 API 回應失敗: {parseEx.Message}");
+                            parsedApiData = $"解析失敗: {parseEx.Message}";
+                        }
 
-                       var memberReserve = new MemberReserve{
+                        var memberReserveLog = new MemberReserveLog{
+                            Status = "N",
+                            Json = apiResult.Data,  // 完整 JSON 回應
+                            Creator = 0,
+                            CreateDate = DateTime.Now,
+                            CreateFrom = "FEDS-SYS"
+                        };
+
+                        var memberReserve = new MemberReserve{
                             MemberId = memberId, // 會員ID，非會員為 0
                             CompanyId = companyId,
                             BranchId = branchId,
@@ -476,16 +514,21 @@ namespace Reservation.Controllers
                             ContactGender = (byte)gender,
                             Datetime = bookingDateTime, // 台灣時間（非 UTC）
                             Note = customerNote,
+                            Remark = !string.IsNullOrEmpty(parsedApiData) 
+                                ? $"ReservationId: {externalReservationId}, CustomerId: {customerId}, Link: {reservationLink}\n{parsedApiData}"
+                                : string.Empty,  // 將解析的資料存入 Remark
                             Creator = 0,
                             CreateDate = DateTime.Now,
                             CreateFrom = "FEDS-SYS",
                             MemberReserveLogs = new List<MemberReserveLog> { memberReserveLog }
-                       };
+                        };
 
-                       _restaurantContext.MemberReserves.Add(memberReserve);
-                       await _restaurantContext.SaveChangesAsync();
-                       _Log?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}");
-                    }catch(Exception ex)
+                        _restaurantContext.MemberReserves.Add(memberReserve);
+                        await _restaurantContext.SaveChangesAsync();
+                        _Log?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}, ReservationId: {externalReservationId}");
+
+                    }
+                    catch(Exception ex)
                     {
                       _Log?.SystemErrorLog_Txt($"儲存訂位資料到資料庫失敗: {ex.Message}");
                     }
