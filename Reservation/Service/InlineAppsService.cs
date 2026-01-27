@@ -1,6 +1,7 @@
 ﻿using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Reservation.Models;
 namespace Reservation.Service
@@ -237,6 +238,24 @@ namespace Reservation.Service
         {
             return await PostInlineApps( $"/waitings/{companyId}/{branchId}", requestBody);
         }
-       
+
+        public async Task<ApiResult> GetCustomerReservationAsync(string companyId,string customerId,string branchId = null ,string reservationTypeFilter = null) 
+        {
+            var queryParams = new List<string>();
+            if(!string.IsNullOrEmpty(branchId))
+            {
+                queryParams.Add($"branchId={Uri.EscapeDataString(branchId)}");
+            }
+
+            if(!string.IsNullOrEmpty(reservationTypeFilter))
+            {
+                queryParams.Add($"reservationTypeFilter={Uri.EscapeDataString(reservationTypeFilter)}");
+            }
+            var queryStr = queryParams.Any()?string.Join("&",queryParams):string.Empty;
+
+            return await GetInlineApps(
+            $"/companies/{companyId}/customers/{customerId}/reservations", 
+            queryStr);
+            }  
     }
 }

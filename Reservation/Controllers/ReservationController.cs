@@ -381,8 +381,14 @@ namespace Reservation.Controllers
                     branchId = restaurant.id;
                 }
 
-                // ========== 步驟 3：將 CustomerTitle (先生/小姐) 轉換為 Gender (0/1/2) ==========
+                // ========== 步驟 3：取得登入會員 ID ==========
                 int memberId = 0;
+                if(HttpContext.Items["MemberId"] != null && HttpContext.Items["MemberId"] is int memberIdValue)
+                {
+                    memberId = memberIdValue;
+                }
+
+                // ========== 步驟 4：將 CustomerTitle (先生/小姐) 轉換為 Gender (0/1/2) ==========
                 int gender = 2; // 預設：未指定
                 if(model.CustomerTitle == "先生")
                 {
@@ -514,6 +520,9 @@ namespace Reservation.Controllers
                             ContactGender = (byte)gender,
                             Datetime = bookingDateTime, // 台灣時間（非 UTC）
                             Note = customerNote,
+                            CustomerId = customerId, 
+                            ExternalReservationId = externalReservationId,  
+                            Status = "已預訂", 
                             Remark = !string.IsNullOrEmpty(parsedApiData) 
                                 ? $"ReservationId: {externalReservationId}, CustomerId: {customerId}, Link: {reservationLink}\n{parsedApiData}"
                                 : string.Empty,  // 將解析的資料存入 Remark
@@ -527,6 +536,73 @@ namespace Reservation.Controllers
                         await _restaurantContext.SaveChangesAsync();
                         _Log?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}, ReservationId: {externalReservationId}");
 
+                        // ========== 呼叫 API 取得完整記錄並更新資料庫 ==========
+                        if(!string.IsNullOrEmpty(customerId) && !string.IsNullOrEmpty(companyId))
+                        {
+                            try
+                            {
+                                 _Log?.SystemLog_Txt($"開始呼叫 API 取得訂位完整記錄 - CustomerId: {customerId}");
+
+                                 var queryApiResult = await _inlineAppsService.GetCustomerReservationAsync(companyId, customerId, branchId, "booking,waiting");
+
+                                 if(queryApiResult.Code == 200 && !string.IsNullOrEmpty(queryApiResult.Data))
+                                 {
+                                    var queryResult = Newtonsoft.Json.Linq.JObject.Parse(queryApiResult.Data);
+                                    var reservations = queryResult["reservations"] as Newtonsoft.Json.Linq.JArray;
+                                    if(reservations !=null)
+                                    {
+                                        foreach(var reservation in reservations)
+                                        {
+                                            var apiReservationId = reservation["id"]?.ToString() ?? string.Empty;
+                                            var apiState = reservation["state"]?.ToString()?? string.Empty;
+                                            var apiType = reservation["type"]?.ToString()??string.Empty;
+
+                                            if(apiReservationId == externalReservationId || 
+                                            (!string.IsNullOrEmpty(memberReserve.ExternalReservationId) && 
+                                            apiReservationId == memberReserve.ExternalReservationId))
+                                            {
+                                                memberReserve.ExternalReservationId = apiReservationId;
+                                                memberReserve.CustomerId = customerId;
+                                                
+                                                string status = "已預訂";
+                                                if(apiType == "booking")
+                                                {
+                                                    status = apiState switch
+                                                    {
+                                                        "booked" => "已預訂",
+                                                        "seated" => "已入座",
+                                                        "completed" => "已完成",
+                                                        "canceled" =>"已取消",
+                                                        _ => "未知狀態"
+                                                    };
+                                                }
+                                                else if(apiType == "waiting")
+                                                {
+                                                    status = apiState switch
+                                                    {
+                                                        "waiting" => "等待中",
+                                                        "called" => "已叫號",
+                                                        "seated" => "已入坐",
+                                                        "completed" => "已完成",
+                                                        "canceled" => "已取消",
+                                                        _ => "等待中"
+                                                    };
+                                                }
+                                                memberReserve.Status = status;
+                                                await _restaurantContext.SaveChangesAsync();
+                                                _Log?.SystemLog_Txt($"訂位紀錄更新 - Status:{status},State:{apiState}");
+                                                break;
+                                            }
+                                        }
+                                    }
+                                 }
+                            }catch(Exception ex)
+                            {
+                                _Log?.SystemErrorLog_Txt($"取得訂位完整記錄失敗: {ex.Message}");
+                            }
+
+
+                        }
                     }
                     catch(Exception ex)
                     {
@@ -612,7 +688,7 @@ namespace Reservation.Controllers
             }
 
             try
-            {
+            {  
                 if(DateTime.TryParse(date, out DateTime selectedDate))
                 {
                     var apiResult = await _inlineAppsService.GetBranchAsync(

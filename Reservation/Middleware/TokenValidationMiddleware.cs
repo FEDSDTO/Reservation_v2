@@ -66,6 +66,8 @@ namespace Reservation.Middleware
                     HttpOnly = true,
                     Secure = context.Request.IsHttps,
                     SameSite = SameSiteMode.Lax,
+                    Path = "/",
+                    Expires = DateTimeOffset.Now.AddDays(1)
                 });
             }
             else if(!string.IsNullOrEmpty(tokenFromCookie))
@@ -75,42 +77,60 @@ namespace Reservation.Middleware
 
             if(string.IsNullOrEmpty(tokenToUse))
             {
+                _log.SystemLog_Txt($"[Token驗證] 未找到 Token - Query:{!string.IsNullOrEmpty(tokenFromQuery)},Cookie:{!string.IsNullOrEmpty(tokenFromCookie)}");
                 await RedirectToLoginAsync(context);
                 return;
             }
-            if(!Guid.TryParse(tokenToUse,out Guid tokenGuid))
-            {
+           if(!Guid.TryParse(tokenToUse,out Guid tokenGuid))
+           {
+              await RedirectToLoginAsync(context);
+              return;
+           }
+           if(memberContext ==null)
+           {
+                _log.SystemErrorLog_Txt($"[Token驗證] MemberContext 為 null，請檢查依賴注入設定 -> 跳轉登入頁面");
                 await RedirectToLoginAsync(context);
                 return;
-            }
-            try
-            {
-                 var memberToken = await memberContext.MemberTokens.FirstOrDefaultAsync
-                 (mt => mt.Token == tokenGuid && mt.EntityStatus ==1);
+           }
+           try
+           {
+                var memberToken = await memberContext.MemberTokens.FirstOrDefaultAsync
+                (mt => mt.Token == tokenGuid && mt.EntityStatus == 1);
 
-                 if(memberToken == null)
-                 {
-                     await RedirectToLoginAsync(context);
-                     return;
-                 }
-
-                 if (memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
-                 {
+                if(memberToken == null)
+                {
+                    _log.SystemLog_Txt($"[Token驗證] 資料庫找不到 Token: {Mask(tokenGuid.ToString())} -> 跳轉登入頁面");
                     await RedirectToLoginAsync(context);
                     return;
-                 }
+                }
 
-                 context.Items["MemberId"] =memberToken.MemberId;
-                 context.Items["Token"]=tokenGuid;
-                 context.Items["MemberToken"]=memberToken;
-                 _log.SystemLog_Txt($"[Token驗證] 驗證成功 會員ID={memberToken.MemberId} -> 繼續處理");
-                 await _next(context);
-            }catch(Exception ex)
-            {
-                _log.SystemErrorLog_Txt($"[Token驗證] 驗證過程中發生錯誤 tokenGuid={Mask(tokenGuid.ToString())}, 錯誤訊息={ex.Message} -> 跳轉登入頁面");
+                if(memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
+                {
+                    _log.SystemLog_Txt($"[Token驗證] Token 已過期: {Mask(tokenGuid.ToString())}, 過期時間: {memberToken.ExpireDate.Value:yyyy-MM-dd HH:mm:ss} -> 跳轉登入頁面");
+                    await RedirectToLoginAsync(context);
+                    return;
+                }
+
+                context.Items["MemberId"] = memberToken.MemberId;
+                context.Items["Token"] = tokenGuid;
+                context.Items["MemberToken"] = memberToken;
+                _log.SystemLog_Txt($"[Token驗證] 驗證成功 會員ID={memberToken.MemberId} -> 繼續處理");
+                await _next(context);
+           }
+           catch(NullReferenceException ex)
+           {
+                string tokenGuidStr = tokenGuid != Guid.Empty ? tokenGuid.ToString() : "unknown";
+                _log.SystemErrorLog_Txt($"[Token驗證] 空引用異常 - Token: {Mask(tokenGuidStr)}, 錯誤: {ex.Message}, 位置: {ex.StackTrace} -> 跳轉登入頁面");
                 await RedirectToLoginAsync(context);
                 return;
-            }
+           }
+           catch(Exception ex)
+           {
+                string tokenGuidStr = tokenGuid != Guid.Empty ? tokenGuid.ToString() : "unknown";
+                _log.SystemErrorLog_Txt($"[Token驗證] 驗證過程中發生錯誤 tokenGuid={Mask(tokenGuidStr)}, 錯誤訊息={ex.Message}, StackTrace={ex.StackTrace} -> 跳轉登入頁面");
+                await RedirectToLoginAsync(context);
+                return;
+           }
         }
 
         private async Task RedirectToLoginAsync(HttpContext context)
@@ -169,12 +189,12 @@ namespace Reservation.Middleware
         }
     }
 
-     public static class TokenValidationMiddlewareExtensions
+    public static class TokenValidationMiddlewareExtensions
     {
         public static IApplicationBuilder UseTokenValidation(this IApplicationBuilder builder)
         {
             return builder.UseMiddleware<TokenValidationMiddleware>();
-        }
+        } 
     }
 }
 

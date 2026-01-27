@@ -100,6 +100,9 @@ public partial class RestaurantContext : DbContext
                 .HasMaxLength(20)
                 .HasComment("資料創建來源");
             entity.Property(e => e.Creator).HasComment("資料創建者ID");
+            entity.Property(e => e.CustomerId)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.Datetime)
                 .HasComment("訂位日期時間")
                 .HasColumnType("datetime");
@@ -110,6 +113,9 @@ public partial class RestaurantContext : DbContext
                 .HasMaxLength(20)
                 .HasComment("最後編輯資料來源");
             entity.Property(e => e.Editor).HasComment("最後編輯者ID");
+            entity.Property(e => e.ExternalReservationId)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.GroupSize).HasComment("訂位人數\r\n表示成人訂位人數");
             entity.Property(e => e.MemberId)
                 .HasComment("登入會員ID\r\n[FEDSMBR_v3].[Member].[id]\r\n")
@@ -121,6 +127,9 @@ public partial class RestaurantContext : DbContext
             entity.Property(e => e.Remark)
                 .HasMaxLength(200)
                 .HasComment("系統備註");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<MemberReserveLog>(entity =>
@@ -188,6 +197,9 @@ public partial class RestaurantContext : DbContext
                 .HasMaxLength(20)
                 .HasComment("資料創建來源");
             entity.Property(e => e.Creator).HasComment("資料創建者ID");
+            entity.Property(e => e.CustomerId)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.Datetime)
                 .HasComment("訂位日期時間")
                 .HasColumnType("datetime");
@@ -212,6 +224,9 @@ public partial class RestaurantContext : DbContext
             entity.Property(e => e.Remark)
                 .HasMaxLength(200)
                 .HasComment("系統備註");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<MemberWaitingLog>(entity =>

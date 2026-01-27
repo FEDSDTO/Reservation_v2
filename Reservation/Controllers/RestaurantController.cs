@@ -112,7 +112,94 @@ namespace Reservation.Controllers
            var reservationRecords = new List<ReservationRecordModel>();
            var waitingRecords = new List<WaitingRecordModel>();
 
+           // ========== 取得登入會員 ID ==========
            int memberId = 0;
+           if(HttpContext.Items["MemberId"] != null && HttpContext.Items["MemberId"] is int memberIdValue)
+           {
+               memberId = memberIdValue;
+           }
+
+           if(memberId == 0)
+           {
+               // 未登入，導向登入頁或顯示提示
+               TempData["ErrorMsg"] = "請先登入會員";
+               return RedirectToAction("Index", "Restaurant");
+           }
+
+           // ========== 查詢所有分館的記錄（如果沒有指定 branchId） ==========
+           if(!branchId.HasValue)
+           {
+               // 查詢所有訂位記錄
+               var allReserves = await _restaurantContext.MemberReserves
+                   .Where(r => r.MemberId == memberId)
+                   .OrderByDescending(r => r.CreateDate)
+                   .ToListAsync();
+
+               foreach(var reserve in allReserves)
+               {
+                   // 找出對應的 GroupId
+                   var groupId = branchDict.FirstOrDefault(x => 
+                       reserve.BranchId != null && reserve.BranchId.StartsWith(x.Key)).Key;
+                   
+                   if(!string.IsNullOrEmpty(groupId))
+                   {
+                       var restaurant = await _restaurantService.GetRestaurantDetailAsync(groupId, reserve.BranchId);
+                       
+                       if(restaurant != null)
+                       {
+                           reservationRecords.Add(new ReservationRecordModel{
+                               ReservationId = (int)reserve.Id,
+                               RestaurantId = restaurant.id.GetHashCode(),
+                               RestaurantName = restaurant.Name,
+                               RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{reserve.BranchId}.jpg",
+                               RestaurantLocation = restaurant.Address,
+                               RestaurantPhone = restaurant.PhoneNumber,
+                               ReservationDate = reserve.Datetime,
+                               DayOfWeek = reserve.Datetime.ToString("dddd",new System.Globalization.CultureInfo("zh-TW")),
+                               AdultCount = reserve.GroupSize,
+                               ChildCount = reserve.NumberOfKid,
+                               Status = reserve.Status ?? "已預訂"
+                           });
+                       }
+                   }
+               }
+               
+               // 查詢所有候位記錄
+               var allWaitings = await _restaurantContext.MemberWaitings
+                   .Where(w => w.MemberId == memberId)
+                   .OrderByDescending(w => w.CreateDate)
+                   .ToListAsync();
+
+               foreach(var waiting in allWaitings)
+               {
+                   // 找出對應的 GroupId
+                   var groupId = branchDict.FirstOrDefault(x => 
+                       waiting.BranchId != null && waiting.BranchId.StartsWith(x.Key)).Key;
+                   
+                   if(!string.IsNullOrEmpty(groupId))
+                   {
+                       var restaurant = await _restaurantService.GetRestaurantDetailAsync(groupId, waiting.BranchId);
+                       
+                       if(restaurant != null)
+                       {
+                           waitingRecords.Add(new WaitingRecordModel{
+                               WaitingId = waiting.Id,
+                               RestaurantId = restaurant.id.GetHashCode(),
+                               RestaurantName = restaurant.Name,
+                               RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{waiting.BranchId}.jpg",
+                               RestaurantLocation = restaurant.Address,
+                               RestaurantPhone = restaurant.PhoneNumber,
+                               JoinDate = waiting.CreateDate,
+                               AdultCount = waiting.GroupSize,
+                               ChildCount = waiting.NumberOfKid,
+                               QueueNumber = waiting.PositionInLine ?? 0,
+                               Status = waiting.Status ?? "等待中"
+                           });
+                       }
+                   }
+               }
+           }
+
            if(branchId.HasValue)
            {
             var selectedGroupId = branchDict.FirstOrDefault(x=>x.Value == branchId.Value).Key;
@@ -143,7 +230,7 @@ namespace Reservation.Controllers
                            DayOfWeek = reserve.Datetime.ToString("dddd",new System.Globalization.CultureInfo("zh-TW")),
                            AdultCount = reserve.GroupSize,
                            ChildCount = reserve.NumberOfKid,
-                           Status = "完成"
+                           Status = reserve.Status ?? "已預訂"
                        });
                     }
                 }
@@ -170,8 +257,8 @@ namespace Reservation.Controllers
                             JoinDate = waiting.CreateDate,
                             AdultCount = waiting.GroupSize,
                             ChildCount = waiting.NumberOfKid,
-                            QueueNumber = 0,
-                            Status = "等待中"                            
+                            QueueNumber = waiting.PositionInLine ?? 0,
+                            Status = waiting.Status ?? "等待中"                            
                         });
                     }
                 }
@@ -184,7 +271,7 @@ namespace Reservation.Controllers
             ReservationRecords = reservationRecords,
             WaitingRecords = waitingRecords,
            };
-           return View();
+           return View(viewModel);
         }
 
         public IActionResult Queue(int id)

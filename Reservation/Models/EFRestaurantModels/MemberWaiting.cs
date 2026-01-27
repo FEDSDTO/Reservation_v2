@@ -109,5 +109,11 @@ public partial class MemberWaiting
     /// </summary>
     public string EditFrom { get; set; }
 
+    public string CustomerId { get; set; }
+
+    public string Status { get; set; }
+
+    public int? PositionInLine { get; set; }
+
     public virtual ICollection<MemberWaitingLog> MemberWaitingLogs { get; set; } = new List<MemberWaitingLog>();
 }

@@ -104,5 +104,11 @@ public partial class MemberReserve
     /// </summary>
     public string EditFrom { get; set; }
 
+    public string CustomerId { get; set; }
+
+    public string ExternalReservationId { get; set; }
+
+    public string Status { get; set; }
+
     public virtual ICollection<MemberReserveLog> MemberReserveLogs { get; set; } = new List<MemberReserveLog>();
 }
