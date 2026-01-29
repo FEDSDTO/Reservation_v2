@@ -116,17 +116,38 @@
                                 </div>
                                 <!-- 狀態按鈕 -->
                                 <div class="text-end">
-                                    @if (record.Status == "完成")
+                                    @if (record.Status == "已完成")
                                     {
                                         <button class="btn btn-primary btn-sm">完成</button>
+                                    }
+                                    else if (record.Status == "已入座")
+                                    {
+                                        <button class="btn btn-success btn-sm">已入座</button>
+                                    }
+                                    else if (record.Status == "已預訂")
+                                    {
+                                        <button class="btn btn-info btn-sm">已預訂</button>
+                                    }
+                                    else if (record.Status == "等待中")
+                                    {
+                                        <button class="btn btn-warning btn-sm">等待中</button>
+                                    }
+                                    else if (record.Status == "已叫號")
+                                    {
+                                        <button class="btn btn-warning btn-sm">已叫號</button>
+                                    }
+                                    else if (record.Status == "已取消")
+                                    {
+                                        <button class="btn btn-secondary btn-sm">已取消</button>
                                     }
                                     else if (record.Status == "未入座")
                                     {
                                         <button class="btn btn-secondary btn-sm">未入座</button>
                                     }
-                                    else if (record.Status == "已取消")
+                                    else if (!string.IsNullOrEmpty(record.Status))
                                     {
-                                        <button class="btn btn-secondary btn-sm">已取消</button>
+                                        <!-- 顯示原始狀態值（包含"未知狀態"或其他未預期的狀態） -->
+                                        <button class="btn btn-secondary btn-sm">@record.Status</button>
                                     }
                                 </div>
                             </div>

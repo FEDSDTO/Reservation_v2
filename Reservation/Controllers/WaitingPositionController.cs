@@ -7,6 +7,7 @@ using Reservation.Service;
 using Microsoft.EntityFrameworkCore; 
 using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.SignalR.Protocol;
+using Microsoft.Data.SqlClient;
 
 namespace Reservation.Controllers
 {
@@ -269,6 +270,15 @@ namespace Reservation.Controllers
             if(HttpContext.Items["MemberId"] != null && HttpContext.Items["MemberId"] is int memberIdValue)
             {
                 memberId = memberIdValue;
+                _Log?.SystemLog_Txt($"候位-取得會員ID:{memberId}");
+            }else
+            {
+                _Log?.SystemLog_Txt($"候位 - 未取得會員ID，使用預設值 0 (非會員)");
+                _Log?.SystemLog_Txt($"候位 - HttpContext.Items[\"MemberId\"] 是否存在: {HttpContext.Items.ContainsKey("MemberId")}");
+                if(HttpContext.Items.ContainsKey("MemberId"))
+                {
+                    _Log?.SystemLog_Txt($"候位 - HttpContext.Items[\"MemberId\"] 值: {HttpContext.Items["MemberId"]}, 型別: {HttpContext.Items["MemberId"]?.GetType().Name}");
+                }
             }
 
             int gender = 2;
@@ -430,30 +440,62 @@ namespace Reservation.Controllers
                     Note = waitingPositionOrder.CustomerNote ?? string.Empty,
                     CustomerId = customerId,  
                     Status = "等待中", 
-                    Remark = !string.IsNullOrEmpty(parsedApiData)
-                        ? $"ReservationId: {reservationId}, CustomerId: {customerId}, Link: {reservationLink}\n{parsedApiData}"
-                        : (!string.IsNullOrEmpty(reservationId) 
-                            ? $"API 返回 reservationId: {reservationId}" 
-                            : string.Empty),  // 將解析的資料存入 Remark
+                    Remark = null,
                     Creator = 0,
                     CreateDate = DateTime.Now,
                     CreateFrom = "FEDS-SYS"
                 };
-                _restaurantContext.MemberWaitings.Add(memberWaiting);
-                await _restaurantContext.SaveChangesAsync();
 
-                var memberWaitingLog = new MemberWaitingLog
+                try
                 {
-                    ReserveId = memberWaiting.Id,
-                    Status = "N",
-                    Json = apiResult.Data,
-                    Creator = 0,
-                    CreateDate = DateTime.Now,
-                    CreateFrom = "FEDS-SYS"
-                };
+                    _Log?.SystemLog_Txt("[DB] 準備寫入 MemberWaiting");
+                    _Log?.SystemLog_Txt($"[DB] MemberId={memberWaiting.MemberId}, CompanyIdLen={memberWaiting.CompanyId?.Length}, BranchIdLen={memberWaiting.BranchId?.Length}");
+                    _Log?.SystemLog_Txt($"[DB] ContactNameLen={memberWaiting.ContactName?.Length}, PhoneLen={memberWaiting.ContactPhone?.Length}");
+                    _Log?.SystemLog_Txt($"[DB] NoteLen={memberWaiting.Note?.Length}, RemarkLen={memberWaiting.Remark?.Length}");
+                    _Log?.SystemLog_Txt($"[DB] CustomerIdLen={memberWaiting.CustomerId?.Length}, StatusLen={memberWaiting.Status?.Length}");
 
-                memberWaiting.MemberWaitingLogs.Add(memberWaitingLog);
-                await _restaurantContext.SaveChangesAsync();
+                    _restaurantContext.MemberWaitings.Add(memberWaiting);
+                    var affected1 = await _restaurantContext.SaveChangesAsync();
+                    _Log?.SystemLog_Txt($"[DB] SaveChanges(MemberWaiting) 成功，affected={affected1}, id={memberWaiting.Id}, MemberId={memberWaiting.MemberId}");
+
+                    var memberWaitingLog = new MemberWaitingLog
+                    {
+                        ReserveId = memberWaiting.Id,
+                        Status = "N",
+                        Json = apiResult.Data,
+                        Creator = 0,
+                        CreateDate = DateTime.Now,
+                        CreateFrom = "FEDS-SYS"
+                    };
+
+                    memberWaiting.MemberWaitingLogs.Add(memberWaitingLog);
+                    var affected2 = await _restaurantContext.SaveChangesAsync();
+                    _Log?.SystemLog_Txt($"[DB] SaveChanges(MemberWaitingLog) 成功，affected={affected2}");
+                    _Log?.SystemLog_Txt($"候位資料已儲存到資料庫 - WaitingId: {memberWaiting.Id}, API ReservationId: {reservationId}, MemberId: {memberWaiting.MemberId}");
+                }
+                catch(DbUpdateException dbEx)
+                {
+                    _Log?.SystemErrorLog_Txt($"[DB] DbUpdateException: {dbEx.Message}");
+                    _Log?.SystemErrorLog_Txt($"[DB] InnerExceptionType: {dbEx.InnerException?.GetType().FullName}");
+                    _Log?.SystemErrorLog_Txt($"[DB] InnerException: {dbEx.InnerException?.Message}");
+                    _Log?.SystemErrorLog_Txt($"[DB] StackTrace: {dbEx.StackTrace}");
+
+                    if(dbEx.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx)
+                    {
+                        _Log?.SystemErrorLog_Txt($"[DB] SqlException.Number={sqlEx.Number}, State={sqlEx.State}, Class={sqlEx.Class}, LineNumber={sqlEx.LineNumber}, Procedure={sqlEx.Procedure}");
+                        foreach (Microsoft.Data.SqlClient.SqlError err in sqlEx.Errors)
+                        {
+                            _Log?.SystemErrorLog_Txt($"[DB] SqlError: Number={err.Number}, Message={err.Message}, Line={err.LineNumber}, Proc={err.Procedure}");
+                        }
+                    }
+                    throw; // 重新拋出異常，讓外層 catch 處理
+                }
+                catch(Exception ex)
+                {
+                    _Log?.SystemErrorLog_Txt($"[DB] Exception: {ex.Message}");
+                    _Log?.SystemErrorLog_Txt($"[DB] StackTrace: {ex.StackTrace}");
+                    throw; // 重新拋出異常，讓外層 catch 處理
+                }
 
                 // ========== 呼叫 API 取得完整記錄並更新資料庫 ==========
                 if(!string.IsNullOrEmpty(customerId) && !string.IsNullOrEmpty(companyId))
@@ -501,6 +543,25 @@ namespace Reservation.Controllers
                                                         _ => "等待中"
                                                     };
                                                 }
+                                                else if(apiType == "booking")
+                                                {
+                                                    // 如果 API 返回的是 booking 類型，也應該處理
+                                                    status = apiState switch
+                                                    {
+                                                        "booked" => "已預訂",
+                                                        "seated" => "已入座",
+                                                        "completed" => "已完成",
+                                                        "canceled" => "已取消",
+                                                        _ => "未知狀態"
+                                                    };
+                                                    _Log?.SystemLog_Txt($"[候位] API 返回 booking 類型 - apiType: {apiType}, apiState: {apiState}, 更新為: {status}");
+                                                }
+                                                else if(!string.IsNullOrEmpty(apiType))
+                                                {
+                                                    // 如果 apiType 不是 waiting 也不是 booking，記錄為未知狀態
+                                                    status = "未知狀態";
+                                                    _Log?.SystemLog_Txt($"[候位] API 返回未知類型 - apiType: {apiType}, apiState: {apiState}, ReservationId: {apiReservationId}");
+                                                }
                                                 memberWaiting.Status = status;
 
                                                 // 更新排隊位置
@@ -530,11 +591,15 @@ namespace Reservation.Controllers
                         _Log?.SystemErrorLog_Txt($"取得候位完整記錄失敗: {ex.Message}\r\nStackTrace: {ex.StackTrace}"); 
                     }
                 }
-                 _Log?.SystemLog_Txt($"候位資料已儲存到資料庫 - WaitingId: {memberWaiting.Id}, API ReservationId: {reservationId}");
             }
             catch(Exception ex)
             {
                 _Log?.SystemErrorLog_Txt($"儲存候位資料到資料庫失敗: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
+                if(Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, errors = new[] { "寫入候位資料失敗，請查看系統紀錄" } });
+                }
+                throw;
             }
 
             if(Request.Headers["X-Requested-With"] == "XMLHttpRequest")

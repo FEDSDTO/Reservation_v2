@@ -5,6 +5,9 @@ using Reservation.Models.ViewModels;
 using Reservation.Service;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using Microsoft.Data.SqlClient;
 
 namespace Reservation.Controllers
 {
@@ -386,6 +389,15 @@ namespace Reservation.Controllers
                 if(HttpContext.Items["MemberId"] != null && HttpContext.Items["MemberId"] is int memberIdValue)
                 {
                     memberId = memberIdValue;
+                    _Log?.SystemLog_Txt($"訂位-取得會員ID:{memberId}");
+                }else
+                {
+                    _Log?.SystemLog_Txt($"訂位-未取得會員ID，使用預設值0");
+                    _Log?.SystemLog_Txt($"訂位-HttpContext.Items[\"MemberId\"]: {HttpContext.Items["MemberId"]}");
+                    if(HttpContext.Items.ContainsKey("MemberId"))
+                    {
+                        _Log?.SystemLog_Txt($"訂位-HttpContext.Items[\"MemberId\"]: {HttpContext.Items["MemberId"]}");
+                    }
                 }
 
                 // ========== 步驟 4：將 CustomerTitle (先生/小姐) 轉換為 Gender (0/1/2) ==========
@@ -523,18 +535,66 @@ namespace Reservation.Controllers
                             CustomerId = customerId, 
                             ExternalReservationId = externalReservationId,  
                             Status = "已預訂", 
-                            Remark = !string.IsNullOrEmpty(parsedApiData) 
-                                ? $"ReservationId: {externalReservationId}, CustomerId: {customerId}, Link: {reservationLink}\n{parsedApiData}"
-                                : string.Empty,  // 將解析的資料存入 Remark
+                            Remark = null,
                             Creator = 0,
                             CreateDate = DateTime.Now,
                             CreateFrom = "FEDS-SYS",
                             MemberReserveLogs = new List<MemberReserveLog> { memberReserveLog }
                         };
 
-                        _restaurantContext.MemberReserves.Add(memberReserve);
-                        await _restaurantContext.SaveChangesAsync();
-                        _Log?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}, ReservationId: {externalReservationId}");
+                        try
+                        {
+                            _Log?.SystemLog_Txt("[DB] 準備寫入 MemberReserve");
+                            _Log?.SystemLog_Txt($"[DB] MemberId={memberReserve.MemberId}, CompanyIdLen={memberReserve.CompanyId?.Length}, BranchIdLen={memberReserve.BranchId?.Length}");
+                            _Log?.SystemLog_Txt($"[DB] ContactNameLen={memberReserve.ContactName?.Length}, PhoneLen={memberReserve.ContactPhone?.Length}");
+                            _Log?.SystemLog_Txt($"[DB] NoteLen={memberReserve.Note?.Length}, RemarkLen={memberReserve.Remark?.Length}");
+                            _Log?.SystemLog_Txt($"[DB] CustomerIdLen={memberReserve.CustomerId?.Length}, ExternalReservationIdLen={memberReserve.ExternalReservationId?.Length}");
+                            _Log?.SystemLog_Txt($"[DB] StatusLen={memberReserve.Status?.Length}, CreateFromLen={memberReserve.CreateFrom?.Length}");                       
+                        
+                            // 序列化 Entity 時避免循環引用問題
+                            try
+                            {
+                                var jsonOptions = new JsonSerializerOptions 
+                                { 
+                                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+                                    MaxDepth = 3
+                                };
+                                _Log?.SystemLog_Txt($"[DB] EntitySnapshot={JsonSerializer.Serialize(memberReserve, jsonOptions)}");
+                            }
+                            catch(Exception jsonEx)
+                            {
+                                _Log?.SystemErrorLog_Txt($"[DB] 序列化 Entity 失敗: {jsonEx.Message}");
+                            }
+
+                            _restaurantContext.MemberReserves.Add(memberReserve);
+                            var affected = await _restaurantContext.SaveChangesAsync();
+
+                            _Log?.SystemLog_Txt($"[DB] SaveChanges 成功，affected={affected}, id={memberReserve.Id}, MemberId={memberReserve.MemberId}");
+                            _Log?.SystemLog_Txt($"訂位資料已儲存到資料庫: {memberReserve.Id}, ReservationId: {externalReservationId}, MemberId: {memberReserve.MemberId}");
+                        }
+                        catch(DbUpdateException dbEx)
+                        {
+                            _Log?.SystemErrorLog_Txt($"[DB] DbUpdateException: {dbEx.Message}");
+                            _Log?.SystemErrorLog_Txt($"[DB] InnerExceptionType: {dbEx.InnerException?.GetType().FullName}");
+                            _Log?.SystemErrorLog_Txt($"[DB] InnerException: {dbEx.InnerException?.Message}");
+                            _Log?.SystemErrorLog_Txt($"[DB] StackTrace: {dbEx.StackTrace}");
+
+                            if(dbEx.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx)
+                            {
+                                _Log?.SystemErrorLog_Txt($"[DB] SqlException.Number={sqlEx.Number}, State={sqlEx.State}, Class={sqlEx.Class}, LineNumber={sqlEx.LineNumber}, Procedure={sqlEx.Procedure}");
+                                foreach (Microsoft.Data.SqlClient.SqlError err in sqlEx.Errors)
+                                {
+                                    _Log?.SystemErrorLog_Txt($"[DB] SqlError: Number={err.Number}, Message={err.Message}, Line={err.LineNumber}, Proc={err.Procedure}");
+                                }
+                            }
+                            return Json(new { success = false, errors = new[] { "寫入訂位資料失敗，請查看系統紀錄" } });
+                        }
+                        catch(Exception ex)
+                        {
+                            _Log?.SystemErrorLog_Txt($"[DB] Exception: {ex.Message}");
+                            _Log?.SystemErrorLog_Txt($"[DB] StackTrace: {ex.StackTrace}");
+                            return Json(new { success = false, errors = new[] { "系統錯誤，請稍後再試" } });
+                        }
 
                         // ========== 呼叫 API 取得完整記錄並更新資料庫 ==========
                         if(!string.IsNullOrEmpty(customerId) && !string.IsNullOrEmpty(companyId))
@@ -557,10 +617,16 @@ namespace Reservation.Controllers
                                             var apiState = reservation["state"]?.ToString()?? string.Empty;
                                             var apiType = reservation["type"]?.ToString()??string.Empty;
 
+                                            // 記錄所有 API 回應的詳細資訊
+                                            var rawReservationJson = reservation?.ToString(Newtonsoft.Json.Formatting.None) ?? "(null)";
+                                            _Log?.SystemLog_Txt($"[StatusDebug] 檢查 API 記錄 - ApiId:{apiReservationId}, Type:{apiType}, State:{apiState}, ExternalReservationId:{externalReservationId}, DbExternalReservationId:{memberReserve.ExternalReservationId}");
+
                                             if(apiReservationId == externalReservationId || 
                                             (!string.IsNullOrEmpty(memberReserve.ExternalReservationId) && 
                                             apiReservationId == memberReserve.ExternalReservationId))
                                             {
+                                                _Log?.SystemLog_Txt($"[StatusDebug] 找到匹配記錄 - ApiId:{apiReservationId}, Type:{apiType}, State:{apiState}, RawJson:{rawReservationJson}");
+                                                
                                                 memberReserve.ExternalReservationId = apiReservationId;
                                                 memberReserve.CustomerId = customerId;
                                                 
@@ -569,12 +635,19 @@ namespace Reservation.Controllers
                                                 {
                                                     status = apiState switch
                                                     {
-                                                        "booked" => "已預訂",
+                                                        // "booked" => "已預訂",
                                                         "seated" => "已入座",
                                                         "completed" => "已完成",
                                                         "canceled" =>"已取消",
+                                                        "waiting" => "已預訂",
                                                         _ => "未知狀態"
                                                     };
+                                                    
+                                                    // 特別記錄未知狀態的原因
+                                                    if(status == "未知狀態")
+                                                    {
+                                                        _Log?.SystemErrorLog_Txt($"[StatusDebug] 未知狀態原因 - Type:booking, State:{apiState} (預期值: booked/seated/completed/canceled), RawJson:{rawReservationJson}");
+                                                    }
                                                 }
                                                 else if(apiType == "waiting")
                                                 {
@@ -587,10 +660,19 @@ namespace Reservation.Controllers
                                                         "canceled" => "已取消",
                                                         _ => "等待中"
                                                     };
+                                                    
+                                                    _Log?.SystemLog_Txt($"[StatusDebug] 候位類型記錄 - Type:waiting, State:{apiState}, 轉換為:{status}");
                                                 }
+                                                else
+                                                {
+                                                    // 如果 apiType 不是 booking 也不是 waiting
+                                                    status = "未知狀態";
+                                                    _Log?.SystemErrorLog_Txt($"[StatusDebug] 未知類型 - Type:{apiType}, State:{apiState}, RawJson:{rawReservationJson}");
+                                                }
+                                                
                                                 memberReserve.Status = status;
                                                 await _restaurantContext.SaveChangesAsync();
-                                                _Log?.SystemLog_Txt($"訂位紀錄更新 - Status:{status},State:{apiState}");
+                                                _Log?.SystemLog_Txt($"訂位紀錄更新 - Status:{status}, Type:{apiType}, State:{apiState}, ApiId:{apiReservationId}");
                                                 break;
                                             }
                                         }
@@ -614,7 +696,82 @@ namespace Reservation.Controllers
                 else
                 {
                     _Log?.SystemErrorLog_Txt($"訂位失敗 - Code: {apiResult.Code}, Msg: {apiResult.Msg}, Data: {apiResult.Data}");
-                    return Json(new { success = false, errors = new[] { "訂位失敗，請聯絡客服單位" } });
+                    
+                    string errorMessage = "訂位失敗，請稍後再試";
+                    bool isLimitReached = false;
+                    bool isDuplicate = false;
+                    
+                    try
+                    {
+                        var errorData = Newtonsoft.Json.Linq.JObject.Parse(apiResult.Data);
+                        var message = errorData.GetValue("message")?.ToString();
+                        var reason = errorData.GetValue("reason")?.ToString();
+                        var errorCode = errorData.GetValue("code")?.ToString();
+                        
+                        // 先檢查錯誤碼（最優先）
+                        if(!string.IsNullOrEmpty(errorCode))
+                        {
+                            // 300001 表示達到訂位數量限制
+                            if(errorCode == "300001")
+                            {
+                                isLimitReached = true;
+                                errorMessage = "您已達到該餐廳的訂位數量上限，請先取消其他訂位或聯絡客服單位";
+                            }
+                            else
+                            {
+                                var errorCodeUpper = errorCode.ToUpper();
+                                if(errorCodeUpper.Contains("DUPLICATE") || errorCodeUpper.Contains("ALREADY"))
+                                {
+                                    isDuplicate = true;
+                                }
+                            }
+                        }
+                        
+                        // 檢查錯誤訊息
+                        if(!string.IsNullOrEmpty(message) && !isLimitReached && !isDuplicate)
+                        {
+                            var messageLower = message.ToLower();
+                            if(messageLower.Contains("hit customer") || messageLower.Contains("limit"))
+                            {
+                                isLimitReached = true;
+                                errorMessage = "您已達到該餐廳的訂位數量上限，請先取消其他訂位或聯絡客服單位";
+                            }
+                            else if(messageLower.Contains("duplicate") || messageLower.Contains("already"))
+                            {
+                                isDuplicate = true;
+                            }
+                            else
+                            {
+                                errorMessage = message;
+                            }
+                        }
+                        
+                        // 檢查 reason
+                        if(!string.IsNullOrEmpty(reason) && !isLimitReached && !isDuplicate)
+                        {
+                            var reasonLower = reason.ToLower();
+                            if(reasonLower.Contains("hit customer") || reasonLower.Contains("limit") || reasonLower.Contains("not allowed to make more"))
+                            {
+                                isLimitReached = true;
+                                errorMessage = "您已達到該餐廳的訂位數量上限，請先取消其他訂位或聯絡客服單位";
+                            }
+                            else if(reasonLower.Contains("duplicate") || reasonLower.Contains("already"))
+                            {
+                                isDuplicate = true;
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        _Log?.SystemErrorLog_Txt($"訂位失敗 - 解析錯誤回應失敗: {ex.Message}");
+                    }
+                    
+                    if(isDuplicate)
+                    {
+                        errorMessage = "此訂位已存在，請聯絡客服單位";
+                    }
+                    
+                    return Json(new { success = false, errors = new[] { errorMessage } });
                 }
             }
             catch(Exception ex)

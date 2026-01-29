@@ -94,6 +94,7 @@ namespace Reservation.Controllers
         }
         public async Task<IActionResult> QueryRecord(int? branchId)
         {
+           _Log?.SystemLog_Txt($"[QueryRecord] 開始查詢訂候位記錄 - BranchId: {branchId?.ToString() ?? "全部"}");
            var mallGroups = await _restaurantService.GetMallsAsync();
            var branchDict =  new Dictionary<string, int>();
            var branches = new List<BranchModel>();
@@ -113,91 +114,137 @@ namespace Reservation.Controllers
            var waitingRecords = new List<WaitingRecordModel>();
 
            // ========== 取得登入會員 ID ==========
-           int memberId = 0;
-           if(HttpContext.Items["MemberId"] != null && HttpContext.Items["MemberId"] is int memberIdValue)
-           {
-               memberId = memberIdValue;
-           }
+          int memberId = 0;
+          if(HttpContext.Items["MemberId"] != null && HttpContext.Items["MemberId"] is int memberIdValue)
+          {
+            memberId = memberIdValue;
+          }
+          if(memberId == 0)
+          {
+                _Log?.SystemLog_Txt($"[QueryRecord] 會員未登入，重定向到餐廳列表");
+                TempData["ErrorMsg"] ="請先登入會員";
+                return RedirectToAction("Index","Restaurant");
+          }
+          
+          var fromDate = DateTime.Today.AddMonths(-3);
+          var toDate = DateTime.Today.AddMonths(3).AddDays(1);
+          
+          _Log?.SystemLog_Txt($"[QueryRecord] 查詢條件 - MemberId: {memberId}, BranchId: {branchId?.ToString() ?? "全部"}");
+          // ========== 取得會員姓名並提取姓氏 ==========
+          string memberName = "會員";
+          try
+          {
+             var member = await _memberContext.Members.FirstOrDefaultAsync(m=>m.Id == memberId);
 
-           if(memberId == 0)
-           {
-               // 未登入，導向登入頁或顯示提示
-               TempData["ErrorMsg"] = "請先登入會員";
-               return RedirectToAction("Index", "Restaurant");
-           }
+             if(member != null && !string.IsNullOrEmpty(member.Name))
+             {
+                if(member.Name.Length > 1)
+                {
+                    memberName = member.Name.Substring(0,1)+"0"+member.Name.Substring(member.Name.Length-1);
+                }
+                else
+                {
+                    memberName = member.Name;
+                }
+             }
+          }
+          catch(Exception ex)
+          {
+            _Log?.SystemErrorLog_Txt($"[QueryRecord] 取得會員姓名失敗:{ex.Message}");
+          }
 
            // ========== 查詢所有分館的記錄（如果沒有指定 branchId） ==========
            if(!branchId.HasValue)
            {
                // 查詢所有訂位記錄
                var allReserves = await _restaurantContext.MemberReserves
-                   .Where(r => r.MemberId == memberId)
+                   .Where(r => r.MemberId == memberId && r.CreateDate >= fromDate && r.CreateDate < toDate)
                    .OrderByDescending(r => r.CreateDate)
                    .ToListAsync();
 
+               _Log?.SystemLog_Txt($"[QueryRecord] 查詢到訂位記錄總數: {allReserves.Count}");
+
                foreach(var reserve in allReserves)
                {
-                   // 找出對應的 GroupId
-                   var groupId = branchDict.FirstOrDefault(x => 
-                       reserve.BranchId != null && reserve.BranchId.StartsWith(x.Key)).Key;
-                   
-                   if(!string.IsNullOrEmpty(groupId))
-                   {
-                       var restaurant = await _restaurantService.GetRestaurantDetailAsync(groupId, reserve.BranchId);
-                       
-                       if(restaurant != null)
-                       {
-                           reservationRecords.Add(new ReservationRecordModel{
-                               ReservationId = (int)reserve.Id,
-                               RestaurantId = restaurant.id.GetHashCode(),
-                               RestaurantName = restaurant.Name,
-                               RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{reserve.BranchId}.jpg",
-                               RestaurantLocation = restaurant.Address,
-                               RestaurantPhone = restaurant.PhoneNumber,
-                               ReservationDate = reserve.Datetime,
-                               DayOfWeek = reserve.Datetime.ToString("dddd",new System.Globalization.CultureInfo("zh-TW")),
-                               AdultCount = reserve.GroupSize,
-                               ChildCount = reserve.NumberOfKid,
-                               Status = reserve.Status ?? "已預訂"
-                           });
-                       }
-                   }
+                if(!string.IsNullOrEmpty(reserve.CompanyId) && !string.IsNullOrEmpty(reserve.BranchId))
+                {
+                    var RestaurantBranch = await _restaurantContext.RestaurantBranches.FirstOrDefaultAsync(rb => rb.CompanyId==reserve.CompanyId && rb.Id == reserve.BranchId);
+
+                    if(RestaurantBranch != null)
+                    {
+                        var groupId = RestaurantBranch.GroupId ?? "";
+
+                        reservationRecords.Add(new ReservationRecordModel{
+                            ReservationId = (int)reserve.Id,
+                            RestaurantId = RestaurantBranch.CompanyId.GetHashCode(),
+                            RestaurantName = RestaurantBranch.Name,
+                            RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{reserve.BranchId}.jpg",
+                            RestaurantLocation = RestaurantBranch.Address,
+                            RestaurantPhone = RestaurantBranch.PhoneNumber,
+                            ReservationDate = reserve.Datetime,
+                            DayOfWeek = reserve.Datetime.ToString("dddd", new System.Globalization.CultureInfo("zh-TW")),
+                            AdultCount = reserve.GroupSize,
+                            ChildCount = reserve.NumberOfKid,
+                            Status = reserve.Status ?? "已預訂"
+                        });
+                        
+                        // 記錄每筆訂位記錄
+                        _Log?.SystemLog_Txt($"[QueryRecord] 訂位記錄 - ID: {reserve.Id}, 餐廳: {RestaurantBranch.Name}, 日期: {reserve.Datetime:yyyy-MM-dd}, 狀態: {reserve.Status ?? "已預訂"}, CompanyId: {reserve.CompanyId}, BranchId: {reserve.BranchId}");
+                    }
+                    else
+                    {
+                        _Log?.SystemLog_Txt($"[QueryRecord] 訂位記錄找不到餐廳資訊 - ReserveId: {reserve.Id}, CompanyId: {reserve.CompanyId}, BranchId: {reserve.BranchId}");
+                    }
+                }
                }
+               
+               _Log?.SystemLog_Txt($"[QueryRecord] 成功處理訂位記錄數: {reservationRecords.Count}");
                
                // 查詢所有候位記錄
                var allWaitings = await _restaurantContext.MemberWaitings
-                   .Where(w => w.MemberId == memberId)
+                   .Where(w => w.MemberId == memberId && w.CreateDate >= fromDate && w.CreateDate < toDate)
                    .OrderByDescending(w => w.CreateDate)
                    .ToListAsync();
 
+               _Log?.SystemLog_Txt($"[QueryRecord] 查詢到候位記錄總數: {allWaitings.Count}");
+
                foreach(var waiting in allWaitings)
                {
-                   // 找出對應的 GroupId
-                   var groupId = branchDict.FirstOrDefault(x => 
-                       waiting.BranchId != null && waiting.BranchId.StartsWith(x.Key)).Key;
-                   
-                   if(!string.IsNullOrEmpty(groupId))
-                   {
-                       var restaurant = await _restaurantService.GetRestaurantDetailAsync(groupId, waiting.BranchId);
-                       
-                       if(restaurant != null)
-                       {
-                           waitingRecords.Add(new WaitingRecordModel{
-                               WaitingId = waiting.Id,
-                               RestaurantId = restaurant.id.GetHashCode(),
-                               RestaurantName = restaurant.Name,
-                               RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{waiting.BranchId}.jpg",
-                               RestaurantLocation = restaurant.Address,
-                               RestaurantPhone = restaurant.PhoneNumber,
-                               JoinDate = waiting.CreateDate,
-                               AdultCount = waiting.GroupSize,
-                               ChildCount = waiting.NumberOfKid,
-                               QueueNumber = waiting.PositionInLine ?? 0,
-                               Status = waiting.Status ?? "等待中"
-                           });
-                       }
-                   }
+                    // 透過 CompanyId 和 BranchId 查詢 RestaurantBranch
+                    if(!string.IsNullOrEmpty(waiting.CompanyId) && !string.IsNullOrEmpty(waiting.BranchId))
+                    {
+                        var restaurantBranch = await _restaurantContext.RestaurantBranches
+                            .FirstOrDefaultAsync(rb => rb.CompanyId == waiting.CompanyId && rb.Id == waiting.BranchId);
+                        
+                        if(restaurantBranch != null)
+                        {
+                            var groupId = restaurantBranch.GroupId ?? "";
+                            
+                            waitingRecords.Add(new WaitingRecordModel{
+                                WaitingId = waiting.Id,
+                                RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
+                                RestaurantName = restaurantBranch.Name,
+                                RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{waiting.BranchId}.jpg",
+                                RestaurantLocation = restaurantBranch.Address,
+                                RestaurantPhone = restaurantBranch.PhoneNumber,
+                                JoinDate = waiting.CreateDate,
+                                AdultCount = waiting.GroupSize,
+                                ChildCount = waiting.NumberOfKid,
+                                QueueNumber = waiting.PositionInLine ?? 0,
+                                Status = waiting.Status ?? "等待中"
+                            });
+                            
+                            // 記錄每筆候位記錄
+                            _Log?.SystemLog_Txt($"[QueryRecord] 候位記錄 - ID: {waiting.Id}, 餐廳: {restaurantBranch.Name}, 日期: {waiting.CreateDate:yyyy-MM-dd}, 狀態: {waiting.Status ?? "等待中"}, 排隊號碼: {waiting.PositionInLine ?? 0}, CompanyId: {waiting.CompanyId}, BranchId: {waiting.BranchId}");
+                        }
+                        else
+                        {
+                            _Log?.SystemLog_Txt($"[QueryRecord] 候位記錄找不到餐廳資訊 - WaitingId: {waiting.Id}, CompanyId: {waiting.CompanyId}, BranchId: {waiting.BranchId}");
+                        }
+                    }
                }
+               
+               _Log?.SystemLog_Txt($"[QueryRecord] 成功處理候位記錄數: {waitingRecords.Count}");
            }
 
            if(branchId.HasValue)
@@ -207,61 +254,84 @@ namespace Reservation.Controllers
             {
                 // 查詢訂位記錄
                  var reserves = await _restaurantContext.MemberReserves
-                .Where(r => r.MemberId == memberId && r.BranchId != null && 
-                           r.BranchId.StartsWith(selectedGroupId))
+                .Where(r => r.MemberId == memberId && r.BranchId != null && r.CreateDate >= fromDate && r.CreateDate < toDate)
                 .OrderByDescending(r => r.CreateDate)
                 .ToListAsync();
 
+                _Log?.SystemLog_Txt($"[QueryRecord] 指定分館查詢到訂位記錄總數: {reserves.Count}, GroupId: {selectedGroupId}");
+
                 foreach(var reserve in reserves)
                 {
-                    var restaurant = await _restaurantService.GetRestaurantDetailAsync
-                    (selectedGroupId,reserve.BranchId);
-                    
-                    if(restaurant!=null)
+                    // 透過 CompanyId 和 BranchId 查詢 RestaurantBranch
+                    if(!string.IsNullOrEmpty(reserve.CompanyId) && !string.IsNullOrEmpty(reserve.BranchId))
                     {
-                       reservationRecords.Add(new ReservationRecordModel{
-                           ReservationId = (int)reserve.Id,
-                           RestaurantId = restaurant.id.GetHashCode(),
-                           RestaurantName = restaurant.Name,
-                           RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{reserve.BranchId}.jpg",
-                           RestaurantLocation = restaurant.Address,
-                           RestaurantPhone = restaurant.PhoneNumber,
-                           ReservationDate = reserve.Datetime,
-                           DayOfWeek = reserve.Datetime.ToString("dddd",new System.Globalization.CultureInfo("zh-TW")),
-                           AdultCount = reserve.GroupSize,
-                           ChildCount = reserve.NumberOfKid,
-                           Status = reserve.Status ?? "已預訂"
-                       });
+                        var restaurantBranch = await _restaurantContext.RestaurantBranches
+                            .FirstOrDefaultAsync(rb => rb.CompanyId == reserve.CompanyId && rb.Id == reserve.BranchId);
+                        
+                        // 檢查是否屬於選定的分館
+                        if(restaurantBranch != null && restaurantBranch.GroupId == selectedGroupId)
+                        {
+                            reservationRecords.Add(new ReservationRecordModel{
+                                ReservationId = (int)reserve.Id,
+                                RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
+                                RestaurantName = restaurantBranch.Name,
+                                RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{reserve.BranchId}.jpg",
+                                RestaurantLocation = restaurantBranch.Address,
+                                RestaurantPhone = restaurantBranch.PhoneNumber,
+                                ReservationDate = reserve.Datetime,
+                                DayOfWeek = reserve.Datetime.ToString("dddd", new System.Globalization.CultureInfo("zh-TW")),
+                                AdultCount = reserve.GroupSize,
+                                ChildCount = reserve.NumberOfKid,
+                                Status = reserve.Status ?? "已預訂"
+                            });
+                            
+                            // 記錄每筆訂位記錄
+                            _Log?.SystemLog_Txt($"[QueryRecord] 訂位記錄(指定分館) - ID: {reserve.Id}, 餐廳: {restaurantBranch.Name}, 日期: {reserve.Datetime:yyyy-MM-dd}, 狀態: {reserve.Status ?? "已預訂"}, CompanyId: {reserve.CompanyId}, BranchId: {reserve.BranchId}");
+                        }
                     }
                 }
+                
+                _Log?.SystemLog_Txt($"[QueryRecord] 指定分館成功處理訂位記錄數: {reservationRecords.Count}");
                 // 查詢候位記錄
                 var waitings = await _restaurantContext.MemberWaitings
-                .Where(w=>w.MemberId == memberId && w.BranchId !=null &&
-                w.BranchId.StartsWith(selectedGroupId))
-                .OrderByDescending(w=>w.CreateDate)
+                .Where(w => w.MemberId == memberId && w.BranchId != null && w.CreateDate >= fromDate && w.CreateDate < toDate)
+                .OrderByDescending(w => w.CreateDate)
                 .ToListAsync();
+
+                _Log?.SystemLog_Txt($"[QueryRecord] 指定分館查詢到候位記錄總數: {waitings.Count}, GroupId: {selectedGroupId}");
 
                 foreach(var waiting in waitings)
                 {
-                    var restaurant = await _restaurantService.GetRestaurantDetailAsync(
-                        selectedGroupId,waiting.BranchId);
-                    if(restaurant!=null)
+                    // 透過 CompanyId 和 BranchId 查詢 RestaurantBranch
+                    if(!string.IsNullOrEmpty(waiting.CompanyId) && !string.IsNullOrEmpty(waiting.BranchId))
                     {
-                        waitingRecords.Add(new WaitingRecordModel{
-                            WaitingId = waiting.Id,
-                            RestaurantId = restaurant.id.GetHashCode(),
-                            RestaurantName = restaurant.Name,
-                            RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{waiting.BranchId}.jpg",
-                            RestaurantLocation = restaurant.Address,
-                            RestaurantPhone = restaurant.PhoneNumber,
-                            JoinDate = waiting.CreateDate,
-                            AdultCount = waiting.GroupSize,
-                            ChildCount = waiting.NumberOfKid,
-                            QueueNumber = waiting.PositionInLine ?? 0,
-                            Status = waiting.Status ?? "等待中"                            
-                        });
+                        var restaurantBranch = await _restaurantContext.RestaurantBranches
+                            .FirstOrDefaultAsync(rb => rb.CompanyId == waiting.CompanyId && rb.Id == waiting.BranchId);
+                        
+                        // 檢查是否屬於選定的分館
+                        if(restaurantBranch != null && restaurantBranch.GroupId == selectedGroupId)
+                        {
+                            waitingRecords.Add(new WaitingRecordModel{
+                                WaitingId = waiting.Id,
+                                RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
+                                RestaurantName = restaurantBranch.Name,
+                                RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{waiting.BranchId}.jpg",
+                                RestaurantLocation = restaurantBranch.Address,
+                                RestaurantPhone = restaurantBranch.PhoneNumber,
+                                JoinDate = waiting.CreateDate,
+                                AdultCount = waiting.GroupSize,
+                                ChildCount = waiting.NumberOfKid,
+                                QueueNumber = waiting.PositionInLine ?? 0,
+                                Status = waiting.Status ?? "等待中"
+                            });
+                            
+                            // 記錄每筆候位記錄
+                            _Log?.SystemLog_Txt($"[QueryRecord] 候位記錄(指定分館) - ID: {waiting.Id}, 餐廳: {restaurantBranch.Name}, 日期: {waiting.CreateDate:yyyy-MM-dd}, 狀態: {waiting.Status ?? "等待中"}, 排隊號碼: {waiting.PositionInLine ?? 0}, CompanyId: {waiting.CompanyId}, BranchId: {waiting.BranchId}");
+                        }
                     }
                 }
+                
+                _Log?.SystemLog_Txt($"[QueryRecord] 指定分館成功處理候位記錄數: {waitingRecords.Count}");
             }
            }
            var viewModel = new RecordQueryModel
@@ -270,7 +340,11 @@ namespace Reservation.Controllers
             SelectedBranchId = branchId,
             ReservationRecords = reservationRecords,
             WaitingRecords = waitingRecords,
+            MemberName = memberName,
            };
+           
+           _Log?.SystemLog_Txt($"[QueryRecord] 查詢完成 - 會員: {memberName}(ID:{memberId}), 訂位記錄: {reservationRecords.Count} 筆, 候位記錄: {waitingRecords.Count} 筆, 分館: {branchId?.ToString() ?? "全部"}");
+           
            return View(viewModel);
         }
 
