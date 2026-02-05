@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using Reservation.Models.EFMemeberModels;
 using Reservation.Models.EFRestaurantModels;
 using Reservation.Models.ViewModels;
@@ -14,18 +15,22 @@ namespace Reservation.Controllers
         private readonly MemberContext _memberContext;
         private readonly RestaurantService _restaurantService;
         private readonly Func_Log _Log;
+        private readonly InlineAppsService _inlineAppsService;
         private const string TokenCookieName = "MemberToken";
 
-        public RestaurantController(
+        public RestaurantController(    
             RestaurantContext restaurantContext,
             MemberContext memberContext,
             RestaurantService restaurantService,
-            Func_Log fileLogService)
+            Func_Log fileLogService,
+            InlineAppsService inlineAppsService
+            )
         {
             _restaurantContext = restaurantContext;
             _memberContext = memberContext;
             _restaurantService = restaurantService;
             _Log = fileLogService;
+            _inlineAppsService = inlineAppsService;
         }
 
         private List<CategoryModel> GetCategories()
@@ -164,86 +169,360 @@ namespace Reservation.Controllers
 
                _Log?.SystemLog_Txt($"[QueryRecord] 查詢到訂位記錄總數: {allReserves.Count}");
 
-               foreach(var reserve in allReserves)
-               {
-                if(!string.IsNullOrEmpty(reserve.CompanyId) && !string.IsNullOrEmpty(reserve.BranchId))
+                  // ========== 步驟 1: 批次查詢所有 RestaurantBranch ==========
+                var companyBranchPairs = allReserves
+                  .Where(r => !string.IsNullOrEmpty(r.CompanyId) && !string.IsNullOrEmpty(r.BranchId))
+                  .Select(r => new { r.CompanyId, r.BranchId })
+                  .Distinct()
+                  .ToList();
+
+                var restaurantBranches = new Dictionary<(string CompanyId, string BranchId), Reservation.Models.EFRestaurantModels.RestaurantBranch>();
+                if(companyBranchPairs.Count > 0)
                 {
-                    var RestaurantBranch = await _restaurantContext.RestaurantBranches.FirstOrDefaultAsync(rb => rb.CompanyId==reserve.CompanyId && rb.Id == reserve.BranchId);
-
-                    if(RestaurantBranch != null)
+                    // 提取 CompanyId 和 BranchId 列表（EF Core 可以轉譯 Contains）
+                    var companyIds = companyBranchPairs.Select(p => p.CompanyId).Distinct().ToList();
+                    var branchIds = companyBranchPairs.Select(p => p.BranchId).Distinct().ToList();
+                    
+                    // 先查詢符合條件的 RestaurantBranches
+                    var branchesList = await _restaurantContext.RestaurantBranches
+                        .Where(rb => companyIds.Contains(rb.CompanyId) && branchIds.Contains(rb.Id))
+                        .ToListAsync();
+                    
+                    // 在記憶體中過濾並建立 Dictionary
+                    foreach(var rb in branchesList)
                     {
-                        var groupId = RestaurantBranch.GroupId ?? "";
-
-                        reservationRecords.Add(new ReservationRecordModel{
-                            ReservationId = (int)reserve.Id,
-                            RestaurantId = RestaurantBranch.CompanyId.GetHashCode(),
-                            RestaurantName = RestaurantBranch.Name,
-                            RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{reserve.BranchId}.jpg",
-                            RestaurantLocation = RestaurantBranch.Address,
-                            RestaurantPhone = RestaurantBranch.PhoneNumber,
-                            ReservationDate = reserve.Datetime,
-                            DayOfWeek = reserve.Datetime.ToString("dddd", new System.Globalization.CultureInfo("zh-TW")),
-                            AdultCount = reserve.GroupSize,
-                            ChildCount = reserve.NumberOfKid,
-                            Status = reserve.Status ?? "已預訂"
-                        });
-                        
-                        // 記錄每筆訂位記錄
-                        _Log?.SystemLog_Txt($"[QueryRecord] 訂位記錄 - ID: {reserve.Id}, 餐廳: {RestaurantBranch.Name}, 日期: {reserve.Datetime:yyyy-MM-dd}, 狀態: {reserve.Status ?? "已預訂"}, CompanyId: {reserve.CompanyId}, BranchId: {reserve.BranchId}");
-                    }
-                    else
-                    {
-                        _Log?.SystemLog_Txt($"[QueryRecord] 訂位記錄找不到餐廳資訊 - ReserveId: {reserve.Id}, CompanyId: {reserve.CompanyId}, BranchId: {reserve.BranchId}");
+                        var key = (CompanyId: rb.CompanyId, BranchId: rb.Id);
+                        if(companyBranchPairs.Any(p => p.CompanyId == rb.CompanyId && p.BranchId == rb.Id))
+                        {
+                            restaurantBranches[key] = rb;
+                        }
                     }
                 }
-               }
+               
+
+               // ========== 步驟 2: 處理訂位記錄 ==========
+               var validReserves = allReserves
+                  .Where(r => !string.IsNullOrEmpty(r.CompanyId) && 
+                             !string.IsNullOrEmpty(r.CustomerId) &&
+                             !string.IsNullOrEmpty(r.ExternalReservationId))
+                  .ToList();
+
+                var uniquePairs = validReserves
+                  .Select(r => new { r.CompanyId, r.CustomerId })
+                  .Distinct()
+                  .ToList();
+                var statusUpdateDict = new Dictionary<long, string>();
+                 // ========== 步驟 3: 呼叫 API 同步狀態（按組呼叫，減少 API 呼叫次數） ==========
+                _Log?.SystemLog_Txt($"[QueryRecord] 發現 {uniquePairs.Count} 個不同的 (CompanyId, CustomerId) 組合");
+                
+                foreach(var pair in uniquePairs)
+                {
+                    try
+                    {
+                        var queryApiResult = await _inlineAppsService.GetCustomerReservationAsync(
+                            pair.CompanyId,
+                            pair.CustomerId,
+                            branchId: null!,
+                            "booking,waiting");
+
+                        if(queryApiResult.Code == 200 && !string.IsNullOrEmpty(queryApiResult.Data))
+                        {
+                            var queryResult = Newtonsoft.Json.Linq.JObject.Parse(queryApiResult.Data);
+                            var reservations = queryResult["reservations"] as Newtonsoft.Json.Linq.JArray;
+
+                            if(reservations != null)
+                            {
+                                var apiDict = new Dictionary<string, Newtonsoft.Json.Linq.JObject>();
+                                
+                                foreach(var reservation in reservations)
+                                {
+                                    var apiId = reservation["id"]?.ToString();
+                                    if(!string.IsNullOrEmpty(apiId))
+                                    {
+                                        var apiReservationObj = reservation as Newtonsoft.Json.Linq.JObject;
+                                        if(apiReservationObj != null)
+                                        {
+                                            apiDict[apiId] = apiReservationObj;
+                                        }
+                                    }
+                                }
+                                
+                                var reservesInGroup = validReserves
+                                    .Where(r => r.CompanyId == pair.CompanyId && r.CustomerId == pair.CustomerId)
+                                    .ToList();
+
+                                foreach(var reserve in reservesInGroup)
+                                {
+                                    if(apiDict.TryGetValue(reserve.ExternalReservationId, out var apiReservation))
+                                    {
+                                        var apiState = apiReservation["state"]?.ToString() ?? string.Empty;
+                                        var apiType = apiReservation["type"]?.ToString() ?? string.Empty;
+
+                                        string status = "已預定";
+                                        if(apiType == "booking" || apiType == "waiting" || apiType == "walk-in")
+                                        {
+                                            status = apiState switch
+                                            {
+                                                "waiting" => "已預定",
+                                                "seated" => "已入座",
+                                                "cancelled" => "已取消",
+                                                _ => "已預定"
+                                            };
+                                        }
+
+                                        statusUpdateDict[reserve.Id] = status;
+                                    }
+                                }
+
+                                _Log?.SystemLog_Txt($"[QueryRecord] API 回應包含 {reservations.Count} 筆記錄，成功匹配 {reservesInGroup.Count(r => statusUpdateDict.ContainsKey(r.Id))} 筆 - CompanyId: {pair.CompanyId}, CustomerId: {pair.CustomerId}");
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        _Log?.SystemErrorLog_Txt($"[QueryRecord] API 呼叫失敗 - CompanyId: {pair.CompanyId}, CustomerId: {pair.CustomerId}, Error: {ex.Message}");
+                    }
+                }
+
+                // ========== 步驟 4: 批次更新資料庫 ==========
+                bool hasChanges = false;
+                foreach(var reserve in allReserves)
+                {
+                    if(statusUpdateDict.TryGetValue(reserve.Id, out var newStatus))
+                    {
+                        if(reserve.Status != newStatus)
+                        {
+                            reserve.Status = newStatus;
+                            hasChanges = true;
+                        }
+                    }
+                }
+
+                if(hasChanges)
+                {
+                    await _restaurantContext.SaveChangesAsync();
+                    _Log?.SystemLog_Txt($"[QueryRecord] 批次更新資料庫完成，共更新 {statusUpdateDict.Count} 筆記錄");
+                }
+
+                // ========== 步驟 5: 建立 ViewModel ==========
+                foreach(var reserve in allReserves)
+                {
+                    if(!string.IsNullOrEmpty(reserve.CompanyId) && !string.IsNullOrEmpty(reserve.BranchId))
+                    {
+                        var key = (CompanyId: reserve.CompanyId, BranchId: reserve.BranchId);
+                        if(restaurantBranches.TryGetValue(key, out var RestaurantBranch))
+                        {
+                            var groupId = RestaurantBranch.GroupId ?? "";
+                            string currentStatus = statusUpdateDict.TryGetValue(reserve.Id, out var syncedStatus) 
+                                ? syncedStatus 
+                                : (reserve.Status ?? "已預訂");
+
+                            reservationRecords.Add(new ReservationRecordModel{
+                                ReservationId = (int)reserve.Id,
+                                RestaurantId = RestaurantBranch.CompanyId.GetHashCode(),
+                                RestaurantName = RestaurantBranch.Name,
+                                RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{reserve.BranchId}.jpg",
+                                RestaurantLocation = RestaurantBranch.Address,
+                                RestaurantPhone = RestaurantBranch.PhoneNumber,
+                                ReservationDate = reserve.Datetime,
+                                DayOfWeek = reserve.Datetime.ToString("dddd", new System.Globalization.CultureInfo("zh-TW")),
+                                AdultCount = reserve.GroupSize,
+                                ChildCount = reserve.NumberOfKid,
+                                Status = currentStatus
+                            });
+                        }
+                    }
+                }
                
                _Log?.SystemLog_Txt($"[QueryRecord] 成功處理訂位記錄數: {reservationRecords.Count}");
                
+
                // 查詢所有候位記錄
                var allWaitings = await _restaurantContext.MemberWaitings
-                   .Where(w => w.MemberId == memberId && w.CreateDate >= fromDate && w.CreateDate < toDate)
-                   .OrderByDescending(w => w.CreateDate)
-                   .ToListAsync();
+               .Where(w=>w.MemberId == memberId && w.CreateDate >= fromDate && w.CreateDate < toDate )
+               .OrderByDescending(w=>w.CreateDate)
+               .ToListAsync();
 
-               _Log?.SystemLog_Txt($"[QueryRecord] 查詢到候位記錄總數: {allWaitings.Count}");
+               _Log?.SystemLog_Txt($"[QueryRecord] 查詢到候位紀錄總數:{allWaitings.Count}");
 
-               foreach(var waiting in allWaitings)
+                //========== 批次查詢候位記錄的 RestaurantBranch ==========
+                var waitingCompanyBranchPairs = allWaitings
+                .Where(w=>!string.IsNullOrEmpty(w.CompanyId) && !string.IsNullOrEmpty(w.BranchId))
+                .Select(w=>new {w.CompanyId,w.BranchId})
+                .Distinct()
+                .ToList();
+
+                var waitingRestaurantBranchesDict = new Dictionary<(string CompanyId, string BranchId), Reservation.Models.EFRestaurantModels.RestaurantBranch>();
+                if(waitingCompanyBranchPairs.Count >0)
+                {
+                    var companyIds = waitingCompanyBranchPairs.Select(p=>p.CompanyId).Distinct().ToList();
+                    var branchIds = waitingCompanyBranchPairs.Select(p=>p.BranchId).Distinct().ToList();
+
+                    var branchesList2 = await _restaurantContext.RestaurantBranches
+                    .Where(rb => companyIds.Contains(rb.CompanyId) && branchIds.Contains(rb.Id)).ToListAsync();
+
+                    foreach(var rb in branchesList2)
+                    {
+                        var key = (CompanyId: rb.CompanyId, BranchId: rb.Id);
+                        if(waitingCompanyBranchPairs.Any(p => p.CompanyId == rb.CompanyId && p.BranchId == rb.Id))
+                        {
+                            waitingRestaurantBranchesDict[key] = rb;
+                        }
+                    }
+                }
+
+                // ========== 候位記錄 API 同步狀態 ==========
+                var validWaitings = allWaitings
+                .Where(w=>!string.IsNullOrEmpty(w.CompanyId) &&
+                !string.IsNullOrEmpty(w.CustomerId) &&
+                !string.IsNullOrEmpty(w.Id))
+                .ToList();
+
+                var uniqueWaitingPairs = validWaitings
+                .Select(w=>new{w.CompanyId,w.CustomerId})
+                .Distinct()
+                .ToList();
+
+               var waitingStatusUpdateDict = new Dictionary<string, (string Status, int? PositionInLine)>();
+
+               _Log?.SystemLog_Txt($"[QueryRecord] 發現 {uniqueWaitingPairs.Count} 個不同的 (CompanyId, CustomerId) 組合");
+
+               foreach(var pair in uniqueWaitingPairs)
                {
-                    // 透過 CompanyId 和 BranchId 查詢 RestaurantBranch
+                  try
+                  {
+                    var queryApiResult = await _inlineAppsService.GetCustomerReservationAsync(
+                    pair.CompanyId,
+                    pair.CustomerId,
+                    branchId: null!,
+                    "booking,waiting");
+
+                    if(queryApiResult.Code == 200 && !string.IsNullOrEmpty(queryApiResult.Data))
+                    {
+                        var queryResult = Newtonsoft.Json.Linq.JObject.Parse(queryApiResult.Data);
+                        var reservations = queryResult["reservations"] as Newtonsoft.Json.Linq.JArray;
+
+                        if(reservations != null)
+                        {
+                            var apiDict = new Dictionary<string, Newtonsoft.Json.Linq.JObject>();
+                           
+                           foreach(var reservation in reservations)
+                           {
+                                var apiId = reservation["id"]?.ToString();
+                                var apiType = reservation["type"]?.ToString()?? string.Empty;
+
+                                if(!string.IsNullOrEmpty(apiId) && apiType == "waiting")
+                                {
+                                    var apiReservationObj = reservation as Newtonsoft.Json.Linq.JObject;
+                                    if(apiReservationObj != null)
+                                    {
+                                        apiDict[apiId] = apiReservationObj;
+                                    }
+                                }
+                           }
+
+                           var waitingsInGroup = validWaitings
+                           .Where(w=>w.CompanyId == pair.CompanyId && w.CustomerId == pair.CustomerId)
+                           .ToList();
+
+                           foreach(var waiting in waitingsInGroup)
+                           {
+                                if(apiDict.TryGetValue(waiting.Id, out var apiReservation))
+                                {
+                                    var apiState = apiReservation["state"]?.ToString() ?? string.Empty;
+                                    var positionInLine = apiReservation["positionInLine"]?.Value<int?>();
+                                
+                                    string status = "等待中";
+                                       if(apiState == "seated")
+                                       {
+                                           status = "已入座";
+                                       }
+                                       else if(apiState == "cancelled")
+                                       {
+                                           status = "已取消";
+                                       }
+                                       else if(apiState == "waiting")
+                                       {
+                                           status = "等待中";
+                                       }
+                                       
+                                       waitingStatusUpdateDict[waiting.Id] = (status, positionInLine);
+                                }
+                           }
+                        }
+                    }
+                  }
+                  catch(Exception ex)
+                  {
+                     _Log?.SystemErrorLog_Txt($"[QueryRecord] 候位 API 呼叫失敗 - CompanyId: {pair.CompanyId}, CustomerId: {pair.CustomerId}, Error: {ex.Message}");
+                  }
+               }
+
+                // ========== 批次更新候位記錄資料庫 ==========
+                bool hasWaitingChanges = false;
+
+                foreach(var waiting in allWaitings)
+                {
+                    if(waitingStatusUpdateDict.TryGetValue(waiting.Id,out var updateinfo))
+                    {
+                        bool needUpdate = false;
+                        if(waiting.Status !=updateinfo.Status)
+                        {
+                            waiting.Status = updateinfo.Status;
+                            needUpdate = true;
+                        }
+                        if(waiting.PositionInLine != updateinfo.PositionInLine)
+                        {
+                            waiting.PositionInLine = updateinfo.PositionInLine;
+                            needUpdate = true;
+                        }
+                        if(needUpdate)
+                        {
+                            hasWaitingChanges = true;
+                        }
+                    }
+                }
+
+                if(hasWaitingChanges)
+                {
+                    await _restaurantContext.SaveChangesAsync();
+                    _Log?.SystemLog_Txt($"[QueryRecord] 批次更新候位記錄資料庫完成");
+                }
+
+                 // ========== 建立候位記錄 ViewModel ==========
+
+                 foreach(var waiting in allWaitings)
+                 {
                     if(!string.IsNullOrEmpty(waiting.CompanyId) && !string.IsNullOrEmpty(waiting.BranchId))
                     {
-                        var restaurantBranch = await _restaurantContext.RestaurantBranches
-                            .FirstOrDefaultAsync(rb => rb.CompanyId == waiting.CompanyId && rb.Id == waiting.BranchId);
-                        
-                        if(restaurantBranch != null)
+                        var key = (CompanyId: waiting.CompanyId, BranchId: waiting.BranchId);
+                        if(waitingRestaurantBranchesDict.TryGetValue(key, out var RestaurantBranch))
                         {
-                            var groupId = restaurantBranch.GroupId ?? "";
-                            
-                            waitingRecords.Add(new WaitingRecordModel{
+                            var groupId = RestaurantBranch.GroupId ?? "";
+
+                            string currentStatus = waitingStatusUpdateDict.TryGetValue(waiting.Id, out var syncedInfo) 
+                                ? syncedInfo.Status 
+                                : (waiting.Status ?? "等待中");
+                            int queueNumber = waitingStatusUpdateDict.TryGetValue(waiting.Id, out var syncedInfo2) 
+                                ? (syncedInfo2.PositionInLine ?? 0)
+                                : (waiting.PositionInLine ?? 0);
+
+                            waitingRecords.Add(new Reservation.Models.ViewModels.WaitingRecordModel{
                                 WaitingId = waiting.Id,
-                                RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
-                                RestaurantName = restaurantBranch.Name,
+                                RestaurantId = RestaurantBranch.CompanyId.GetHashCode(),
+                                RestaurantName = RestaurantBranch.Name,
                                 RestaurantImageUrl = $"~/IMG/HomePage/{groupId}/{waiting.BranchId}.jpg",
-                                RestaurantLocation = restaurantBranch.Address,
-                                RestaurantPhone = restaurantBranch.PhoneNumber,
+                                RestaurantLocation = RestaurantBranch.Address,
+                                RestaurantPhone = RestaurantBranch.PhoneNumber,
                                 JoinDate = waiting.CreateDate,
                                 AdultCount = waiting.GroupSize,
                                 ChildCount = waiting.NumberOfKid,
-                                QueueNumber = waiting.PositionInLine ?? 0,
-                                Status = waiting.Status ?? "等待中"
+                                QueueNumber = queueNumber,
+                                Status = currentStatus
                             });
-                            
-                            // 記錄每筆候位記錄
-                            _Log?.SystemLog_Txt($"[QueryRecord] 候位記錄 - ID: {waiting.Id}, 餐廳: {restaurantBranch.Name}, 日期: {waiting.CreateDate:yyyy-MM-dd}, 狀態: {waiting.Status ?? "等待中"}, 排隊號碼: {waiting.PositionInLine ?? 0}, CompanyId: {waiting.CompanyId}, BranchId: {waiting.BranchId}");
-                        }
-                        else
-                        {
-                            _Log?.SystemLog_Txt($"[QueryRecord] 候位記錄找不到餐廳資訊 - WaitingId: {waiting.Id}, CompanyId: {waiting.CompanyId}, BranchId: {waiting.BranchId}");
                         }
                     }
-               }
-               
+                 }
                _Log?.SystemLog_Txt($"[QueryRecord] 成功處理候位記錄數: {waitingRecords.Count}");
            }
 
@@ -260,34 +539,162 @@ namespace Reservation.Controllers
 
                 _Log?.SystemLog_Txt($"[QueryRecord] 指定分館查詢到訂位記錄總數: {reserves.Count}, GroupId: {selectedGroupId}");
 
-                foreach(var reserve in reserves)
+                // ========== 批次查詢 RestaurantBranch ==========
+                var reserveCompanyBranchPairs = reserves
+                    .Where(r => !string.IsNullOrEmpty(r.CompanyId) && !string.IsNullOrEmpty(r.BranchId))
+                    .Select(r => new { r.CompanyId, r.BranchId })
+                    .Distinct()
+                    .ToList();
+
+                var reserveRestaurantBranchesDict = new Dictionary<(string CompanyId, string BranchId), Reservation.Models.EFRestaurantModels.RestaurantBranch>();
+                if(reserveCompanyBranchPairs.Count > 0)
                 {
-                    // 透過 CompanyId 和 BranchId 查詢 RestaurantBranch
-                    if(!string.IsNullOrEmpty(reserve.CompanyId) && !string.IsNullOrEmpty(reserve.BranchId))
+                    var companyIds = reserveCompanyBranchPairs.Select(p => p.CompanyId).Distinct().ToList();
+                    var branchIds = reserveCompanyBranchPairs.Select(p => p.BranchId).Distinct().ToList();
+                    
+                    var branchesList3 = await _restaurantContext.RestaurantBranches
+                        .Where(rb => companyIds.Contains(rb.CompanyId) && branchIds.Contains(rb.Id))
+                        .ToListAsync();
+                    
+                    foreach(var rb in branchesList3)
                     {
-                        var restaurantBranch = await _restaurantContext.RestaurantBranches
-                            .FirstOrDefaultAsync(rb => rb.CompanyId == reserve.CompanyId && rb.Id == reserve.BranchId);
-                        
-                        // 檢查是否屬於選定的分館
-                        if(restaurantBranch != null && restaurantBranch.GroupId == selectedGroupId)
+                        var key = (CompanyId: rb.CompanyId, BranchId: rb.Id);
+                        if(reserveCompanyBranchPairs.Any(p => p.CompanyId == rb.CompanyId && p.BranchId == rb.Id))
                         {
-                            reservationRecords.Add(new ReservationRecordModel{
-                                ReservationId = (int)reserve.Id,
-                                RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
-                                RestaurantName = restaurantBranch.Name,
-                                RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{reserve.BranchId}.jpg",
-                                RestaurantLocation = restaurantBranch.Address,
-                                RestaurantPhone = restaurantBranch.PhoneNumber,
-                                ReservationDate = reserve.Datetime,
-                                DayOfWeek = reserve.Datetime.ToString("dddd", new System.Globalization.CultureInfo("zh-TW")),
-                                AdultCount = reserve.GroupSize,
-                                ChildCount = reserve.NumberOfKid,
-                                Status = reserve.Status ?? "已預訂"
-                            });
-                            
-                            // 記錄每筆訂位記錄
-                            _Log?.SystemLog_Txt($"[QueryRecord] 訂位記錄(指定分館) - ID: {reserve.Id}, 餐廳: {restaurantBranch.Name}, 日期: {reserve.Datetime:yyyy-MM-dd}, 狀態: {reserve.Status ?? "已預訂"}, CompanyId: {reserve.CompanyId}, BranchId: {reserve.BranchId}");
+                            reserveRestaurantBranchesDict[key] = rb;
                         }
+                    }
+                }
+
+                // ========== 過濾屬於選定分館的記錄 ==========
+                var filteredReserves = reserves
+                    .Where(r => !string.IsNullOrEmpty(r.CompanyId) && !string.IsNullOrEmpty(r.BranchId))
+                    .Where(r => reserveRestaurantBranchesDict.ContainsKey((CompanyId: r.CompanyId, BranchId: r.BranchId)))
+                    .Where(r => reserveRestaurantBranchesDict[(CompanyId: r.CompanyId, BranchId: r.BranchId)].GroupId == selectedGroupId)
+                    .ToList();
+
+                // ========== API 同步狀態 ==========
+                var validReserves2 = filteredReserves
+                    .Where(r => !string.IsNullOrEmpty(r.CompanyId) && 
+                               !string.IsNullOrEmpty(r.CustomerId) &&
+                               !string.IsNullOrEmpty(r.ExternalReservationId))
+                    .ToList();
+
+                var uniquePairs2 = validReserves2
+                    .Select(r => new { r.CompanyId, r.CustomerId })
+                    .Distinct()
+                    .ToList();
+
+                var statusUpdateDict2 = new Dictionary<long, string>();
+
+                foreach(var pair in uniquePairs2)
+                {
+                    try
+                    {
+                        var queryApiResult = await _inlineAppsService.GetCustomerReservationAsync(
+                            pair.CompanyId,
+                            pair.CustomerId,
+                            branchId: null!,
+                            "booking,waiting");
+                        
+                        if(queryApiResult.Code == 200 && !string.IsNullOrEmpty(queryApiResult.Data))
+                        {
+                            var queryResult = Newtonsoft.Json.Linq.JObject.Parse(queryApiResult.Data);
+                            var reservations = queryResult["reservations"] as Newtonsoft.Json.Linq.JArray;
+                            
+                            if(reservations != null)
+                            {
+                                var apiDict = new Dictionary<string, Newtonsoft.Json.Linq.JObject>();
+                                foreach(var reservation in reservations)
+                                {
+                                    var apiId = reservation["id"]?.ToString();
+                                    if(!string.IsNullOrEmpty(apiId))
+                                    {
+                                        var apiReservationObj = reservation as Newtonsoft.Json.Linq.JObject;
+                                        if(apiReservationObj != null)
+                                        {
+                                            apiDict[apiId] = apiReservationObj;
+                                        }
+                                    }
+                                }
+                                
+                                var reservesInGroup = validReserves2
+                                    .Where(r => r.CompanyId == pair.CompanyId && r.CustomerId == pair.CustomerId)
+                                    .ToList();
+                                
+                                foreach(var reserve in reservesInGroup)
+                                {
+                                    if(apiDict.TryGetValue(reserve.ExternalReservationId, out var apiReservation))
+                                    {
+                                        var apiState = apiReservation["state"]?.ToString() ?? string.Empty;
+                                        var apiType = apiReservation["type"]?.ToString() ?? string.Empty;
+                                        
+                                        string status = "已預定";
+                                        if(apiType == "booking" || apiType == "waiting" || apiType == "walk-in")
+                                        {
+                                            status = apiState switch
+                                            {
+                                                "waiting" => "已預定",
+                                                "seated" => "已入座",
+                                                "cancelled" => "已取消",
+                                                _ => "已預定"
+                                            };
+                                        }
+                                        
+                                        statusUpdateDict2[reserve.Id] = status;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        _Log?.SystemErrorLog_Txt($"[QueryRecord] API 呼叫失敗(指定分館) - CompanyId: {pair.CompanyId}, CustomerId: {pair.CustomerId}, Error: {ex.Message}");
+                    }
+                }
+
+                // ========== 批次更新資料庫 ==========
+                bool hasChanges2 = false;
+                foreach(var reserve in filteredReserves)
+                {
+                    if(statusUpdateDict2.TryGetValue(reserve.Id, out var newStatus))
+                    {
+                        if(reserve.Status != newStatus)
+                        {
+                            reserve.Status = newStatus;
+                            hasChanges2 = true;
+                        }
+                    }
+                }
+
+                if(hasChanges2)
+                {
+                    await _restaurantContext.SaveChangesAsync();
+                }
+
+                // ========== 建立 ViewModel ==========
+                foreach(var reserve in filteredReserves)
+                {
+                    var key = (CompanyId: reserve.CompanyId, BranchId: reserve.BranchId);
+                    if(reserveRestaurantBranchesDict.TryGetValue(key, out var restaurantBranch))
+                    {
+                        string currentStatus = statusUpdateDict2.TryGetValue(reserve.Id, out var syncedStatus) 
+                            ? syncedStatus 
+                            : (reserve.Status ?? "已預訂");
+
+                        reservationRecords.Add(new ReservationRecordModel{
+                            ReservationId = (int)reserve.Id,
+                            RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
+                            RestaurantName = restaurantBranch.Name,
+                            RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{reserve.BranchId}.jpg",
+                            RestaurantLocation = restaurantBranch.Address,
+                            RestaurantPhone = restaurantBranch.PhoneNumber,
+                            ReservationDate = reserve.Datetime,
+                            DayOfWeek = reserve.Datetime.ToString("dddd", new System.Globalization.CultureInfo("zh-TW")),
+                            AdultCount = reserve.GroupSize,
+                            ChildCount = reserve.NumberOfKid,
+                            Status = currentStatus
+                        });
                     }
                 }
                 
@@ -300,34 +707,184 @@ namespace Reservation.Controllers
 
                 _Log?.SystemLog_Txt($"[QueryRecord] 指定分館查詢到候位記錄總數: {waitings.Count}, GroupId: {selectedGroupId}");
 
-                foreach(var waiting in waitings)
+                // ========== 批次查詢候位記錄的 RestaurantBranch ==========
+                var waitingCompanyBranchPairs2 = waitings
+                    .Where(w => !string.IsNullOrEmpty(w.CompanyId) && !string.IsNullOrEmpty(w.BranchId))
+                    .Select(w => new { w.CompanyId, w.BranchId })
+                    .Distinct()
+                    .ToList();
+
+                var waitingRestaurantBranchesDict2 = new Dictionary<(string CompanyId, string BranchId), Reservation.Models.EFRestaurantModels.RestaurantBranch>();
+                if(waitingCompanyBranchPairs2.Count > 0)
                 {
-                    // 透過 CompanyId 和 BranchId 查詢 RestaurantBranch
-                    if(!string.IsNullOrEmpty(waiting.CompanyId) && !string.IsNullOrEmpty(waiting.BranchId))
+                    var companyIds = waitingCompanyBranchPairs2.Select(p => p.CompanyId).Distinct().ToList();
+                    var branchIds = waitingCompanyBranchPairs2.Select(p => p.BranchId).Distinct().ToList();
+                    
+                    var branchesList4 = await _restaurantContext.RestaurantBranches
+                        .Where(rb => companyIds.Contains(rb.CompanyId) && branchIds.Contains(rb.Id))
+                        .ToListAsync();
+                    
+                    foreach(var rb in branchesList4)
                     {
-                        var restaurantBranch = await _restaurantContext.RestaurantBranches
-                            .FirstOrDefaultAsync(rb => rb.CompanyId == waiting.CompanyId && rb.Id == waiting.BranchId);
-                        
-                        // 檢查是否屬於選定的分館
-                        if(restaurantBranch != null && restaurantBranch.GroupId == selectedGroupId)
+                        var key = (CompanyId: rb.CompanyId, BranchId: rb.Id);
+                        if(waitingCompanyBranchPairs2.Any(p => p.CompanyId == rb.CompanyId && p.BranchId == rb.Id))
                         {
-                            waitingRecords.Add(new WaitingRecordModel{
-                                WaitingId = waiting.Id,
-                                RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
-                                RestaurantName = restaurantBranch.Name,
-                                RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{waiting.BranchId}.jpg",
-                                RestaurantLocation = restaurantBranch.Address,
-                                RestaurantPhone = restaurantBranch.PhoneNumber,
-                                JoinDate = waiting.CreateDate,
-                                AdultCount = waiting.GroupSize,
-                                ChildCount = waiting.NumberOfKid,
-                                QueueNumber = waiting.PositionInLine ?? 0,
-                                Status = waiting.Status ?? "等待中"
-                            });
-                            
-                            // 記錄每筆候位記錄
-                            _Log?.SystemLog_Txt($"[QueryRecord] 候位記錄(指定分館) - ID: {waiting.Id}, 餐廳: {restaurantBranch.Name}, 日期: {waiting.CreateDate:yyyy-MM-dd}, 狀態: {waiting.Status ?? "等待中"}, 排隊號碼: {waiting.PositionInLine ?? 0}, CompanyId: {waiting.CompanyId}, BranchId: {waiting.BranchId}");
+                            waitingRestaurantBranchesDict2[key] = rb;
                         }
+                    }
+                }
+
+                // ========== 過濾屬於選定分館的候位記錄 ==========
+                var filteredWaitings = waitings
+                    .Where(w => !string.IsNullOrEmpty(w.CompanyId) && !string.IsNullOrEmpty(w.BranchId))
+                    .Where(w => waitingRestaurantBranchesDict2.ContainsKey((CompanyId: w.CompanyId, BranchId: w.BranchId)))
+                    .Where(w => waitingRestaurantBranchesDict2[(CompanyId: w.CompanyId, BranchId: w.BranchId)].GroupId == selectedGroupId)
+                    .ToList();
+
+                // ========== 候位記錄 API 同步狀態 ==========
+                var validWaitings2 = filteredWaitings
+                    .Where(w => !string.IsNullOrEmpty(w.CompanyId) && 
+                               !string.IsNullOrEmpty(w.CustomerId) &&
+                               !string.IsNullOrEmpty(w.Id))
+                    .ToList();
+
+                var uniqueWaitingPairs2 = validWaitings2
+                    .Select(w => new { w.CompanyId, w.CustomerId })
+                    .Distinct()
+                    .ToList();
+
+                var waitingStatusUpdateDict2 = new Dictionary<string, (string Status, int? PositionInLine)>();
+
+                foreach(var pair in uniqueWaitingPairs2)
+                {
+                    try
+                    {
+                        var queryApiResult = await _inlineAppsService.GetCustomerReservationAsync(
+                            pair.CompanyId,
+                            pair.CustomerId,
+                            branchId: null!,
+                            "booking,waiting");
+                        
+                        if(queryApiResult.Code == 200 && !string.IsNullOrEmpty(queryApiResult.Data))
+                        {
+                            var queryResult = Newtonsoft.Json.Linq.JObject.Parse(queryApiResult.Data);
+                            var reservations = queryResult["reservations"] as Newtonsoft.Json.Linq.JArray;
+                            
+                            if(reservations != null)
+                            {
+                                var apiDict = new Dictionary<string, Newtonsoft.Json.Linq.JObject>();
+                                
+                                foreach(var reservation in reservations)
+                                {
+                                    var apiId = reservation["id"]?.ToString();
+                                    var apiType = reservation["type"]?.ToString() ?? string.Empty;
+                                    
+                                    if(!string.IsNullOrEmpty(apiId) && apiType == "waiting")
+                                    {
+                                        var apiReservationObj = reservation as Newtonsoft.Json.Linq.JObject;
+                                        if(apiReservationObj != null)
+                                        {
+                                            apiDict[apiId] = apiReservationObj;
+                                        }
+                                    }
+                                }
+                                
+                                var waitingsInGroup = validWaitings2
+                                    .Where(w => w.CompanyId == pair.CompanyId && w.CustomerId == pair.CustomerId)
+                                    .ToList();
+                                
+                                foreach(var waiting in waitingsInGroup)
+                                {
+                                    if(apiDict.TryGetValue(waiting.Id, out var apiReservation))
+                                    {
+                                        var apiState = apiReservation["state"]?.ToString() ?? string.Empty;
+                                        var positionInLine = apiReservation["positionInLine"]?.Value<int?>();
+                                        
+                                        string status = "等待中";
+                                        if(apiState == "seated")
+                                        {
+                                            status = "已入座";
+                                        }
+                                        else if(apiState == "cancelled")
+                                        {
+                                            status = "已取消";
+                                        }
+                                        else if(apiState == "waiting")
+                                        {
+                                            status = "等待中";
+                                        }
+                                        
+                                        waitingStatusUpdateDict2[waiting.Id] = (status, positionInLine);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        _Log?.SystemErrorLog_Txt($"[QueryRecord] 候位 API 呼叫失敗(指定分館) - CompanyId: {pair.CompanyId}, CustomerId: {pair.CustomerId}, Error: {ex.Message}");
+                    }
+                }
+
+                // ========== 批次更新候位記錄資料庫 ==========
+                bool hasWaitingChanges2 = false;
+                foreach(var waiting in filteredWaitings)
+                {
+                    if(waitingStatusUpdateDict2.TryGetValue(waiting.Id, out var updateInfo))
+                    {
+                        bool needUpdate = false;
+                        
+                        if(waiting.Status != updateInfo.Status)
+                        {
+                            waiting.Status = updateInfo.Status;
+                            needUpdate = true;
+                        }
+                        
+                        if(waiting.PositionInLine != updateInfo.PositionInLine)
+                        {
+                            waiting.PositionInLine = updateInfo.PositionInLine;
+                            needUpdate = true;
+                        }
+                        
+                        if(needUpdate)
+                        {
+                            hasWaitingChanges2 = true;
+                        }
+                    }
+                }
+
+                if(hasWaitingChanges2)
+                {
+                    await _restaurantContext.SaveChangesAsync();
+                    _Log?.SystemLog_Txt($"[QueryRecord] 批次更新候位記錄資料庫完成(指定分館)");
+                }
+
+                // ========== 建立候位記錄 ViewModel ==========
+                foreach(var waiting in filteredWaitings)
+                {
+                    var key = (CompanyId: waiting.CompanyId, BranchId: waiting.BranchId);
+                    if(waitingRestaurantBranchesDict2.TryGetValue(key, out var restaurantBranch))
+                    {
+                        string currentStatus = waitingStatusUpdateDict2.TryGetValue(waiting.Id, out var syncedInfo) 
+                            ? syncedInfo.Status 
+                            : (waiting.Status ?? "等待中");
+                        int queueNumber = waitingStatusUpdateDict2.TryGetValue(waiting.Id, out var syncedInfo2) 
+                            ? (syncedInfo2.PositionInLine ?? 0)
+                            : (waiting.PositionInLine ?? 0);
+                        
+                        waitingRecords.Add(new WaitingRecordModel{
+                            WaitingId = waiting.Id,
+                            RestaurantId = restaurantBranch.CompanyId.GetHashCode(),
+                            RestaurantName = restaurantBranch.Name,
+                            RestaurantImageUrl = $"~/IMG/HomePage/{selectedGroupId}/{waiting.BranchId}.jpg",
+                            RestaurantLocation = restaurantBranch.Address,
+                            RestaurantPhone = restaurantBranch.PhoneNumber,
+                            JoinDate = waiting.CreateDate,
+                            AdultCount = waiting.GroupSize,
+                            ChildCount = waiting.NumberOfKid,
+                            QueueNumber = queueNumber,
+                            Status = currentStatus
+                        });
                     }
                 }
                 

@@ -79,6 +79,8 @@ namespace Reservation.Controllers
                 var availableTimeSlots = new List<string>();
                 var menus = new List<MenuModel>();
                 string openingHours = "10:00-22:00"; // 預設值
+                int minGroupSize =1;
+                int maxGroupSize =8;
 
                 if(apiResult.Code == 200)
                 {
@@ -86,13 +88,35 @@ namespace Reservation.Controllers
                     {
                         var data = JObject.Parse(apiResult.Data);
                         
+                        var apiDataPreview = apiResult.Data.Length > 500 ? apiResult.Data.Substring(0, 500) + "..." : apiResult.Data;
+                        _Log?.SystemLog_Txt($"[API Response Preview] API 回應預覽: {apiDataPreview}");
+                        
                         // 解析可訂位時段（對應 Framework 的 GetBookingTime）
                         var bookingInfo = data.GetValue("bookingInfo");
                         if(bookingInfo != null)
                         {
                             var defaultBooking = bookingInfo.Value<JObject>("default");
+                            
+                            // 先檢查 defaultBooking 是否存在
                             if(defaultBooking != null)
                             {
+                                // 嘗試從 defaultBooking 取得人數限制（使用舊版欄位名稱）
+                                var minSize = defaultBooking.GetValue("minBookingGroupSize");
+                                var maxSize = defaultBooking.GetValue("maxBookingGroupSize");
+
+                                if(minSize != null)
+                                {
+                                    minGroupSize = minSize.Value<int>();
+                                    _Log?.SystemLog_Txt($"從 bookingInfo.default 取得 minBookingGroupSize: {minGroupSize}");
+                                }
+                                
+                                if(maxSize != null)
+                                {
+                                    maxGroupSize = maxSize.Value<int>();
+                                    _Log?.SystemLog_Txt($"從 bookingInfo.default 取得 maxBookingGroupSize: {maxGroupSize}");
+                                }
+                                
+                                // 處理時段資料
                                 var todayBooking = defaultBooking.Value<JObject>(today);
                                 if(todayBooking != null)
                                 {
@@ -101,11 +125,73 @@ namespace Reservation.Controllers
                                     {
                                         if(prop.Value.ToString() == "open")
                                         {
-                                            availableTimeSlots.Add(prop.Name);
+                                            var normalizedTime = NormalizeTimeSlot(prop.Name);
+                                            availableTimeSlots.Add(normalizedTime);
                                         }
                                     }
                                 }
                             }
+                            else
+                            {
+                                _Log?.SystemErrorLog_Txt($"bookingInfo.default 為 null，嘗試從其他位置尋找人數限制");
+                            }
+                            
+                            // 根據預設餐期過濾時間
+                            availableTimeSlots = FilterTimeSlots(availableTimeSlots, "中午");
+
+                            availableTimeSlots = FilterTimeSlots(availableTimeSlots,"中午");
+                            
+                            // 如果還是預設值，嘗試從 bookingInfo 的直接屬性取得（使用舊版欄位名稱）
+                            if(minGroupSize == 1 && maxGroupSize == 8)
+                            {
+                                var bookingInfoObj = bookingInfo as JObject;
+                                if(bookingInfoObj != null)
+                                {
+                                    var bookingMinSize = bookingInfoObj.GetValue("minBookingGroupSize");
+                                    var bookingMaxSize = bookingInfoObj.GetValue("maxBookingGroupSize");
+                                    
+                                    if(bookingMinSize != null)
+                                    {
+                                        minGroupSize = bookingMinSize.Value<int>();
+                                        _Log?.SystemLog_Txt($"從 bookingInfo 直接屬性取得 minBookingGroupSize: {minGroupSize}");
+                                    }
+                                    
+                                    if(bookingMaxSize != null)
+                                    {
+                                        maxGroupSize = bookingMaxSize.Value<int>();
+                                        _Log?.SystemLog_Txt($"從 bookingInfo 直接屬性取得 maxBookingGroupSize: {maxGroupSize}");
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            _Log?.SystemErrorLog_Txt($"API 回應中未找到 bookingInfo");
+                        }
+                        
+                        // 如果還是預設值，嘗試從根層級取得（使用舊版欄位名稱）
+                        if(minGroupSize == 1 && maxGroupSize == 8)
+                        {
+                            var rootMinSize = data.GetValue("minBookingGroupSize");
+                            var rootMaxSize = data.GetValue("maxBookingGroupSize");
+                            
+                            if(rootMinSize != null)
+                            {
+                                minGroupSize = rootMinSize.Value<int>();
+                                _Log?.SystemLog_Txt($"從根層級取得 minBookingGroupSize: {minGroupSize}");
+                            }
+                            
+                            if(rootMaxSize != null)
+                            {
+                                maxGroupSize = rootMaxSize.Value<int>();
+                                _Log?.SystemLog_Txt($"從根層級取得 maxBookingGroupSize: {maxGroupSize}");
+                            }
+                        }
+                        
+                        // 如果仍然無法取得，記錄警告
+                        if(minGroupSize == 1 && maxGroupSize == 8)
+                        {
+                            _Log?.SystemErrorLog_Txt($"無法從 API 取得人數限制，使用預設值 - minGroupSize: {minGroupSize}, maxGroupSize: {maxGroupSize}");
                         }
 
                         // 取得菜單圖片
@@ -190,7 +276,9 @@ namespace Reservation.Controllers
                     ChildCount = 0,
                     SelectedMealPeriod = "中午",
                     AvailableTimeSlots = availableTimeSlots.OrderBy(t => t).ToList(),
-                    Menus = menus
+                    Menus = menus,
+                    MinGroupSize = minGroupSize,
+                    MaxGroupSize = maxGroupSize
                 };
 
                 // 儲存到 ViewBag 供 View 使用
@@ -425,10 +513,71 @@ namespace Reservation.Controllers
                 }
 
                 // ========== 步驟 5：轉換日期時間為 UTC==========
-                string dateTimeStr = $"{model.SelectedDate:yyyy-MM-dd} {model.SelectedTimeSlot}:00";
-                DateTime bookingDateTime = DateTime.Parse(dateTimeStr);
-                DateTime bookingDateTimeUtc = bookingDateTime.AddHours(-8); // 台灣時間轉 UTC
-                string datetimeIso = bookingDateTimeUtc.ToString("s") + "Z";
+                DateTime bookingDateTime;
+                string datetimeIso;
+                
+                var timeParts = model.SelectedTimeSlot.Split(':');
+                if(timeParts.Length == 2 && int.TryParse(timeParts[0], out int hours))
+                {
+                    // 處理跨日時間（00:00-02:59 屬於次日）
+                    if(hours < 3)
+                    {
+                        bookingDateTime = model.SelectedDate.AddDays(1);
+                    }
+                    else
+                    {
+                        bookingDateTime = model.SelectedDate;
+                    }
+
+                    if(int.TryParse(timeParts[1], out int minutes))
+                    {
+                        bookingDateTime = new DateTime(
+                            bookingDateTime.Year, 
+                            bookingDateTime.Month, 
+                            bookingDateTime.Day, 
+                            hours, 
+                            minutes, 
+                            0);
+                    }
+                    else
+                    {
+                        // 如果無法解析分鐘，預設為 0
+                        bookingDateTime = new DateTime(
+                            bookingDateTime.Year, 
+                            bookingDateTime.Month, 
+                            bookingDateTime.Day, 
+                            hours, 
+                            0, 
+                            0);
+                    }
+
+                    // 檢查時間是否已過（如果是今天）
+                    if(bookingDateTime.Date == DateTime.Today && bookingDateTime <= DateTime.Now)
+                    {
+                        return Json(new { success = false, errors = new[] { "選擇的時間已過，請選擇未來的時間" } });
+                    }
+                    
+                    DateTime bookingDateTimeUtc = bookingDateTime.AddHours(-8); // 台灣時間轉 UTC
+                    datetimeIso = bookingDateTimeUtc.ToString("s") + "Z"; // ISO 8601 格式，使用大寫 Z
+
+                    _Log?.SystemLog_Txt($"訂位時間轉換 - 選擇日期: {model.SelectedDate:yyyy-MM-dd}, 選擇時間: {model.SelectedTimeSlot}, 組合時間: {bookingDateTime:yyyy-MM-dd HH:mm:ss}, UTC時間: {datetimeIso}");
+                }
+                else
+                {
+                    // 如果無法解析時間格式，使用預設邏輯
+                    string dateTimeStr = $"{model.SelectedDate:yyyy-MM-dd} {model.SelectedTimeSlot}:00";
+                    bookingDateTime = DateTime.Parse(dateTimeStr);
+                    
+                    if(bookingDateTime.Date == DateTime.Today && bookingDateTime <= DateTime.Now)
+                    {
+                        return Json(new { success = false, errors = new[] { "選擇的時間已過，請選擇未來的時間" } });
+                    }
+                    
+                    DateTime bookingDateTimeUtc = bookingDateTime.AddHours(-8);
+                    datetimeIso = bookingDateTimeUtc.ToString("s") + "Z";
+                    
+                    _Log?.SystemLog_Txt($"訂位時間轉換（預設邏輯）- 選擇日期: {model.SelectedDate:yyyy-MM-dd}, 選擇時間: {model.SelectedTimeSlot}, 組合時間: {bookingDateTime:yyyy-MM-dd HH:mm:ss}, UTC時間: {datetimeIso}");
+                }
 
                 // ========== 步驟 6：組合 customerNote（用餐目的 + 備註）==========
                 string customerNote = string.Empty;
@@ -630,46 +779,41 @@ namespace Reservation.Controllers
                                                 memberReserve.ExternalReservationId = apiReservationId;
                                                 memberReserve.CustomerId = customerId;
                                                 
-                                                string status = "已預訂";
+                                                string status = "已預定";
                                                 if(apiType == "booking")
                                                 {
                                                     status = apiState switch
                                                     {
-                                                        // "booked" => "已預訂",
+                                                        "waiting" => "已預定",
                                                         "seated" => "已入座",
-                                                        "completed" => "已完成",
-                                                        "canceled" =>"已取消",
-                                                        "waiting" => "已預訂",
-                                                        _ => "未知狀態"
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
                                                     };
-                                                    
-                                                    // 特別記錄未知狀態的原因
-                                                    if(status == "未知狀態")
-                                                    {
-                                                        _Log?.SystemErrorLog_Txt($"[StatusDebug] 未知狀態原因 - Type:booking, State:{apiState} (預期值: booked/seated/completed/canceled), RawJson:{rawReservationJson}");
-                                                    }
                                                 }
                                                 else if(apiType == "waiting")
                                                 {
                                                     status = apiState switch
                                                     {
-                                                        "waiting" => "等待中",
-                                                        "called" => "已叫號",
-                                                        "seated" => "已入坐",
-                                                        "completed" => "已完成",
-                                                        "canceled" => "已取消",
-                                                        _ => "等待中"
+                                                        "waiting" => "已預定",
+                                                        "seated" => "已入座",
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
                                                     };
-                                                    
-                                                    _Log?.SystemLog_Txt($"[StatusDebug] 候位類型記錄 - Type:waiting, State:{apiState}, 轉換為:{status}");
+                                                }else if(apiType == "walk-in")
+                                                {
+                                                    status = apiState switch
+                                                    {
+                                                        "waiting" => "已預定",
+                                                        "seated" => "已入座",
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
+                                                    };
                                                 }
                                                 else
                                                 {
-                                                    // 如果 apiType 不是 booking 也不是 waiting
                                                     status = "未知狀態";
                                                     _Log?.SystemErrorLog_Txt($"[StatusDebug] 未知類型 - Type:{apiType}, State:{apiState}, RawJson:{rawReservationJson}");
                                                 }
-                                                
                                                 memberReserve.Status = status;
                                                 await _restaurantContext.SaveChangesAsync();
                                                 _Log?.SystemLog_Txt($"訂位紀錄更新 - Status:{status}, Type:{apiType}, State:{apiState}, ApiId:{apiReservationId}");
@@ -747,10 +891,14 @@ namespace Reservation.Controllers
                         }
                         
                         // 檢查 reason
-                        if(!string.IsNullOrEmpty(reason) && !isLimitReached && !isDuplicate)
+                       if(!string.IsNullOrEmpty(reason) && !isLimitReached && !isDuplicate)
                         {
                             var reasonLower = reason.ToLower();
-                            if(reasonLower.Contains("hit customer") || reasonLower.Contains("limit") || reasonLower.Contains("not allowed to make more"))
+                            if(reasonLower.Contains("not in bookable time") || reasonLower.Contains("bookable time"))
+                            {
+                                errorMessage = "選擇的時間不在可訂位時間範圍內，請重新選擇時間";
+                            }
+                            else if(reasonLower.Contains("hit customer") || reasonLower.Contains("limit") || reasonLower.Contains("not allowed to make more"))
                             {
                                 isLimitReached = true;
                                 errorMessage = "您已達到該餐廳的訂位數量上限，請先取消其他訂位或聯絡客服單位";
@@ -833,11 +981,98 @@ namespace Reservation.Controllers
             return timeSlots;
         }
 
+
+        /// <summary>
+        /// 轉換 API 回傳的時間格式（處理跨日時間，如 24:00 → 00:00）
+        /// </summary>
+        private string NormalizeTimeSlot(string timeSlot)
+        {
+            if(string.IsNullOrEmpty(timeSlot))
+                return timeSlot;
+
+            // 解析時間格式 HH:mm
+            var parts = timeSlot.Split(':');
+            if(parts.Length != 2)
+                return timeSlot; // 格式不正確，直接返回
+            
+            if(int.TryParse(parts[0], out int hours) && int.TryParse(parts[1], out int minutes))
+            {
+                // 如果小時數 >= 24，轉換為標準格式
+                if(hours >= 24)
+                {
+                    hours = hours % 24;
+                }
+                
+                // 確保分鐘數在有效範圍內
+                if(minutes < 0 || minutes >= 60)
+                {
+                    minutes = 0;
+                }
+                
+                return $"{hours:D2}:{minutes:D2}";
+            }
+            
+            return timeSlot; // 無法解析，直接返回
+        }
+
+        /// <summary>
+        /// 根據餐期過濾時間
+        /// </summary>
+        private List<string> FilterTimeSlots(List<string> timeSlots, string mealPeriod)
+        {
+            if(string.IsNullOrEmpty(mealPeriod) || timeSlots == null || timeSlots.Count == 0)
+            {
+                return timeSlots ?? new List<string>();
+            }
+
+            var filteredSlots = new List<string>();
+
+            foreach(var slot in timeSlots)
+            {
+                var parts = slot.Split(':');
+                if(parts.Length == 2 && int.TryParse(parts[0], out int hours))
+                {
+                    if(mealPeriod == "中午")
+                    {
+                        // 中午：11:00 - 16:59
+                        if(hours >= 11 && hours < 17)
+                        {
+                            filteredSlots.Add(slot);
+                        }
+                    }
+                    else if(mealPeriod == "晚上")
+                    {
+                        // 晚上：17:00 - 23:59 或 00:00 - 02:59（跨日）
+                        if(hours >= 17 || hours < 3)
+                        {
+                            filteredSlots.Add(slot);
+                        }
+                    }
+                }
+            }
+            
+            return filteredSlots.OrderBy(t => 
+            {
+                var parts = t.Split(':');
+                if(parts.Length == 2 && int.TryParse(parts[0], out int hours) && int.TryParse(parts[1], out int minutes))
+                {
+                    if(hours < 3)
+                    {
+                        return hours * 100 + minutes + 2400; // 例如：00:00 -> 2400, 02:30 -> 2630
+                    }
+                    else
+                    {
+                        return hours * 100 + minutes; // 例如：17:00 -> 1700, 23:45 -> 2345
+                    }
+                }
+                return 9999; // 無法解析的時間排在最後
+            }).ToList();
+        }
         /// <summary>
         /// 取得可訂位時段（AJAX 用）
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetTimeSlots(string id, string companyId, string branchId, string date)
+        public async Task<IActionResult> GetTimeSlots(string id, string companyId, string branchId, string date, string mealPeriod = "")
         {
             if(string.IsNullOrEmpty(id) || string.IsNullOrEmpty(companyId) || string.IsNullOrEmpty(branchId))
             {
@@ -874,7 +1109,8 @@ namespace Reservation.Controllers
                                     {
                                         if(prop.Value.ToString() == "open")
                                         {
-                                            timeSlots.Add(prop.Name);
+                                            var normalizedTime = NormalizeTimeSlot(prop.Name);
+                                            timeSlots.Add(normalizedTime);
                                         }
                                     }
                                 }
@@ -882,7 +1118,33 @@ namespace Reservation.Controllers
                         }
                     }
 
-                    return Json(timeSlots.OrderBy(t => t).ToList());
+                    // 如果 mealPeriod 為空，返回所有時間（不過濾）
+                    if(!string.IsNullOrEmpty(mealPeriod))
+                    {
+                        timeSlots = FilterTimeSlots(timeSlots, mealPeriod);
+                    }
+                    else
+                    {
+                        // 如果不過濾，需要排序所有時間（跨日時間排在後面）
+                        timeSlots = timeSlots.OrderBy(t => 
+                        {
+                            var parts = t.Split(':');
+                            if(parts.Length == 2 && int.TryParse(parts[0], out int hours) && int.TryParse(parts[1], out int minutes))
+                            {
+                                if(hours < 3)
+                                {
+                                    return (hours + 24) * 100 + minutes;
+                                }
+                                else
+                                {
+                                    return hours * 100 + minutes;
+                                }
+                            }
+                            return 9999;
+                        }).ToList();
+                    }
+                    
+                    return Json(timeSlots);
                 }
             }
             catch(Exception ex)

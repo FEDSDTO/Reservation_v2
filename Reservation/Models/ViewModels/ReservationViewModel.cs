@@ -18,6 +18,8 @@ namespace Reservation.Models.ViewModels
         public string? SelectedTimeSlot { get; set; }
         public List<string> AvailableTimeSlots { get; set; } = new();
         public List<MenuModel> Menus { get; set; } = new();
+        public int MinGroupSize {get; set;}=1;
+        public int MaxGroupSize {get; set;}=8;
     }
 
     public class ReservationConfirmModel

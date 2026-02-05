@@ -530,37 +530,41 @@ namespace Reservation.Controllers
                                             {
                                                 memberWaiting.CustomerId = customerId;
 
-                                                string status = "等待中";
+                                                string status = "已預定";
                                                 if(apiType == "waiting")
                                                 {
                                                     status = apiState switch
                                                     {
-                                                        "waiting" => "等待中",
-                                                        "called" => "已叫號",
+                                                        "waiting" => "已預定",
                                                         "seated" => "已入座",
-                                                        "completed" => "已完成",
-                                                        "canceled" => "已取消",
-                                                        _ => "等待中"
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
                                                     };
                                                 }
                                                 else if(apiType == "booking")
                                                 {
-                                                    // 如果 API 返回的是 booking 類型，也應該處理
                                                     status = apiState switch
                                                     {
-                                                        "booked" => "已預訂",
+                                                        "waiting" => "已預定",
                                                         "seated" => "已入座",
-                                                        "completed" => "已完成",
-                                                        "canceled" => "已取消",
-                                                        _ => "未知狀態"
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
                                                     };
-                                                    _Log?.SystemLog_Txt($"[候位] API 返回 booking 類型 - apiType: {apiType}, apiState: {apiState}, 更新為: {status}");
                                                 }
-                                                else if(!string.IsNullOrEmpty(apiType))
+                                                else if(apiType == "walk-in")
                                                 {
-                                                    // 如果 apiType 不是 waiting 也不是 booking，記錄為未知狀態
+                                                    status = apiState switch
+                                                    {
+                                                        "waiting" => "已預定",
+                                                        "seated" => "已入座",
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
+                                                    };
+                                                }
+                                                else
+                                                {
                                                     status = "未知狀態";
-                                                    _Log?.SystemLog_Txt($"[候位] API 返回未知類型 - apiType: {apiType}, apiState: {apiState}, ReservationId: {apiReservationId}");
+                                                    _Log?.SystemErrorLog_Txt($"[候位] API 返回未知類型 - apiType: {apiType}, apiState: {apiState}, ReservationId: {apiReservationId}");
                                                 }
                                                 memberWaiting.Status = status;
 
