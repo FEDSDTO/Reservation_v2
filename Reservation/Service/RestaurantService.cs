@@ -1,9 +1,13 @@
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Reservation.Models;
 using Reservation.Models.EFRestaurantModels;
 using Reservation.Models.ViewModels;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Reservation.Service
 {
@@ -15,15 +19,18 @@ namespace Reservation.Service
         private readonly RestaurantContext _restaurantContext;
         private readonly InlineAppsService _inlineAppsService;
         private readonly Func_Log _Log;
+        private readonly IWebHostEnvironment _env;
 
         public RestaurantService(
             RestaurantContext restaurantContext,
             InlineAppsService inlineAppsService,
-            Func_Log fileLogService)
+            Func_Log fileLogService,
+            IWebHostEnvironment env)
         {
             _restaurantContext = restaurantContext;
             _inlineAppsService = inlineAppsService;
             _Log = fileLogService;
+            _env = env;
         }
 
         /// <summary>
@@ -70,8 +77,8 @@ namespace Reservation.Service
                   var card = new RestaurantCardModel
                   {
                         id = dbBranch.Id,
-                        GroupId = dbBranch.GroupId,
-                        CompanyId = dbBranch.CompanyId,
+                        GroupId = dbBranch.GroupId ?? "",
+                        CompanyId = dbBranch.CompanyId ?? "",
                         Name = dbBranch.Name,
                         Address = dbBranch.Address,
                         PhoneNumber = dbBranch.PhoneNumber,
@@ -79,7 +86,8 @@ namespace Reservation.Service
                         WebWaitingEnabled = dbBranch.WebWaitingEnable,
                         WaitingCount = 0,
                         EstimatedWaitingMinutes = 0,
-                        Images = new List<string>() // 空列表，View 會使用本地目錄圖片  
+                        Images = new List<string>(),
+                        ImageUrl = GetRestaurantImageUrl(dbBranch.GroupId ?? "", dbBranch.Id)
                   };
                   cards.Add(card);
                }
@@ -254,7 +262,8 @@ namespace Reservation.Service
                     WebWaitingEnabled = dbBranch.WebWaitingEnable,
                     WaitingCount = 0,
                     EstimatedWaitingMinutes = 0,
-                    Images = new List<string>()
+                    Images = new List<string>(),
+                    ImageUrl = GetRestaurantImageUrl(dbBranch.GroupId ?? "", dbBranch.Id)
                 };
             }
             catch(Exception ex)
@@ -262,6 +271,26 @@ namespace Reservation.Service
                 _Log?.SystemErrorLog_Txt($"取得餐廳詳細資料錯誤 - GroupId: {groupId}, BranchId: {branchId}, Error: {ex.Message}");
                 return null;
             }
+        }
+
+        /// <summary>
+        /// 依 GroupId / BranchId 從 wwwroot/IMG/HomePage 取得圖片路徑；若檔案不存在則寫錯誤 log 並回傳預設圖。
+        /// </summary>
+        public string GetRestaurantImageUrl(string groupId, string branchId)
+        {
+            var relativePath = Path.Combine("IMG", "HomePage", groupId, $"{branchId}.jpg");
+            var physicalPath = Path.Combine(_env.WebRootPath, relativePath);
+
+            if (!File.Exists(physicalPath))
+            {
+                _Log?.SystemErrorLog_Txt(
+                    $"[RestaurantService.GetRestaurantImageUrl] 實體圖片不存在 - PhysicalPath: {physicalPath}, GroupId: {groupId}, BranchId: {branchId}");
+                return "~/IMG/HomePage/10.jpg";
+            }
+
+            _Log?.SystemLog_Txt(
+                $"[RestaurantService.GetRestaurantImageUrl] 使用圖片 - {relativePath} (GroupId: {groupId}, BranchId: {branchId})");
+            return "~/" + relativePath.Replace("\\", "/");
         }
     }
 }

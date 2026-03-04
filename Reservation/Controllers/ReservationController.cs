@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Reservation.Models.EFRestaurantModels;
 using Reservation.Models.ViewModels;
@@ -248,7 +248,7 @@ namespace Reservation.Controllers
                 }
 
                 // ========== 步驟 4：建立 ViewModel ==========
-                var restaurantImageUrl = $"~/IMG/HomePage/{id}/{branchId}.jpg";
+                var restaurantImageUrl = _restaurantService.GetRestaurantImageUrl(id, branchId);
                 var selectedBranchId = branchDict.ContainsKey(id) ? branchDict[id] : 1;
 
                 var restaurantInfo = new Reservation.Models.ViewModels.RestaurantInfoModel
@@ -388,7 +388,7 @@ namespace Reservation.Controllers
                 {
                     Id = selectedBranchId,
                     Name = restaurant.Name,
-                    ImageUrl = $"~/IMG/HomePage/{id}/{branchId}.jpg",
+                    ImageUrl = _restaurantService.GetRestaurantImageUrl(id, branchId),
                     Location = restaurant.Address,
                     Phone = restaurant.PhoneNumber,
                     OpeningHours = "10:00-22:00",

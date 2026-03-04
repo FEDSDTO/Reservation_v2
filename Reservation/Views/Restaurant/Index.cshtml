@@ -89,7 +89,7 @@
                         <!-- 左側圖片 - 直接使用本地目錄圖片 -->
                         <div class="col-md-3 col-4">
                             <div class="restaurant-image-wrapper">
-                                <img src="@Url.Content($"~/IMG/HomePage/{card.GroupId}/{card.id}.jpg")" 
+                                <img src="@Url.Content(card.ImageUrl)" 
                                      class="restaurant-image" 
                                      alt="@card.Name"
                                      onerror="this.src='@Url.Content("~/IMG/HomePage/10.jpg")'" />
