@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace Reservation.Models.ViewModels
 {
@@ -36,7 +36,10 @@ namespace Reservation.Models.ViewModels
          [Description("目前候位中組數")]
         public int WaitingCount { get; set; }
 
-        [Description("目前預計等候時間分鐘")]
+         [Description("目前預計等候時間分鐘")]
         public int? EstimatedWaitingMinutes { get; set; }
+
+        [Description("餐廳主圖路徑（本地資料夾）")]
+        public string ImageUrl { get; set; } = string.Empty;
     }
 }

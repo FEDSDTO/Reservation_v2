@@ -87,23 +87,33 @@
                 <div class="col-6">
                     <label class="form-label">大人</label>
                     <select class="form-select" name="AdultCount" id="adultCount" required>
-                        @for (int i = 1; i <= 8; i++)
+                        @for(int i = Model.MinGroupSize; i<=Model.MaxGroupSize; i++)
                         {
-                            <option value="@i" selected="@(Model.AdultCount == i)">@i 位</option>
+                            <option value="@i" selected="@(Model.AdultCount==i)">@i 位</option>
                         }
                     </select>
                 </div>
                 <div class="col-6">
                     <label class="form-label">小孩</label>
                     <select class="form-select" name="ChildCount" id="childCount">
-                        @for (int i = 0; i <= 8; i++)
+                        @for(int i = 0; i<=Model.MaxGroupSize-Model.AdultCount; i++)
                         {
-                            <option value="@i" selected="@(Model.ChildCount == i)">@i 位</option>
+                            <option value="@i" selected="@(Model.ChildCount==i)">@i 位</option>
                         }
                     </select>
                 </div>
             </div>
-            <p class="reservation-info-text">線上訂位最多可至8位,如需團體訂位請撥打餐廳電話。</p>
+            <p class="reservation-info-text">
+                線上訂位可訂 @Model.MaxGroupSize 位
+                @if(Model.MinGroupSize > 1)
+                {
+                    <text>，如需團體訂位請撥打餐廳電話。</text>
+                }
+                else
+                {
+                    <text>，如需更多人數請撥打餐廳電話。</text>
+                }
+            </p>
 
             <!-- 時段選擇 -->
             <div class="time-slot-section">
@@ -197,6 +207,101 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
+
+            var timeSlotsCache={};
+            var currentDate = null;
+
+             function filterTimeSlotsByPeriod(allSlots, mealPeriod)
+             {
+                if(!allSlots || allSlots.length === 0 ) return [];
+                var filtered =[];
+                allSlots.forEach(function(slot){
+                    var parts = slot.split(':');
+                    if(parts.length ===2)
+                    {
+                        var hours = parseInt(parts[0]);
+                        if(mealPeriod === '中午')
+                        {
+                            // 中午：11:00 - 16:59
+                            if(hours >= 11 && hours < 17)
+                            {
+                                filtered.push(slot);
+                            }
+                        }
+                        else if(mealPeriod === '晚上')
+                        {
+                            // 晚上：17:00 - 23:59 或 00:00 - 02:59（跨日）
+                            if(hours >= 17 || hours < 3)
+                            {
+                                filtered.push(slot);
+                            }
+                        }
+                    }
+                });
+
+                return filtered.sort(function(a,b){
+                    var aParts = a.split(':');
+                    var bParts = b.split(':');
+                    var aHours = parseInt(aParts[0]);
+                    var bHours = parseInt(bParts[0]);
+                    var aMinutes = parseInt(aParts[1]);
+                    var bMinutes = parseInt(bParts[1]);
+
+                    var aSort = aHours < 3 ? aHours * 100 + aMinutes + 2400 : aHours * 100 + aMinutes;
+                    var bSort = bHours < 3 ? bHours * 100 + bMinutes + 2400 : bHours * 100 + bMinutes;
+                    
+                    return aSort - bSort;
+                })
+             }
+
+             function displayTimeSlots(slots){
+                var grid = $('#timeSlotsGrid');
+                grid.empty();
+                var selectedSlot = $('#selectedTimeSlot').val();
+
+                if(slots && slots.length > 0){
+                    slots.forEach(function(slot){
+                        var isActive = slot === selectedSlot ? 'active' : '';
+                        var btn = $('<button>')
+                        .attr('type','button')
+                        .addClass('time-slot-btn ' + isActive)
+                        .attr('data-slot',slot)
+                        .text(slot);
+                        grid.append(btn);
+                    });
+                }
+                else{
+                    var selectedDate = $('#reservationDate').val();
+                    var today = new Date();
+                    var todayStr = today.getFullYear() + '-' +
+                    String(today.getMonth()+1).padStart(2,'0')+'-'+
+                    String(today.getDate()).padStart(2,'0');
+
+                    if (selectedDate === todayStr) {
+                        grid.html('<p class="text-danger" style="font-weight: bold; white-space: nowrap;">本日已無可預約時段 已滿</p>');
+                    } else {
+                        grid.html('<p class="text-muted">暫無可用時段</p>');
+                    }
+                }
+             }
+             
+            // 大人人數改變時，連動更新小孩人數選項
+            $('#adultCount').on('change', function() {
+                var adultCount = parseInt($(this).val());
+                var maxGroupSize = @Model.MaxGroupSize;
+                var currentChildCount = parseInt($('#childCount').val());
+                var maxChildAllowed = maxGroupSize - adultCount;
+                
+                var $childSelect = $('#childCount');
+                $childSelect.empty();
+                for (var i = 0; i <= maxChildAllowed; i++) {
+                    $childSelect.append($('<option>', {
+                        value: i,
+                        text: i + ' 位',
+                        selected: (i === Math.min(currentChildCount, maxChildAllowed))
+                    }));
+                }
+            });
 
             // 菜單輪播功能物件
             var menuCarousel = {
@@ -665,17 +770,25 @@
 
             // 日期選擇器事件
             $('.reservation-date-input').on('change', function() {
-                loadTimeSlots();
+                loadTimeSlots(true);
             });
 
-            // 餐期標籤切換
-            $('.meal-period-tab').on('click', function() {
-                $('.meal-period-tab').removeClass('active');
-                $(this).addClass('active');
-                var period = $(this).data('period');
-                $('#selectedMealPeriod').val(period);
-                loadTimeSlots();
-            });
+            // 餐期標籤切換（優化：只過濾，不重新載入）
+           $('.meal-period-tab').on('click',function(){
+            $('.meal-period-tab').removeClass('active');
+            $(this).addClass('active');
+            var period = $(this).data('period');
+            $('#selectedMealPeriod').val(period);
+
+            // 如果有快取，直接過濾顯示；否則載入
+            var date = $('#reservationDate').val();
+            if (timeSlotsCache[date]) {
+                var filteredSlots = filterTimeSlotsByPeriod(timeSlotsCache[date], period);
+                displayTimeSlots(filteredSlots);
+            } else {
+                loadTimeSlots(false);
+            }
+           });
 
             // 時段按鈕選擇 - 時間必須必選，不允許取消
             $(document).on('click', '.time-slot-btn', function() {
@@ -687,59 +800,48 @@
             });          
 
             // 載入時段
-            function loadTimeSlots() {
+            function loadTimeSlots(forceReload){
                 var date = $('#reservationDate').val();
-                
-                if (!date) {
-                    date = '@DateTime.Today.ToString("yyyy-MM-dd")';
+
+                if(!date){
+                     date = '@DateTime.Today.ToString("yyyy-MM-dd")';
                     $('#reservationDate').val(date);
                 }
 
-                var groupId = '@ViewBag.GroupId';
-                var companyId = '@ViewBag.CompanyId';
-                var branchId = '@ViewBag.BranchId';
+                var mealPeriod = $('#selectedMealPeriod').val() || '中午';
+
+                if(!forceReload && currentDate === date && timeSlotsCache[date]) {
+                    var filteredSlots = filterTimeSlotsByPeriod(timeSlotsCache[date],mealPeriod);
+                    displayTimeSlots(filteredSlots);
+                    return;
+                }
+
+                var GroupId = '@ViewBag.GroupId';
+                var CompanyId ='@ViewBag.CompanyId';
+                var BranchId = '@ViewBag.BranchId';
+
+                var grid = $('#timeSlotsGrid');
+                grid.html('<p class="text-muted">載入中...</p>');
 
                 $.ajax({
-                    url: '@Url.Action("GetTimeSlots", "Reservation")',
-                    type: 'GET',
-                    data: {
-                        id: groupId,
-                        companyId: companyId,
-                        branchId: branchId,
-                        date: date
+                    url:'@Url.Action("GetTimeSlots","Reservation")',
+                    type:'GET',
+                    data:{
+                        id:GroupId,
+                        companyId:CompanyId,
+                        branchId:BranchId,
+                        date:date,
+                        mealPeriod:''
                     },
-                    success: function(slots) {
-                        var grid = $('#timeSlotsGrid');
-                        grid.empty();
-                        var selectedSlot = $('#selectedTimeSlot').val();
-                        
-                        if (slots && slots.length > 0) {
-                            slots.forEach(function(slot) {
-                                var isActive = slot === selectedSlot ? 'active' : '';
-                                var btn = $('<button>')
-                                    .attr('type', 'button')
-                                    .addClass('time-slot-btn ' + isActive)
-                                    .attr('data-slot', slot)
-                                    .text(slot);
-                                grid.append(btn);
-                            });
-                        } else {
-                           var selectedDate = $('#reservationDate').val();
-                           var today = new Date();
-                           var todayStr = today.getFullYear() + '-' + 
-                            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                            String(today.getDate()).padStart(2, '0');
-                            if(selectedDate === todayStr)
-                            {
-                                  grid.html('<p class="text-danger" style="font-weight: bold; white-space: nowrap;">本日已無可預約時段 已滿</p>');
-                            }else
-                            {
-                                    grid.html('<p class="text-muted">暫無可用時段</p>');
-                            }
-                        }
+                    success:function(slots){
+                        timeSlotsCache[date]= slots || [];
+                        currentDate = date;
+
+                        var filteredSlots = filterTimeSlotsByPeriod(timeSlotsCache[date], mealPeriod);
+                        displayTimeSlots(filteredSlots);
                     },
-                    error: function() {
-                        $('#timeSlotsGrid').html('<p class="text-danger">載入時段失敗，請重新整理頁面</p>');
+                    error:function(){
+                          grid.html('<p class="text-danger">載入時段失敗，請重新整理頁面</p>');
                     }
                 });
             }

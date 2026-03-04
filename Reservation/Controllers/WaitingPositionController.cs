@@ -6,6 +6,8 @@ using Reservation.Models.ViewModels;
 using Reservation.Service;
 using Microsoft.EntityFrameworkCore; 
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.SignalR.Protocol;
+using Microsoft.Data.SqlClient;
 
 namespace Reservation.Controllers
 {
@@ -263,7 +265,22 @@ namespace Reservation.Controllers
                 return Json(new { success = false, errors = new[] { "查無此餐廳" } });
             }
 
+            // ========== 取得登入會員 ID ==========
             int memberId = 0;
+            if(HttpContext.Items["MemberId"] != null && HttpContext.Items["MemberId"] is int memberIdValue)
+            {
+                memberId = memberIdValue;
+                _Log?.SystemLog_Txt($"候位-取得會員ID:{memberId}");
+            }else
+            {
+                _Log?.SystemLog_Txt($"候位 - 未取得會員ID，使用預設值 0 (非會員)");
+                _Log?.SystemLog_Txt($"候位 - HttpContext.Items[\"MemberId\"] 是否存在: {HttpContext.Items.ContainsKey("MemberId")}");
+                if(HttpContext.Items.ContainsKey("MemberId"))
+                {
+                    _Log?.SystemLog_Txt($"候位 - HttpContext.Items[\"MemberId\"] 值: {HttpContext.Items["MemberId"]}, 型別: {HttpContext.Items["MemberId"]?.GetType().Name}");
+                }
+            }
+
             int gender = 2;
             var salutation = Request.Form["Salutation"].ToString();
             if(salutation == "先生")
@@ -368,66 +385,225 @@ namespace Reservation.Controllers
 
             };
             string reservationId = string.Empty;
+            string customerId = string.Empty;
+            string reservationLink = string.Empty;
+            string parsedApiData = string.Empty;
+
             try
             {
                 var result = Newtonsoft.Json.Linq.JObject.Parse(apiResult.Data);
-                var reservationIdToken = result.GetValue("reservationId");
-                reservationId = reservationIdToken?.ToString() ?? string.Empty;
+
+                // 解析所有欄位
+                reservationId = result["reservationId"]?.ToString() ?? string.Empty;
+                customerId = result["customerId"]?.ToString() ?? string.Empty;
+                reservationLink = result["reservationLink"]?.ToString() ?? string.Empty;
+
+                //組合解析後的資料
+                var parsedFields = new System.Text.StringBuilder();
+                parsedFields.AppendLine("=== API 回應解析 ===");
+
+                foreach(var prop in result.Properties())
+                {
+                    parsedFields.AppendLine($"{prop.Name}: {prop.Value?.ToString() ?? "null"}");
+                    _Log?.SystemLog_Txt($"候位 API 回應欄位 - {prop.Name}: {prop.Value?.ToString() ?? "null"}");
+                }
+
+                parsedApiData = parsedFields.ToString();
+                _Log?.SystemLog_Txt($"候位 API 解析完成 - ReservationId: {reservationId}, CustomerId: {customerId}, Link: {reservationLink}");
             }
             catch(Exception ex)
             {
-               _Log?.SystemErrorLog_Txt($"候位失敗 - 解析ReservationId失敗: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"候位失敗 - 解析API回應失敗: {ex.Message}");
             }
 
             try
             {
-               string waitingId = reservationId;
-               if(string.IsNullOrEmpty(waitingId))
-               {
-                  waitingId = $"WAIT_{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid().ToString("N").Substring(0, 8)}";
-                   _Log?.SystemLog_Txt($"API 未返回 reservationId，產生臨時 ID: {waitingId}");
-               }
-
-               var memberWaiting = new MemberWaiting
-               {
-                 Id = waitingId,
-                 MemberId = memberId,
-                 CompanyId = companyId,
-                 BranchId = branchId,
-                 GroupSize = model.AdultCount,
-                 NumberOfKid=model.ChildCount,
-                 ContactName = model.CustomerName,
-                 ContactPhone = formattedPhone,
-                 ContactGender = (byte)gender,
-                 Datetime = DateTime.Now,
-                 Note = waitingPositionOrder.CustomerNote ?? string.Empty,
-                 Remark = !string.IsNullOrEmpty(reservationId)
-                 ? $"API 返回 reservationId: {reservationId}"
-                 : string.Empty,
-                 Creator = 0,
-                 CreateDate = DateTime.Now,
-                 CreateFrom = "FEDS-SYS"
-               };
-
-               _restaurantContext.MemberWaitings.Add(memberWaiting);
-               await _restaurantContext.SaveChangesAsync();
-               
-                var memberWaitingLog = new MemberWaitingLog
+                string waitingId = reservationId;
+                if(string.IsNullOrEmpty(waitingId))
                 {
-                    ReserveId = memberWaiting.Id,
-                    Status = "N",
-                    Json = System.Text.Json.JsonSerializer.Serialize(waitingPositionOrder),
+                     waitingId = $"WAIT_{DateTime.Now:yyyyMMddHHmmss}_{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+                    _Log?.SystemLog_Txt($"API 未返回 reservationId，產生臨時 ID: {waitingId}");
+                }
+
+                var memberWaiting = new MemberWaiting
+                {
+                    Id = waitingId,
+                    MemberId = memberId,
+                    CompanyId = companyId,
+                    BranchId = branchId,
+                    GroupSize = model.AdultCount,
+                    NumberOfKid = model.ChildCount,
+                    ContactName = model.CustomerName,
+                    ContactPhone = formattedPhone,
+                    ContactGender = (byte)gender,
+                    Datetime = DateTime.Now,
+                    Note = waitingPositionOrder.CustomerNote ?? string.Empty,
+                    CustomerId = customerId,  
+                    Status = "等待中", 
+                    Remark = null,
                     Creator = 0,
                     CreateDate = DateTime.Now,
                     CreateFrom = "FEDS-SYS"
                 };
-                memberWaiting.MemberWaitingLogs.Add(memberWaitingLog);
-                await _restaurantContext.SaveChangesAsync();
-                _Log?.SystemLog_Txt($"候位資料已儲存到資料庫 - WaitingId: {memberWaiting.Id}, API ReservationId: {reservationId}");
+
+                try
+                {
+                    _Log?.SystemLog_Txt("[DB] 準備寫入 MemberWaiting");
+                    _Log?.SystemLog_Txt($"[DB] MemberId={memberWaiting.MemberId}, CompanyIdLen={memberWaiting.CompanyId?.Length}, BranchIdLen={memberWaiting.BranchId?.Length}");
+                    _Log?.SystemLog_Txt($"[DB] ContactNameLen={memberWaiting.ContactName?.Length}, PhoneLen={memberWaiting.ContactPhone?.Length}");
+                    _Log?.SystemLog_Txt($"[DB] NoteLen={memberWaiting.Note?.Length}, RemarkLen={memberWaiting.Remark?.Length}");
+                    _Log?.SystemLog_Txt($"[DB] CustomerIdLen={memberWaiting.CustomerId?.Length}, StatusLen={memberWaiting.Status?.Length}");
+
+                    _restaurantContext.MemberWaitings.Add(memberWaiting);
+                    var affected1 = await _restaurantContext.SaveChangesAsync();
+                    _Log?.SystemLog_Txt($"[DB] SaveChanges(MemberWaiting) 成功，affected={affected1}, id={memberWaiting.Id}, MemberId={memberWaiting.MemberId}");
+
+                    var memberWaitingLog = new MemberWaitingLog
+                    {
+                        ReserveId = memberWaiting.Id,
+                        Status = "N",
+                        Json = apiResult.Data,
+                        Creator = 0,
+                        CreateDate = DateTime.Now,
+                        CreateFrom = "FEDS-SYS"
+                    };
+
+                    memberWaiting.MemberWaitingLogs.Add(memberWaitingLog);
+                    var affected2 = await _restaurantContext.SaveChangesAsync();
+                    _Log?.SystemLog_Txt($"[DB] SaveChanges(MemberWaitingLog) 成功，affected={affected2}");
+                    _Log?.SystemLog_Txt($"候位資料已儲存到資料庫 - WaitingId: {memberWaiting.Id}, API ReservationId: {reservationId}, MemberId: {memberWaiting.MemberId}");
+                }
+                catch(DbUpdateException dbEx)
+                {
+                    _Log?.SystemErrorLog_Txt($"[DB] DbUpdateException: {dbEx.Message}");
+                    _Log?.SystemErrorLog_Txt($"[DB] InnerExceptionType: {dbEx.InnerException?.GetType().FullName}");
+                    _Log?.SystemErrorLog_Txt($"[DB] InnerException: {dbEx.InnerException?.Message}");
+                    _Log?.SystemErrorLog_Txt($"[DB] StackTrace: {dbEx.StackTrace}");
+
+                    if(dbEx.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx)
+                    {
+                        _Log?.SystemErrorLog_Txt($"[DB] SqlException.Number={sqlEx.Number}, State={sqlEx.State}, Class={sqlEx.Class}, LineNumber={sqlEx.LineNumber}, Procedure={sqlEx.Procedure}");
+                        foreach (Microsoft.Data.SqlClient.SqlError err in sqlEx.Errors)
+                        {
+                            _Log?.SystemErrorLog_Txt($"[DB] SqlError: Number={err.Number}, Message={err.Message}, Line={err.LineNumber}, Proc={err.Procedure}");
+                        }
+                    }
+                    throw; // 重新拋出異常，讓外層 catch 處理
+                }
+                catch(Exception ex)
+                {
+                    _Log?.SystemErrorLog_Txt($"[DB] Exception: {ex.Message}");
+                    _Log?.SystemErrorLog_Txt($"[DB] StackTrace: {ex.StackTrace}");
+                    throw; // 重新拋出異常，讓外層 catch 處理
+                }
+
+                // ========== 呼叫 API 取得完整記錄並更新資料庫 ==========
+                if(!string.IsNullOrEmpty(customerId) && !string.IsNullOrEmpty(companyId))
+                {
+                    try
+                    {
+                        _Log?.SystemLog_Txt($"開始呼叫 API 取得候位完整記錄 - CustomerId: {customerId}");
+                        var queryApiResult = await _inlineAppsService.GetCustomerReservationAsync(
+                            companyId,
+                            customerId,
+                            branchId,
+                            "booking,waiting"
+                        );
+                        if(queryApiResult.Code == 200 && !string.IsNullOrEmpty(queryApiResult.Data))
+                        {
+                            try
+                            {
+                                var queryResult = Newtonsoft.Json.Linq.JObject.Parse(queryApiResult.Data);
+                                var reservations = queryResult["reservations"] as Newtonsoft.Json.Linq.JArray;
+
+                                if(reservations != null)
+                                {
+                                    // 比對候位記錄
+                                    foreach(var reservation in reservations)
+                                        {
+                                            var apiReservationId = reservation["id"]?.ToString() ?? string.Empty;
+                                            var apiState = reservation["state"]?.ToString() ?? string.Empty;
+                                            var apiType = reservation["type"]?.ToString() ?? string.Empty;
+                                            var apiPositionInLine = reservation["positionInLine"]?.ToObject<int?>();
+
+                                            if(apiReservationId == reservationId || apiReservationId == memberWaiting.Id)
+                                            {
+                                                memberWaiting.CustomerId = customerId;
+
+                                                string status = "已預定";
+                                                if(apiType == "waiting")
+                                                {
+                                                    status = apiState switch
+                                                    {
+                                                        "waiting" => "已預定",
+                                                        "seated" => "已入座",
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
+                                                    };
+                                                }
+                                                else if(apiType == "booking")
+                                                {
+                                                    status = apiState switch
+                                                    {
+                                                        "waiting" => "已預定",
+                                                        "seated" => "已入座",
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
+                                                    };
+                                                }
+                                                else if(apiType == "walk-in")
+                                                {
+                                                    status = apiState switch
+                                                    {
+                                                        "waiting" => "已預定",
+                                                        "seated" => "已入座",
+                                                        "cancelled" => "已取消",
+                                                        _=>"已預定"
+                                                    };
+                                                }
+                                                else
+                                                {
+                                                    status = "未知狀態";
+                                                    _Log?.SystemErrorLog_Txt($"[候位] API 返回未知類型 - apiType: {apiType}, apiState: {apiState}, ReservationId: {apiReservationId}");
+                                                }
+                                                memberWaiting.Status = status;
+
+                                                // 更新排隊位置
+                                                if(apiPositionInLine.HasValue)
+                                                {
+                                                    memberWaiting.PositionInLine = apiPositionInLine.Value;
+                                                }
+                                                await _restaurantContext.SaveChangesAsync();
+                                                _Log?.SystemLog_Txt($"候位記錄已更新 - Status: {status}, State: {apiState}, PositionInLine: {apiPositionInLine}");
+                                                break;
+                                            }
+                                        }
+                                }
+                            }catch(Exception queryEx)
+                            {
+                                _Log?.SystemErrorLog_Txt($"解析候位查詢 API 回應失敗: {queryEx.Message}\r\nStackTrace: {queryEx.StackTrace}");
+                            }
+
+                        }
+                        else
+                        {
+                            _Log?.SystemErrorLog_Txt($"取得候位完整記錄失敗 - Code: {queryApiResult.Code}, Message: {queryApiResult.Msg}");
+                        }
+                        }
+                    catch(Exception ex)
+                    {
+                        _Log?.SystemErrorLog_Txt($"取得候位完整記錄失敗: {ex.Message}\r\nStackTrace: {ex.StackTrace}"); 
+                    }
+                }
             }
             catch(Exception ex)
             {
                 _Log?.SystemErrorLog_Txt($"儲存候位資料到資料庫失敗: {ex.Message}\r\nStackTrace: {ex.StackTrace}");
+                if(Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, errors = new[] { "寫入候位資料失敗，請查看系統紀錄" } });
+                }
+                throw;
             }
 
             if(Request.Headers["X-Requested-With"] == "XMLHttpRequest")

@@ -18,8 +18,8 @@
             </div>
             <div class="col text-center">
                 <h1 class="reservation-header-title">@(Model.SelectedBranchId.HasValue ? 
-                    Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百信義A13" 
-                    : "遠百信義A13")</h1>
+                    Model.Branches.FirstOrDefault(b => b.Id == Model.SelectedBranchId)?.Name ?? "遠百餐廳訂位" 
+                    : "遠百餐廳訂位")</h1>
             </div>
             <div class="col-auto" style="width: 24px;"></div>
         </div>
@@ -61,6 +61,9 @@
     <!-- 會員問候語 -->
     <div class="mb-3">
         <p class="mb-0">親愛的 會員 @Model.MemberName 您好:</p>
+    </div>
+    <div class="mb-3">
+        <p class="mb-0" style="color: red;">只顯示最近3個月內的訂位與候位紀錄</p>
     </div>
 
     <!-- 標籤頁 -->
@@ -115,18 +118,22 @@
                                     </div>
                                 </div>
                                 <!-- 狀態按鈕 -->
-                                <div class="text-end">
-                                    @if (record.Status == "完成")
+                                <div class="">
+                                    @if(record.Status == "已入座")
                                     {
-                                        <button class="btn btn-primary btn-sm">完成</button>
+                                       <button class="btn btn-success btn-sm">已入座</button>
                                     }
-                                    else if (record.Status == "未入座")
+                                    else if(record.Status =="已預定")
                                     {
-                                        <button class="btn btn-secondary btn-sm">未入座</button>
+                                        <button class="btn btn-warning btn-sm">已預定</button>
                                     }
-                                    else if (record.Status == "已取消")
+                                    else if(record.Status =="已取消")
                                     {
                                         <button class="btn btn-secondary btn-sm">已取消</button>
+                                    }
+                                    else if(!string.IsNullOrEmpty(record.Status))
+                                    {
+                                        <button class="btn btn-secondary btn-sm">@record.Status</button>
                                     }
                                 </div>
                             </div>
@@ -182,7 +189,22 @@
                                     </div>
                                 </div>
                                 <div class="text-end">
-                                    <button class="btn btn-secondary btn-sm">@record.Status</button>
+                                    @if(record.Status == "已入座")
+                                    {
+                                        <button class="btn btn-success btn-sm">已入座</button>
+                                    }
+                                    else if(record.Status == "已預定")
+                                    {
+                                        <button class="btn btn-warning btn-sm">已預定</button>
+                                    }
+                                    else if(record.Status == "已取消")
+                                    {
+                                        <button class="btn btn-secondary btn-sm">已取消</button>
+                                    }
+                                    else if(!string.IsNullOrEmpty(record.Status))
+                                    {
+                                        <button class="btn btn-secondary btn-sm">@record.Status</button>
+                                    }
                                 </div>
                             </div>
                         </div>
