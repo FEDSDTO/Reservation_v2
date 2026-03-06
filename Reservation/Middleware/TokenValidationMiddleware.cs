@@ -195,7 +195,7 @@ namespace Reservation.Middleware
             }
             else
             {
-                return "https://member.feds.com.tw/Reservation_v2";
+                return "https://www.feds.com.tw/Reservation_v2";
             }
         }
          // 避免 log 寫入完整 token（敏感資訊）
