@@ -58,9 +58,9 @@ namespace Reservation.Middleware
             var tokenFromQuery = context.Request.Query["Token"].FirstOrDefault();
             var tokenFromCookie = context.Request.Cookies[TokenCookieName];
 
-            _log.SystemLog_Txt(
-                $"[Token驗證][{traceId}] Token來源 Query={(string.IsNullOrEmpty(tokenFromQuery) ? "N" : "Y")}, Cookie={(string.IsNullOrEmpty(tokenFromCookie) ? "N" : "Y")}"
-            );
+            // _log.SystemLog_Txt(
+            //     $"[Token驗證][{traceId}] Token來源 Query={(string.IsNullOrEmpty(tokenFromQuery) ? "N" : "Y")}, Cookie={(string.IsNullOrEmpty(tokenFromCookie) ? "N" : "Y")}"
+            // );
             string? tokenToUse = null;
 
             if(!string.IsNullOrEmpty(tokenFromQuery))
@@ -79,9 +79,9 @@ namespace Reservation.Middleware
                 tokenToUse = tokenFromCookie;
             }
 
-            _log.SystemLog_Txt(
-                $"[Token驗證][{traceId}] 採用Token來源={(string.IsNullOrEmpty(tokenFromQuery) ? "Cookie" : "Query")}, Token前8碼={Mask(tokenToUse)}"
-            );
+            // _log.SystemLog_Txt(
+            //     $"[Token驗證][{traceId}] 採用Token來源={(string.IsNullOrEmpty(tokenFromQuery) ? "Cookie" : "Query")}, Token前8碼={Mask(tokenToUse)}"
+            // );
 
             if(string.IsNullOrEmpty(tokenToUse))
             {
@@ -103,7 +103,7 @@ namespace Reservation.Middleware
            }
            try
            {
-                _log.SystemLog_Txt($"[Token驗證][{traceId}] 開始查詢資料庫 Token前8碼={Mask(tokenGuid.ToString())}");
+                // _log.SystemLog_Txt($"[Token驗證][{traceId}] 開始查詢資料庫 Token前8碼={Mask(tokenGuid.ToString())}");
                 var memberToken = await memberContext.MemberTokens.FirstOrDefaultAsync
                 (mt => mt.Token == tokenGuid && mt.EntityStatus == 1);
 
@@ -114,9 +114,9 @@ namespace Reservation.Middleware
                     return;
                 }
 
-                _log.SystemLog_Txt(
-                    $"[Token驗證][{traceId}] DB命中成功 MemberId={memberToken.MemberId}, EntityStatus={memberToken.EntityStatus}, ExpireDate={(memberToken.ExpireDate.HasValue ? memberToken.ExpireDate.Value.ToString("yyyy-MM-dd HH:mm:ss") : "NULL")}"
-                );
+                // _log.SystemLog_Txt(
+                //     $"[Token驗證][{traceId}] DB命中成功 MemberId={memberToken.MemberId}, EntityStatus={memberToken.EntityStatus}, ExpireDate={(memberToken.ExpireDate.HasValue ? memberToken.ExpireDate.Value.ToString("yyyy-MM-dd HH:mm:ss") : "NULL")}"
+                // );
 
                 if(memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
                 {
@@ -156,9 +156,9 @@ namespace Reservation.Middleware
             var  loginBaseUrl = GetLoginUrl().TrimEnd('/');
             var loginUrl = $"{loginBaseUrl}/?returnUrl={encodedReturnUrl}";
 
-            _log.SystemLog_Txt(
-                $"[Token驗證][{traceId}] RedirectToLogin 觸發 Env={_environment.EnvironmentName}, Host={context.Request.Host}, Path={context.Request.Path}, QueryString={context.Request.QueryString}, LoginUrl={loginUrl}, ReturnUrl={returnUrl}"
-            );
+            // _log.SystemLog_Txt(
+            //     $"[Token驗證][{traceId}] RedirectToLogin 觸發 Env={_environment.EnvironmentName}, Host={context.Request.Host}, Path={context.Request.Path}, QueryString={context.Request.QueryString}, LoginUrl={loginUrl}, ReturnUrl={returnUrl}"
+            // );
             
             context.Response.Redirect(loginUrl);
             await Task.CompletedTask;           
