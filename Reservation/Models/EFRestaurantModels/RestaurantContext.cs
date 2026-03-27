@@ -27,6 +27,8 @@ public partial class RestaurantContext : DbContext
 
     public virtual DbSet<RestaurantBranch> RestaurantBranches { get; set; }
 
+    public virtual DbSet<RestaurantCategory> RestaurantCategories { get; set; }
+
     public virtual DbSet<RestaurantImage> RestaurantImages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -339,6 +341,7 @@ public partial class RestaurantContext : DbContext
                 .HasMaxLength(10)
                 .IsFixedLength()
                 .HasComment("備註");
+            entity.Property(e => e.RestaurantCategoryId).HasDefaultValue((byte)1);
             entity.Property(e => e.WebBookingEnable)
                 .HasComment("是否開啟網路訂位")
                 .HasAnnotation("Relational:DefaultConstraintName", "DF_RestaurantBranch_BookingEnable");
@@ -355,6 +358,23 @@ public partial class RestaurantContext : DbContext
                 .HasForeignKey(d => d.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Branch_Group");
+
+            entity.HasOne(d => d.RestaurantCategory).WithMany(p => p.RestaurantBranches)
+                .HasForeignKey(d => d.RestaurantCategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Stores_RestaurantCategory");
+        });
+
+        modelBuilder.Entity<RestaurantCategory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Restaura__3214EC0735B4049A");
+
+            entity.ToTable("RestaurantCategory");
+
+            entity.Property(e => e.CategoryName)
+                .IsRequired()
+                .HasMaxLength(20);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<RestaurantImage>(entity =>

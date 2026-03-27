@@ -64,18 +64,29 @@ namespace Reservation.Service
         /// </summary>
         /// <param name="groupId">分館 ID（GroupId）</param>
         /// <returns>餐廳卡片列表</returns>
-        public async Task<List<RestaurantCardModel>> GetRestaurantsAsync(string groupId)
+        public async Task<List<RestaurantCardModel>> GetRestaurantsAsync(string groupId, int? categoryId = null)
         {
             var cards = new List<RestaurantCardModel>();
             try
             {
-               var dbBranches = await _restaurantContext.RestaurantBranches
-               .Where(x=>x.GroupId ==groupId && x.IsUse == true).ToListAsync();
+                var query = _restaurantContext.RestaurantBranches
+                    .Where(x => x.GroupId == groupId && x.IsUse == true);
 
-               foreach(var dbBranch in dbBranches)
-               {
-                  var card = new RestaurantCardModel
-                  {
+                if (categoryId == 1)
+                {
+                    query = query.Where(x => x.RestaurantCategoryId == 1 || x.RestaurantCategoryId == 3);
+                }
+                else if (categoryId == 2)
+                {
+                    query = query.Where(x => x.RestaurantCategoryId == 2 || x.RestaurantCategoryId == 3);
+                }
+
+                var dbBranches = await query.ToListAsync();
+
+                foreach (var dbBranch in dbBranches)
+                {
+                    var card = new RestaurantCardModel
+                    {
                         id = dbBranch.Id,
                         GroupId = dbBranch.GroupId ?? "",
                         CompanyId = dbBranch.CompanyId ?? "",
@@ -88,14 +99,15 @@ namespace Reservation.Service
                         EstimatedWaitingMinutes = 0,
                         Images = new List<string>(),
                         ImageUrl = GetRestaurantImageUrl(dbBranch.GroupId ?? "", dbBranch.Id)
-                  };
-                  cards.Add(card);
-               }
+                    };
+                    cards.Add(card);
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _Log?.SystemErrorLog_Txt($"資料庫讀取錯誤 - GroupId: {groupId}, Error: {ex.Message}");
+                _Log?.SystemErrorLog_Txt($"資料庫讀取錯誤 - GroupId: {groupId}, CategoryId: {categoryId}, Error: {ex.Message}");
             }
+
             return cards;
         }
     

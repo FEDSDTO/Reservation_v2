@@ -81,7 +81,11 @@ public partial class RestaurantBranch
 
     public bool? IsUse { get; set; }
 
+    public byte RestaurantCategoryId { get; set; }
+
     public virtual Restaurant Company { get; set; }
 
     public virtual MallGroup Group { get; set; }
+
+    public virtual RestaurantCategory RestaurantCategory { get; set; }
 }
