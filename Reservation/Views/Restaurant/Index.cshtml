@@ -60,18 +60,16 @@
 
         <!-- 類別篩選 -->
         <div class="category-filter">
-            @foreach (var category in Model.Categories)
+            @foreach(var category in Model.Categories)
             {
-                var isActive = (Model.SelectedCategoryId == category.Id) || 
-                              (!Model.SelectedCategoryId.HasValue && category.Id == 0);
-                <a href="@Url.Action("Index", new { groupId = Model.SelectedGroupId, categoryId = category.Id == 0 ? (int?)null : category.Id })" 
-                   class="category-tag @(isActive ? "active" : "")">
+                var isActive = (Model.SelectedCategoryId == category.Id) ||
+                (!Model.SelectedCategoryId.HasValue && category.Id == 0);
+
+                 <a href="@Url.Action("Index", new { groupId = Model.SelectedGroupId, categoryId = category.Id == 0 ? (int?)null : category.Id })"
+                    class="category-tag @(isActive ? "active" : "")">
                     @category.Name
                 </a>
-                @if (category != Model.Categories.Last())
-                {
-                    <span class="category-separator">|</span>
-                }
+
             }
         </div>
     </div>
@@ -86,17 +84,16 @@
             {
                 <div class="restaurant-card">
                     <div class="row g-0">
-                        <!-- 左側圖片 - 直接使用本地目錄圖片 -->
-                        <div class="col-md-3 col-4">
+                        <div class="col-md-3 col-12">
                             <div class="restaurant-image-wrapper">
-                                <img src="@Url.Content(card.ImageUrl)" 
-                                     class="restaurant-image" 
-                                     alt="@card.Name"
-                                     onerror="this.src='@Url.Content("~/IMG/HomePage/10.jpg")'" />
+                                <img src="@Url.Content(card.ImageUrl)"
+                                    class="restaurant-image"
+                                    alt="@card.Name"
+                                    onerror="this.src='@Url.Content("~/IMG/HomePage/10.jpg")'" />
                             </div>
                         </div>
-                        <!-- 右側資訊 -->
-                        <div class="col-md-9 col-8">
+
+                        <div class="col-md-9 col-12">
                             <div class="restaurant-info">
                                 <h3 class="restaurant-name">@card.Name</h3>
                                 <div class="restaurant-details">
@@ -116,17 +113,13 @@
                                 <div class="restaurant-actions">
                                     @if (card.WebBookingEnabled)
                                     {
-                                        <a href="@Url.Action("Index", "Reservation", new { 
-                                            id = card.GroupId, 
-                                            companyId = card.CompanyId, 
-                                            branchId = card.id 
-                                        })" 
-                                           class="btn btn-outline-primary btn-reservation">訂位</a>
+                                        <a href="@Url.Action("Index", "Reservation", new { id = card.GroupId, companyId = card.CompanyId, branchId = card.id })"
+                                        class="btn btn-outline-primary btn-reservation">訂位</a>
                                     }
                                     @if (card.WebWaitingEnabled)
                                     {
-                                        <a href="@Url.Action("Index", "WaitingPosition", new { branchId = card.GroupId, restaurantId = card.id })" 
-                                           class="btn btn-outline-secondary btn-queue">候位</a>
+                                        <a href="@Url.Action("Index", "WaitingPosition", new { branchId = card.GroupId, restaurantId = card.id })"
+                                        class="btn btn-outline-secondary btn-queue">候位</a>
                                     }
                                 </div>
                             </div>

@@ -40,7 +40,7 @@ namespace Reservation.Controllers
                 new CategoryModel { Id = 0, Name = "所有餐廳" },
                 new CategoryModel { Id = 1, Name = "主題餐廳" },
                 new CategoryModel { Id = 2, Name = "輕食甜點" },
-                new CategoryModel { Id = 3, Name = "吃到飽" }
+                // new CategoryModel { Id = 3, Name = "吃到飽" }
             };
         }
 
@@ -72,7 +72,7 @@ namespace Reservation.Controllers
                 // 顯示所有分館：同步所有分館的資料
                 foreach(var mallGroup in mallGroups)
                 {
-                   var groupRestaurants = await _restaurantService.GetRestaurantsAsync(mallGroup.GroupId);
+                   var groupRestaurants = await _restaurantService.GetRestaurantsAsync(mallGroup.GroupId, categoryId);
                    restaurantCards.AddRange(groupRestaurants);
                 }
             }
@@ -80,7 +80,7 @@ namespace Reservation.Controllers
             {
                 // 顯示特定分館：只同步該分館的資料
                 await _restaurantService.RestaurantApiAsync(groupId);
-                restaurantCards = await _restaurantService.GetRestaurantsAsync(groupId);
+                restaurantCards = await _restaurantService.GetRestaurantsAsync(groupId, categoryId);
             }
 
             var viewModel = new RestaurantListModel

@@ -36,33 +36,39 @@
 }
 
 .category-filter {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
+    width: 100%;
 }
 
 .category-tag {
-    color: #6c757d;
-    text-decoration: none;
-    font-size: 0.95rem;
-    padding: 0.25rem 0.5rem;
-    transition: color 0.2s;
+   display:flex;
+   align-items:center;
+   justify-content:center;
+    color:#6c757d;
+    text-decoration:none;
+    font-size:0.95rem;
+    padding:0.5rem 0.25rem;
+    text-align:center;
+    border-radius:8px;
+    transition:color 0.2s,background-color 0.2s;
 }
 
 .category-tag:hover {
     color: #258cfb;
     text-decoration: none;
+    background-color: #f5f8ff;
 }
 
 .category-tag.active {
     color: #258cfb;
     font-weight: 600;
+    background-color: #e7f3ff;
 }
 
 .category-separator {
-    color: #dee2e6;
-    margin: 0 0.25rem;
+    display: none;
 }
 
 .restaurant-list-section {
@@ -89,6 +95,7 @@
     height: 100%;
     min-height: 150px;
     overflow: hidden;
+    background-color: #f5f5f5;
 }
 
 .restaurant-image {
@@ -230,7 +237,7 @@
     flex: 1;
     height: 42px;
 }
-
+ 
 .unified-input:focus {
     border: none !important;
     box-shadow: none;
@@ -279,32 +286,31 @@
 }
 
 @media (max-width: 768px) {
-    .header-title {
-        font-size: 1.25rem;
+    .restaurant-image-wrapper{
+        height:auto;
+        min-height:0;
+        aspect-ratio: 16/9;
     }
-
-    .restaurant-image-wrapper {
-        min-height: 120px;
+    .restaurant-info{
+        padding:1rem;
+        min-height:auto;
     }
-
-    .restaurant-info {
-        padding: 1rem;
-        min-height: 120px;
+    .restaurant-name{
+        font-size:1.1rem;
     }
-
-    .restaurant-name {
-        font-size: 1.1rem;
+    .category-filter{
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4rem;
     }
-
-    .category-filter {
-        font-size: 0.85rem;
+    .category-tag{
+        font-size:0.85rem;
+        padding:0.45rem 0.2rem;
     }
-
     .unified-control,
     .unified-input,
-    .unified-search-btn {
-        height: 38px;
-        font-size: 0.9rem;
+    .unified-search-btn{
+        height:38px;
+        font-size:0.9rem;
     }
 }
 

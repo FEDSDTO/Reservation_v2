@@ -47,6 +47,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[RestaurantCategory]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[RestaurantImage]",
          "ObjectType": 0
       }
