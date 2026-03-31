@@ -53,19 +53,15 @@ namespace Reservation.Middleware
                 return;
             }
 
-            _log.SystemLog_Txt($"[Token驗證][{traceId}] 開始處理路徑={path}, Host={context.Request.Host}, QueryString={context.Request.QueryString}");
-
             var tokenFromQuery = context.Request.Query["Token"].FirstOrDefault();
             var tokenFromCookie = context.Request.Cookies[TokenCookieName];
-
-            // _log.SystemLog_Txt(
-            //     $"[Token驗證][{traceId}] Token來源 Query={(string.IsNullOrEmpty(tokenFromQuery) ? "N" : "Y")}, Cookie={(string.IsNullOrEmpty(tokenFromCookie) ? "N" : "Y")}"
-            // );
             string? tokenToUse = null;
+            string tokenSource = "無";
 
             if(!string.IsNullOrEmpty(tokenFromQuery))
             {
                 tokenToUse = tokenFromQuery;
+                tokenSource = "Query";
                 context.Response.Cookies.Append(TokenCookieName,tokenFromQuery,new CookieOptions{
                     HttpOnly = true,
                     Secure = context.Request.IsHttps,
@@ -77,28 +73,23 @@ namespace Reservation.Middleware
             else if(!string.IsNullOrEmpty(tokenFromCookie))
             {
                 tokenToUse = tokenFromCookie;
+                tokenSource = "Cookie";
             }
-
-            // _log.SystemLog_Txt(
-            //     $"[Token驗證][{traceId}] 採用Token來源={(string.IsNullOrEmpty(tokenFromQuery) ? "Cookie" : "Query")}, Token前8碼={Mask(tokenToUse)}"
-            // );
 
             if(string.IsNullOrEmpty(tokenToUse))
             {
-                _log.SystemLog_Txt($"[Token驗證][{traceId}] 未找到 Token - Query:{!string.IsNullOrEmpty(tokenFromQuery)}, Cookie:{!string.IsNullOrEmpty(tokenFromCookie)} -> 跳轉登入頁面");
-                await RedirectToLoginAsync(context);
+                await RedirectToLoginAsync(context, "未提供 Token", tokenSource, tokenToUse);
                 return;
             }
            if(!Guid.TryParse(tokenToUse,out Guid tokenGuid))
            {
-              _log.SystemLog_Txt($"[Token驗證][{traceId}] Token 格式錯誤，原始值前8碼={Mask(tokenToUse)} -> 跳轉登入頁面");
-              await RedirectToLoginAsync(context);
+              await RedirectToLoginAsync(context, "Token 格式錯誤", tokenSource, tokenToUse);
               return;
            }
            if(memberContext ==null)
            {
                 _log.SystemErrorLog_Txt($"[Token驗證][{traceId}] MemberContext 為 null，請檢查依賴注入設定 -> 跳轉登入頁面");
-                await RedirectToLoginAsync(context);
+                await RedirectToLoginAsync(context, "MemberContext 為 null", tokenSource, tokenToUse);
                 return;
            }
            try
@@ -109,8 +100,7 @@ namespace Reservation.Middleware
 
                 if(memberToken == null)
                 {
-                    _log.SystemLog_Txt($"[Token驗證][{traceId}] 資料庫找不到 Token: {Mask(tokenGuid.ToString())}, Path={context.Request.Path}, QueryString={context.Request.QueryString}, Host={context.Request.Host} -> 跳轉登入頁面");
-                    await RedirectToLoginAsync(context);
+                    await RedirectToLoginAsync(context, "資料庫找不到有效 Token", tokenSource, tokenGuid.ToString());
                     return;
                 }
 
@@ -120,8 +110,7 @@ namespace Reservation.Middleware
 
                 if(memberToken.ExpireDate.HasValue && memberToken.ExpireDate.Value < DateTime.Now)
                 {
-                    _log.SystemLog_Txt($"[Token驗證][{traceId}] Token 已過期: {Mask(tokenGuid.ToString())}, 過期時間: {memberToken.ExpireDate.Value:yyyy-MM-dd HH:mm:ss} -> 跳轉登入頁面");
-                    await RedirectToLoginAsync(context);
+                    await RedirectToLoginAsync(context, $"Token 已過期 ({memberToken.ExpireDate.Value:yyyy-MM-dd HH:mm:ss})", tokenSource, tokenGuid.ToString());
                     return;
                 }
 
@@ -135,19 +124,19 @@ namespace Reservation.Middleware
            {
                 string tokenGuidStr = tokenGuid != Guid.Empty ? tokenGuid.ToString() : "unknown";
                 _log.SystemErrorLog_Txt($"[Token驗證][{traceId}] 空引用異常 - Token: {Mask(tokenGuidStr)}, 錯誤: {ex.Message}, 位置: {ex.StackTrace} -> 跳轉登入頁面");
-                await RedirectToLoginAsync(context);
+                await RedirectToLoginAsync(context, "發生空引用異常", tokenSource, tokenGuidStr);
                 return;
            }
            catch(Exception ex)
            {
                 string tokenGuidStr = tokenGuid != Guid.Empty ? tokenGuid.ToString() : "unknown";
                 _log.SystemErrorLog_Txt($"[Token驗證][{traceId}] 驗證過程中發生錯誤 tokenGuid={Mask(tokenGuidStr)}, 錯誤訊息={ex.Message}, StackTrace={ex.StackTrace} -> 跳轉登入頁面");
-                await RedirectToLoginAsync(context);
+                await RedirectToLoginAsync(context, "驗證流程發生例外", tokenSource, tokenGuidStr);
                 return;
            }
         }
 
-        private async Task RedirectToLoginAsync(HttpContext context)
+        private async Task RedirectToLoginAsync(HttpContext context, string reason, string tokenSource, string? tokenValue)
         {
             var traceId = context.TraceIdentifier;
             var returnUrl = GetReturnUrl();
@@ -156,9 +145,9 @@ namespace Reservation.Middleware
             var  loginBaseUrl = GetLoginUrl().TrimEnd('/');
             var loginUrl = $"{loginBaseUrl}/?returnUrl={encodedReturnUrl}";
 
-            // _log.SystemLog_Txt(
-            //     $"[Token驗證][{traceId}] RedirectToLogin 觸發 Env={_environment.EnvironmentName}, Host={context.Request.Host}, Path={context.Request.Path}, QueryString={context.Request.QueryString}, LoginUrl={loginUrl}, ReturnUrl={returnUrl}"
-            // );
+            _log.SystemLog_Txt(
+                $"[Token驗證][{traceId}] 跳轉登入頁 - 原因={reason}，Token來源={tokenSource}，Token={Mask(tokenValue)}，Path={context.Request.Path}，完整跳轉網址={loginUrl}"
+            );
             
             context.Response.Redirect(loginUrl);
             await Task.CompletedTask;           
