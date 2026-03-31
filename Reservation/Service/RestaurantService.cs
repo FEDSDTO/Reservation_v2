@@ -300,8 +300,6 @@ namespace Reservation.Service
                 return "~/IMG/HomePage/10.jpg";
             }
 
-            _Log?.SystemLog_Txt(
-                $"[RestaurantService.GetRestaurantImageUrl] 使用圖片 - {relativePath} (GroupId: {groupId}, BranchId: {branchId})");
             return "~/" + relativePath.Replace("\\", "/");
         }
     }
